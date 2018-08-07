@@ -18,16 +18,18 @@ class tsp(object):
         self.coords = np.random.uniform(-length, length, size=(n,2)).tolist()
 
         self.dist_mat = distance_matrix(self.coords, self.coords).tolist()
-    def dump(self, filename='tsp_data', fmt='json'):
-        all_data = {'coords':self.coords,
-                'tour': self.tour_,
-                'obj': self.obj_,
-                'runtime': self.runtime_}
-        with open(f'{filename}.{fmt}', 'w') as outfile:
-            if fmt == 'json':
-                json.dump(all_data, outfile, sort_keys=True, indent=4)
-            elif fmt == 'yaml':
-                yaml.dump(all_data, outfile)
+    def dump(self, filename='', fmt='json'):
+        """
+        Default: dump JSON as string
+        """
+        if filename:
+            with open(f'{filename}.{fmt}', 'w') as outfile:
+                if fmt == 'json':
+                    json.dump(self.all_data_, outfile, sort_keys=True, indent=4)
+                elif fmt == 'yaml':
+                    yaml.dump(self.all_data_, outfile)
+        else:
+            return json.dumps(self.all_data_)
     def solve(self):
         def subtourelim(model, where):
             '''Callback - use lazy constraints to eliminate sub-tours'''
@@ -85,6 +87,10 @@ class tsp(object):
         self.runtime_ = m.Runtime
         self.obj_ = m.objVal
         self.tour_ = tour
+        self.all_data_ = {'coords':self.coords,
+                          'tour': self.tour_,
+                          'obj': self.obj_,
+                          'runtime': self.runtime_}
 
 
 if __name__ == '__main__':

@@ -18,11 +18,16 @@ def render_tsp():
         my_tsp = tsp()
         my_tsp.from_num_cities(int(n))
         my_tsp.solve()
-        my_tsp.dump()
-        return render_template('tsp.html', result=my_tsp.obj_, default_value=n)
+        result = my_tsp.all_data_
+        return render_template('tsp.html', result=result, default_value=n)
     else:
         return render_template('tsp.html')
 
+@app.route('/tsp/detail/', methods=['POST'])
+def tsp_detail():
+    result = request.form['result']
+    return render_template('tsp_detail.html', result=result)
+        
 @app.route('/')
 def root():
     return render_template('index.html')

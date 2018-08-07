@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<title>ALGORITHM</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+	</head>
+<body>
+
+   <!-- Main -->
+				<div id="main">
+					<div class="inner">
+					<!-- Boxes -->
+                        <div class="thumbnails">
+                    		<div class="box">
+								<div class="inner">
+									<h3>Traveling Salesman Problem Example</h3>
+                                    
+									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style3 fit">Read description</a> 
+                                    <a href="/" class="button fit">Go to homepage</a>
+								</div>
+							</div>
+                        </div>
+                        
+							<div class="box">
+								<div class="inner">
+									<h3>Detailed Results</h3>          
+                                    <p>This is an example to show result data can be passed to another page. <br>
+                                       TODO: visualize the result.
+									{% if result %}
+                                        <p>{{ result }}</p>
+                                    {% endif %}
+								</div>
+							</div>
+                            
+                        
+					</div>
+				</div>
+  
+
+	</body>
+</html>

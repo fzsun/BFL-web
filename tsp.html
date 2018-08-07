@@ -8,69 +8,58 @@
 	</head>
 <body>
 
-            
-
-            	<section id="banner" data-video="images/banner"> 
-					<div class="inner">
-						<header>
-							<h1>Traveling Salesman Problem Example</h1>
-							<p><a href='/'> Go to homepage </a> </p>
-						</header>
-						<a href="#main" class="more">Learn More</a>
-					</div>
-				</section> 
    <!-- Main -->
 				<div id="main">
 					<div class="inner">
 					<!-- Boxes -->
+                        <div class="thumbnails">
+                    		<div class="box">
+								<div class="inner">
+									<h3>Traveling Salesman Problem Example</h3>
+                                    
+									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style3 fit">Read description</a> 
+                                    <a href="/" class="button fit">Go to homepage</a>
+								</div>
+							</div>
+                        </div>
+                        
 						<div class="thumbnails">
-
+                        
 							<div class="box">
 								<div class="inner">
 									<h3>Input</h3>       
                                     <p> Enter number of cities</p>
-									<form name="form1" id="form1" action='/tsp/' method="post" role="form">
+									<form method="POST">
 									   <input required="required" type="text" name="num_cities" id="num_cities" 
                                               placeholder="Valid range [3,100]; TODO: validate." value="{{default_value}}">
                                        <br>
-                                       <button type="button" onclick="submit()">Submit</button>
+                                       <input type="submit">
                                     </form>   
-
 								</div>
 							</div>
-
+                            
 							<div class="box">
 								<div class="inner">
 									<h3>Summary of Results</h3>                                 
 									{% if result %}
-                                        <p>Optimal Objective = {{ result }}</p>
-                                    {% else %}
-                                        <p>Result Placeholder</p>
+                                        <ul>
+                                            <li>obj = {{ result.obj }}</li>
+                                            <li>runtime = {{ result.runtime }}</li>
+                                        </ul>
+                                        <form method='POST' action='/tsp/detail/'>
+                                          <input name='result' type="hidden" value="{{ result }}"> 
+                                          <input type='submit' value="Detailed result">
+                                        </form>
                                     {% endif %}
-                                    <button type="button">Detailed result</button>
+                                    
 								</div>
 							</div>
-
-							<div class="box">
-								<div class="inner">
-									<h3>Algorithm Description</h3>
-									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style3 fit">Read</a>
-								</div>
-							</div>
-							
-							
-						</div>
+                            
+                        </div>
+                        
 					</div>
 				</div>
-   
-		<!-- Scripts -->
-        
-			<!-- <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> -->
-			<!-- <script src="{{ url_for('static', filename='js/jquery.scrolly.min.js') }}"></script>  -->
-			<!-- <!-- <script src="{{ url_for('static', filename='js/jquery.poptrox.min.js') }}"></script> --> -->
-			<!-- <script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>  -->
-			<!-- <script src="{{ url_for('static', filename='js/util.js') }}"></script>  -->
-			<!-- <!-- <script src="{{ url_for('static', filename='js/main.js') }}"></script> --> -->
+  
 
 	</body>
 </html>
