@@ -29,7 +29,7 @@ class tsp(object):
                 elif fmt == 'yaml':
                     yaml.dump(self.all_data_, outfile)
         else:
-            return json.dumps(self.all_data_)
+            return json.dumps(self.all_data_, sort_keys=True)
     def solve(self):
         def subtourelim(model, where):
             '''Callback - use lazy constraints to eliminate sub-tours'''
@@ -88,9 +88,10 @@ class tsp(object):
         self.obj_ = m.objVal
         self.tour_ = tour
         self.all_data_ = {'coords':self.coords,
-                          'tour': self.tour_,
+                          'num_cities': self.num_cities,
                           'obj': self.obj_,
-                          'runtime': self.runtime_}
+                          'runtime': self.runtime_,
+                          'tour': self.tour_}
 
 
 if __name__ == '__main__':

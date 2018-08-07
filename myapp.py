@@ -8,6 +8,7 @@ Created on Sat Jun 30 21:01:11 2018
 
 from flask import Flask, render_template, request
 from algorithm.tsp import tsp
+from waitress import serve
 
 app = Flask(__name__, template_folder='')
 
@@ -19,18 +20,18 @@ def render_tsp():
         my_tsp.from_num_cities(int(n))
         my_tsp.solve()
         result = my_tsp.all_data_
-        return render_template('tsp.html', result=result, default_value=n)
+        return render_template('tsp.html', result=result)
     else:
         return render_template('tsp.html')
 
-@app.route('/tsp/detail/', methods=['POST'])
+@app.route('/tsp/detail/')
 def tsp_detail():
-    result = request.form['result']
-    return render_template('tsp_detail.html', result=result)
+    return render_template('tsp_detail.html')
         
 @app.route('/')
 def root():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8081)
+    app.run(debug=True, port=8081) # development server
+    # serve(app, port=8081) # production server by waitress

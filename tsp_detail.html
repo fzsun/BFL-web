@@ -17,8 +17,9 @@
 								<div class="inner">
 									<h3>Traveling Salesman Problem Example</h3>
                                     
-									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style3 fit">Read description</a> 
-                                    <a href="/" class="button fit">Go to homepage</a>
+									<p><a href="/" class="button style3">Go to homepage</a><p>
+									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style2">Read description</a> 
+                                    
 								</div>
 							</div>
                         </div>
@@ -27,17 +28,29 @@
 								<div class="inner">
 									<h3>Detailed Results</h3>          
                                     <p>This is an example to show result data can be passed to another page. <br>
-                                       TODO: visualize the result.
-									{% if result %}
-                                        <p>{{ result }}</p>
-                                    {% endif %}
+                                       TODO: visualize the result.</p>
+									<p><div id="result"></div></p>
+                                    
+      
+      
 								</div>
 							</div>
                             
                         
 					</div>
 				</div>
-  
-
+                
+        <script>
+            if(typeof(Storage) !== "undefined") {
+                if (localStorage.tsp_result) {
+                    document.getElementById("result").innerHTML = localStorage.tsp_result;
+                } else {
+                    window.alert("Please submit input")
+                }
+            } else {
+                window.alert("Sorry, your browser does not support local storage...");
+            }
+        </script> 
+        
 	</body>
 </html>
