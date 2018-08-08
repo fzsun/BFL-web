@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-		<title>ALGORITHM</title>
+		<title>Traveling Salesman Problem Example</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+
 	</head>
 <body>
 
@@ -15,80 +17,84 @@
 
                     		<div class="box">
 								<div class="inner">
-									<h3>Traveling Salesman Problem Example</h3>
-                                    
+									<h2>Traveling Salesman Problem Example</h2>
+
                                     <p><a href="/" class="button style3">Go to homepage</a><p>
-									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style2">Read description</a> 
-                                    
+									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.html" class="button style2">Read description</a>
+
 								</div>
 							</div>
 
-                        
+
 						<div class="thumbnails">
-                        
+
 							<div class="box">
 								<div class="inner">
-									<h3>Input</h3>       
+									<h3>Input</h3>
                                     <p> Enter number of cities</p>
 									<form method="POST">
-									   <input required type="text" name="num_cities" 
+									   <input required type="text" name="num_cities"
                                               placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b" oninvalid="this.setCustomValidity('integer, valid range [3,99]')" oninput="this.setCustomValidity('')">
                                        <br>
-                                       <input type="submit">
+                                       <input type="submit" value="Submit">
                                        <input type="reset" value="Reset" onclick="localStorage.removeItem('tsp_result');display_result();" class="style3">
-                                    </form>   
+                                    </form>
 								</div>
 							</div>
-                            
+
 							<div class="box">
 								<div class="inner">
-									<h3>Summary of Results</h3>                       
-                                        <p><div id="summary"></div></p>
-                                        <div id="detail"><p><a href='/tsp/detail/' class="button">Detail</a></p></div>
+                                    <h3>Summary of Results</h3>
+                                    <table style="width: 100%">
+                                        <thead>
+                                          <th>num_cities</th>
+                                          <th>obj</th>
+                                          <th>runtime (sec)</th>
+                                        </thead>
+                                        <tbody id="tbody">
+                                        </tbody>
+                                    </table>
+                                    <div id="detail"><p><a href='/tsp/detail/' class="button">Detail</a></p></div>
 								</div>
 							</div>
-                            
+
                         </div>
-                        
+
 					</div>
 				</div>
-  
-        
-        
+
+
+
         <script>
-             function store_result() {
+            {% if result %}
                 if(typeof(Storage) !== "undefined") {
-                    {% if result %} 
-                        localStorage.setItem('tsp_result', JSON.stringify({{ result|tojson|safe }})); 
-                    {% endif %} 
+                        localStorage.setItem('tsp_result', JSON.stringify({{ result|tojson|safe }}));
                 } else {
                     window.alert("Sorry, your browser does not support local storage...");
                 }
-             }
-        
+            {% endif %}
+
             function display_result() {
                 if(typeof(Storage) !== "undefined") {
                     var summary_div = document.getElementById("summary");
-                    var detail_div = document.getElementById("detail");
                     if (localStorage.tsp_result) {
                         var res = JSON.parse(localStorage.tsp_result);
-                        summary_div.innerHTML += 'num_cities = ' + res.num_cities;
-                        summary_div.innerHTML += '<br>obj = ' + res.obj;
-                        summary_div.innerHTML += '<br>runtime = ' + res.runtime;
-                        detail_div.style.display = "block";
+                        var row = "<tr>"
+                                + "<td>" + res.num_cities + "</td>"
+                                + "<td>" + res.obj.toFixed(2) + "</td>"
+                                + "<td>" + res.runtime.toFixed(3) + "</td>"
+                                + "</tr>";
+                        document.getElementById("tbody").innerHTML = row;
                     } else {
-                        summary_div.innerHTML = '';
-                        detail_div.style.display = "none";
+                        document.getElementById("tbody").innerHTML = '';
                     }
                 } else {
                     window.alert("Sorry, your browser does not support local storage...");
                 }
             }
-            
-            store_result()
             display_result()
-        </script> 
-         
-        
+        </script>
+
+
 	</body>
 </html>

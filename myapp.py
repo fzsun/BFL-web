@@ -8,7 +8,6 @@ Created on Sat Jun 30 21:01:11 2018
 
 from flask import Flask, render_template, request
 from algorithm.tsp import tsp
-from waitress import serve
 
 app = Flask(__name__, template_folder='')
 
@@ -33,5 +32,4 @@ def root():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8081) # development server
-    # serve(app, port=8081) # production server by waitress
+    app.run(debug=True, port=8081) # Note: development server only
