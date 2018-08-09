@@ -66,9 +66,10 @@
     </footer>
 
     <!-- Bootstrap core JavaScript -->
-    {% block myscript %}{% endblock %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-
+    <script src="{{ url_for('static', filename='js/my_util.js') }}"></script>
+    {% block myscript %}{% endblock %}
+    
   </body>
 </html>
