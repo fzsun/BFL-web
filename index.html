@@ -1,99 +1,40 @@
-<!DOCTYPE HTML>
-<!--
-	Full Motion by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
--->
-<html>
-	<head>
-		<title>Biomass Feedstock Logistics</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
-        
-	</head>
-	<body id="top">
+{% extends "layout.html" %}
+{% block title %}Home{% endblock %}
+{% block heading %}Home{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md">
+      <p>Some introduction about team.</p>
+      <a class="btn btn-primary" href="https://www.ise.vt.edu/people/faculty/sarin.html">View More</a>
+    </div>
+  </div>
 
-			<!-- Banner -->
-			<!--
-				To use a video as your background, set data-video to the name of your video without
-				its extension (eg. images/banner). Your video must be available in both .mp4 and .webm
-				formats to work correctly.
-			-->
-				<section id="banner" data-video="images/banner"> 
-					<div class="inner">
-						<header>
-							<h1>Biomass Feedstock Logistics</h1>
-							<!-- <p>Virginia Tech</p> -->
-						</header>
-						<a href="#main" class="more">Learn More</a>
-					</div>
-				</section> 
+  <hr>
 
-			<!-- Main -->
-				<div id="main">
-					<div class="inner">
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <img class="card-img-top" src="{{ url_for('static', filename='images/s-bfls.png')}}" alt="">
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">Sorghum BFLS</h4>
+          <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
+          <a class="btn btn-primary mt-auto" href="#">View</a>
+        </div>
+      </div>
+    </div>
 
-					<!-- Boxes -->
-						<div class="thumbnails">
+    <div class="col-lg-6 mb-4">
+      <div class="card h-100">
+        <img class="card-img-top" src="{{ url_for('static', filename='images/tsp_map.jpg')}}" alt="">
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">TSP Example</h4>
+          <p>A traveling salesman problem example.</p>
+          <a class="btn btn-primary mt-auto" href="/tsp/">View</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-							<div class="box">
-								<a class="image fit"><img src="{{ url_for('static', filename='images/pic01.jpg') }}" alt="" /></a>
-								<div class="inner">
-									<h3>Dr. Subhash C. Sarin</h3>
-									<p>Bio of Professor</p>
-									<a href="https://www.ise.vt.edu/people/faculty/sarin.html" class="button fit">About</a>
-								</div>
-							</div>
-
-
-							<div class="box">
-								<a class="image fit"><img src="{{ url_for('static', filename='images/pic02.jpg') }}" alt="" /></a>
-								<div class="inner">
-									<h3>Sorghum BFLS</h3>
-									<p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
-									<a href="https://www.ise.vt.edu/about/news/2016/fall/subhash-sarin-fund-usda-doe-brdi.htm" class="button style2 fit">Enter</a>
-								</div>
-							</div>
-
-							<div class="box">
-								<a class="image fit"><img src="{{ url_for('static', filename='images/pic03.jpg') }}" alt="" /></a>
-								<div class="inner">
-									<h3>TSP Example</h3>
-									<p>A traveling salesman problem example.</p>
-									<a href="/tsp/" class="button style3 fit">Enter</a>
-								</div>
-							</div>						
-
-						</div>
-
-					</div>
-				</div>
-
-			<!-- Footer -->
-				<footer id="footer">
-					<div class="inner">
-						<h2>Footer</h2>
-						<p>Contact information... </p>
-
-						<!-- <ul class="icons"> -->
-							<!-- <li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li> -->
-							<!-- <li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li> -->
-							<!-- <li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li> -->
-							<!-- <li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li> -->
-						<!-- </ul> -->
-						<p class="copyright">&copy; Untitled. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com/">Unsplash</a>. Videos: <a href="http://coverr.co/">Coverr</a>.</p>
-					</div>
-				</footer>
-
-		<!-- Scripts -->
-        
-			<!-- <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> -->
-			<!-- <script src="{{ url_for('static', filename='js/jquery.scrolly.min.js') }}"></script>  -->
-			<!-- <!-- <script src="{{ url_for('static', filename='js/jquery.poptrox.min.js') }}"></script> --> -->
-			<!-- <script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>  -->
-			<!-- <script src="{{ url_for('static', filename='js/util.js') }}"></script>  -->
-			<!-- <!-- <script src="{{ url_for('static', filename='js/main.js') }}"></script> --> -->
-
-	</body>
-</html>
+  <hr>
+{% endblock %}
+{% block myscript %}{% endblock %}

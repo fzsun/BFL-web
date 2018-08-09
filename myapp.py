@@ -11,6 +11,16 @@ from algorithm.tsp import tsp
 
 app = Flask(__name__, template_folder='')
 
+@app.route('/')
+def root():
+    return render_template('index.html')
+
+@app.route('/<path:subpath>/')
+def render_static(subpath):
+    """all htmls that do not need extra code in Flask"""
+    return render_template(f'static_html/{subpath}.html')
+
+
 @app.route('/tsp/', methods=['GET', 'POST'])
 def render_tsp():
     if request.method == 'POST':
@@ -22,14 +32,6 @@ def render_tsp():
         return render_template('tsp.html', result=result)
     else:
         return render_template('tsp.html')
-
-@app.route('/tsp/detail/')
-def tsp_detail():
-    return render_template('tsp_detail.html')
-        
-@app.route('/')
-def root():
-    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8081) # Note: development server only
