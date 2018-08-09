@@ -16,41 +16,40 @@
   <hr>
 
 <!-- Project -->
-<div class="row">
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-          <div class="card-header">Input</div>
-          <div class="card-body">
-            <form method="POST">
-              <div class="form-group">
-                <label for="num_cities">Number of cities:</label>
-                <input required type="text" class="form-control" id="num_cities" name="num_cities" placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b" oninvalid="this.setCustomValidity('integer, valid range [3,99]')" oninput="this.setCustomValidity('')">
-              </div>
-              <input type="submit" value="Submit" class="btn btn-primary">
-              <input type="reset" value="Reset" class="btn btn-danger" onclick="localStorage.removeItem('tsp_result');display_result();">
-            </form>
+<div class="row my-4">
+  <div class="col-lg-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header">Input</div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="form-group">
+            <label for="num_cities">Number of cities:</label>
+            <input required type="text" class="form-control" id="num_cities" name="num_cities" placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b" oninvalid="this.setCustomValidity('integer, valid range [3,99]')" oninput="this.setCustomValidity('')">
           </div>
-        </div>
+          <input type="submit" value="Submit" class="btn btn-primary">
+          <input type="reset" value="Reset" class="btn btn-danger" onclick="localStorage.removeItem('tsp_result');display_result();">
+        </form>
       </div>
-      <div class="col-lg-6 mb-4">
-        <div class="card h-100">
-          <div class="card-header">Result Summary</div>
-          <div class="card-body d-flex flex-column flex-row">
-            <table class="table" style="width: 100%">
-                <thead>
-                  <th>num_cities</th>
-                  <th>obj</th>
-                  <th>runtime (sec)</th>
-                </thead>
-                <tbody id="tbody">
-                </tbody>
-            </table>
-            <a id="detail" href='/tsp/detail/' class="btn btn-primary mt-auto mx-auto">Detail</a>
-          </div>
-        </div>
+    </div>
+  </div>
+  <div class="col-lg-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header">Result Summary</div>
+      <div class="card-body d-flex flex-column flex-row">
+        <table class="table" style="width: 100%">
+          <thead>
+            <th>num_cities</th>
+            <th>obj</th>
+            <th>runtime (sec)</th>
+          </thead>
+          <tbody id="tbody">
+          </tbody>
+        </table>
+        <a id="detail" href='/tsp/detail/' class="btn btn-primary mt-auto mx-auto">Detail</a>
       </div>
+    </div>
+  </div>
 </div>
-<hr>
 {% endblock %}
 {% block myscript %}
   <script>
