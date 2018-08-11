@@ -8,31 +8,32 @@
     
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     
-    <title>{% block title %}{% endblock %} - VT BFL Team</title>
+    <title>{{ title|striptags }} - VT BFL Team</title>
 
     <!-- Bootstrap core CSS and customized CSS-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/1-col-portfolio.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/1-col-portfolio.css') }}">
   </head>
 
   <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
       <div class="container">
         <a class="navbar-brand" href="/">VT BFL Team</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Home
-                <span class="sr-only">(current)</span>
-              </a>
+          {%- set navigation_bar = [('/', 'index', 'Home'),
+                                    ('/team/', 'team', 'Team'),
+                                    ('/contact/', 'contact', 'Contact')] -%}
+          {% for href, id, caption in navigation_bar %}
+            <li class="nav-item {% if id == active_page %}active{% endif %}">
+              <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/team/">Team</a>
-            </li>
+          {%- endfor %}
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
                 Projects
@@ -42,9 +43,6 @@
                 <a class="dropdown-item" href="/tsp/">TSP Example</a>
               </div>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
-            </li>
           </ul>
         </div>
       </div>
@@ -53,15 +51,15 @@
     <!-- Page Content -->
     <div class="container px-4">
       <!-- Content Heading -->
-      <h1 class="my-4">{% block heading %}{% endblock %}</h1>
+      <h1 class="my-4">{{ title|safe }}</h1>
       <!-- Content Body -->
       {% block content %}{% endblock %}
     </div>
 
     <!-- Footer -->
-    <footer class="py-5 bg-dark">
+    <footer class="py-5 bg-primary">
       <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2018</p>
+        <p class="m-0 text-center text-white">Copyright &copy; VT BFL Team 2018</p>
       </div>
     </footer>
 
@@ -70,6 +68,5 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='js/my_util.js') }}"></script>
     {% block myscript %}{% endblock %}
-    
   </body>
 </html>

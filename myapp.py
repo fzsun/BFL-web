@@ -42,4 +42,4 @@ def render_tsp():
     return jsonify(my_tsp.all_data_)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8081) # Note: development server only
+    app.run(debug=True, port=5000) # Note: development server only

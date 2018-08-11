@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}TSP Example{% endblock %}
-{% block heading %}TSP Example{% endblock %}
+{% set title = "TSP Example" %}
 {% block content %}
 <div class="row my-4">
     <div class="col-md-7">
@@ -28,13 +27,10 @@
           <div class="form-group">
             <label for="num_cities">Number of cities:</label>
             <input required type="text" class="form-control" id="num_cities" name="num_cities"
-              placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b"
-              oninvalid="this.setCustomValidity('integer, valid range [3,99]')"
-              oninput="this.setCustomValidity('')">
+              placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b">
           </div>
           <input type="submit" value="Submit" class="btn btn-primary">
-          <input type="reset" value="Reset" class="btn btn-danger"
-            onclick="localStorage.removeItem('tspresult');display_summary();">
+          <input type="reset" value="Reset" class="btn btn-danger"> 
         </form>
       </div>
     </div>
