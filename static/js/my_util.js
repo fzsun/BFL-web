@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	$("form").on("submit", function(event) {
-	  event.preventDefault(); // prevent submit button from default post
+		event.preventDefault(); // prevent submit button from default post
 	  try {
 		$.post( $(location).attr('href') + "action/", // post url
 				$(this).serialize(),                  // post data

@@ -6,18 +6,18 @@
     <meta name="description" content="">
     <meta name="author" content="">
     
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     
     <title>{{ title|striptags }} - VT BFL Team</title>
 
     <!-- Bootstrap core CSS and customized CSS-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/1-col-portfolio.css') }}">
+    <style>body{padding-top: 50px;}</style>
   </head>
 
   <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary fixed-top">
       <div class="container">
         <a class="navbar-brand" href="/">VT BFL Team</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="py-5 bg-primary">
+    <footer class="py-4 bg-primary">
       <div class="container">
         <p class="m-0 text-center text-white">Copyright &copy; VT BFL Team 2018</p>
       </div>
