@@ -26,8 +26,9 @@
         <form>
           <div class="form-group">
             <label for="num_cities">Number of cities:</label>
-            <input required type="text" class="form-control" id="num_cities" name="num_cities"
-              placeholder="integer, valid range [3,99]" pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b">
+            <input type="text" class="form-control" id="num_cities" name="num_cities"
+              placeholder="integer, valid range [3,99]" required 
+              pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b" title="integer, valid range [3,99]">
           </div>
           <input type="submit" value="Submit" class="btn btn-primary">
           <input type="reset" value="Reset" class="btn btn-danger"> 
@@ -73,7 +74,7 @@
     $("tbody").html(table_row);
   }
 
-display_summary();
+  display_summary();
 </script>
 {% endblock %}
 
