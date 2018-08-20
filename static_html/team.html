@@ -1,69 +1,64 @@
-{% extends "layout.html" %}
-{% set title = "Team" %}
+{% extends "layout.html" %} 
+{% set title = "Team" %} 
 {% block content %}
 <div class="columns">
 
-    <div class="column is-3">
-      <div class="card">
-        <div class="card-image">
-          <figure class="image is-1by1">
-            <img src="{{ url_for('static', filename='images/subhash-sarin-w.jpg')}}">
-          </figure>
-        </div>
-        <div class="card-content">
-            <p class="title is-5">Subhash C. Sarin</p>
-            <p>Paul T. Norton Endowed Professor</p>
-            <a class="button is-primary is-fullwidth" href="https://www.ise.vt.edu/people/faculty/sarin.html">View More</a>
-        </div>
+  <div class="column is-3">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-1by1">
+          <img src="/static/images/subhash-sarin-w.jpg">
+        </figure>
+      </div>
+      <div class="card-content">
+        <a class="title is-5" href="https://www.ise.vt.edu/people/faculty/sarin.html">Subhash C. Sarin</a>
+        <p>Paul T. Norton Endowed Professor</p>
       </div>
     </div>
-  
-    <div class="column is-3" >
-      <div class="card">
-        <div class="card-image">
-          <figure class="image is-1by1">
-            <img src="https://placehold.it/300x300">
-          </figure>
-        </div>
-        <div class="card-content">
-          <p class="title is-5">More People</p>
-          <p>Short bio.</p>
-          <a class="button is-primary is-fullwidth" href="#">View More</a>
-        </div>
+  </div>
+
+  <div class="column is-3">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-1by1">
+          <img src="https://placehold.it/300x300">
+        </figure>
+      </div>
+      <div class="card-content">
+        <a class="title is-5" href="#">Team Member</a>
+        <p>Some description.</p>
       </div>
     </div>
+  </div>
 
-    <div class="column is-3">
-        <div class="card">
-          <div class="card-image">
-            <figure class="image is-1by1">
-              <img src="https://placehold.it/300x300">
-            </figure>
-          </div>
-          <div class="card-content">
-            <p class="title is-5">More People</p>
-            <p>Short bio.</p>
-            <a class="button is-primary" href="#">View More</a>
-          </div>
-        </div>
-      </div>    
-      
-      <div class="column is-3">
-          <div class="card">
-            <div class="card-image">
-              <figure class="image is-1by1">
-                <img src="https://placehold.it/300x300">
-              </figure>
-            </div>
-            <div class="card-content">
-              <p class="title is-5">More People</p>
-              <p>Short bio.</p>
-              <a class="button is-primary" href="#">View More</a>
-            </div>
-          </div>
-        </div>
+  <div class="column is-3">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-1by1">
+          <img src="https://placehold.it/300x300">
+        </figure>
+      </div>
+      <div class="card-content">
+        <a class="title is-5" href="#">Team Member</a>
+        <p>Some description.</p>
+      </div>
+    </div>
+  </div>
 
-      
+  <div class="column is-3">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-1by1">
+          <img src="https://placehold.it/300x300">
+        </figure>
+      </div>
+      <div class="card-content">
+        <a class="title is-5" href="#">Team Member</a>
+        <p>Some description.</p>
+      </div>
+    </div>
+  </div>
+
 </div>
-{% endblock %}
+{% endblock %} 
 {% block myscript %}{% endblock %}

@@ -1,24 +1,25 @@
-{% extends "layout.html" %}
-{% set title = "Home" %}
+{% extends "layout.html" %} 
+{% set title = "Home" %} 
 {% block hero%}
 <section class="hero  is-light is-bold">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">
-          Welcome.
-        </h1>
-        <h2 class="subtitle">
-          Some introduction about team.
-        </h2>
-        <a class="button is-primary" href="/team/">View More</a>
-      </div>
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        Biomass Feedstock Logistics
+      </h1>
+      <h2 class="subtitle">
+        Some introduction about team. 
+      </h2>
+      <a class="button is-primary" href="/team/">View More</a>
     </div>
+    <p class="has-text-info">(The frontend is currently using Bulma and jQuery)</p>
+  </div>
 </section>
-{% endblock %}
+{% endblock %} 
 {% block content %}
 <div class="columns">
 
-  <div class="column is-3">
+  <div class="column is-4">
     <div class="card">
       <div class="card-image">
         <figure class="image is-3by2">
@@ -26,14 +27,16 @@
         </figure>
       </div>
       <div class="card-content">
-          <p class="title">Sorghum BFLS</p>
-          <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
-          <a class="button is-primary" href="/s-bfls/">View</a>
+        <p class="title">Sorghum BFLS</p>
+        <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
+      </div>
+      <div class="card-content is-bottom">
+        <a class="button is-primary is-fullwidth" href="/s-bfls/">View</a>
       </div>
     </div>
   </div>
 
-  <div class="column is-3">
+  <div class="column is-4">
     <div class="card">
       <div class="card-image">
         <figure class="image is-3by2">
@@ -43,11 +46,13 @@
       <div class="card-content">
         <p class="title">TSP Example</p>
         <p>A traveling salesman problem example.</p>
-        <a class="button is-primary" href="/tsp/">View</a>
+      </div>
+      <div class="card-content is-bottom">
+        <a class="button is-primary is-fullwidth" href="/tsp/">View</a>
       </div>
     </div>
   </div>
-  
+
 </div>
-{% endblock %}
+{% endblock %} 
 {% block myscript %}{% endblock %}

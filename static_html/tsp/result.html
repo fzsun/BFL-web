@@ -1,21 +1,19 @@
-{% extends "layout.html" %}
-{% set title = "<a href='/tsp/'>TSP Example</a> <small>Detailed Results</small>" %}
+{% extends "layout.html" %} 
+{% set title = "<a href='/tsp/'>TSP Example</a> <small>Detailed Results</small>" %} 
 {% block content %}
-<div class="row my-4">
-  <div class="col-sm-12">
-    <p>This is an example to show result data can be passed to another page. </p>
-    <div class="alert alert-warning">TODO: visualize the result.</div>
-    <div id="result"></div>
-  </div>
+<div class="notification is-danger">
+  TODO: visualize the result.
 </div>
-{% endblock %}
+The data is passed across page using localStorage.
+<div id="result"></div>
+{% endblock %} 
 {% block myscript %}
 <script>
-  if(Storage !== undefined) {
+  if (Storage !== undefined) {
     if (localStorage.tspresult) {
       $("#result").html(localStorage.tspresult);
     } else {
-      $("#result").html("<div class='alert alert-danger'>Please submit input.</div>");
+      $("#result").html("<div class='notification'>Please submit input.</div>");
     }
   } else {
     alert("Sorry, your browser does not support local storage...");
