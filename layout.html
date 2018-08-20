@@ -2,71 +2,84 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    
+
     <title>{{ title|striptags }} - VT BFL Team</title>
 
     <!-- Bootstrap core CSS and customized CSS-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <style>body{padding-top: 50px;}</style>
+    <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/flatly/bulmaswatch.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+    <style>body{padding-top: 50px;} .card{height: 100%;} .navbar-brand.navbar-item{color: #fff;}</style>
   </head>
 
   <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-sm navbar-dark bg-primary fixed-top">
-      <div class="container">
-        <a class="navbar-brand" href="/">VT BFL Team</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ml-auto">
-          {%- set navigation_bar = [('/', 'index', 'Home'),
-                                    ('/team/', 'team', 'Team'),
-                                    ('/contact/', 'contact', 'Contact')] -%}
-          {% for href, id, caption in navigation_bar %}
-            <li class="nav-item {% if id == active_page %}active{% endif %}">
-              <a class="nav-link" href="{{ href|e }}">{{ caption|e }}</a>
-            </li>
-          {%- endfor %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
-                Projects
+    <nav class="navbar  is-fixed-top">
+        <div class="container">
+          <div class="navbar-brand">
+              <a class="navbar-item" href="/">
+                <img src="/favicon.ico">
               </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="/s-bfls/">Sorghum BFLS</a>
-                <a class="dropdown-item" href="/tsp/">TSP Example</a>
+            <span class="navbar-burger burger" data-target="navMenu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </div>
+          <div id="navMenu" class="navbar-menu">
+            <div class="navbar-end">
+              <a href="/" class="navbar-item">Home</a>
+              <a href="/team/" class="navbar-item">Team</a>
+              <a href="/contact/" class="navbar-item">Contact</a>
+              <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Projects</a>
+                <div class="navbar-dropdown is-boxed">
+                  <a class="navbar-item" href="/s-bfls/">Sorghum BFLS</a>
+                  <a class="navbar-item" href="/tsp/">TSP Example</a>
+                </div>
               </div>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+
 
     <!-- Page Content -->
-    <div class="container px-4">
-      <!-- Content Heading -->
-      <h1 class="my-4">{{ title|safe }}</h1>
-      <!-- Content Body -->
-      {% block content %}{% endblock %}
-    </div>
+    {% block hero %}{% endblock %}
+
+      <section class="section">
+          <div class="container">
+            <h1 class="title">{{ title|safe }}</h1>
+            {% block content %}{% endblock %}
+          </div>
+        </section>
+
 
     <!-- Footer -->
-    <footer class="py-4 bg-primary">
-      <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; VT BFL Team 2018</p>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>Copyright &copy; VT BFL Team 2018</p>
       </div>
     </footer>
 
+
     <!-- Bootstrap core JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='js/my_util.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/my_util.js') }}"></script> -->
     {% block myscript %}{% endblock %}
+    <script type="text/javascript">
+      (function() {
+        var burger = document.querySelector('.burger');
+        var nav = document.querySelector('#'+burger.dataset.target);
+        burger.addEventListener('click', function(){
+          burger.classList.toggle('is-active');
+          nav.classList.toggle('is-active');
+        });
+      })();
+    </script>
   </body>
 </html>

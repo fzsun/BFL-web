@@ -1,38 +1,53 @@
 {% extends "layout.html" %}
-{% set active_page = "index" %}
 {% set title = "Home" %}
+{% block hero%}
+<section class="hero  is-light is-bold">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">
+          Welcome.
+        </h1>
+        <h2 class="subtitle">
+          Some introduction about team.
+        </h2>
+        <a class="button is-primary" href="/team/">View More</a>
+      </div>
+    </div>
+</section>
+{% endblock %}
 {% block content %}
-<div class="row my-4">
-  <div class="col">
-    <p>Some introduction about team.</p>
-    <a class="btn btn-primary" href="/team/">View More</a>
-  </div>
-</div>
+<div class="columns">
 
-<hr>
-
-<div class="row my-4">
-  <div class="col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="{{ url_for('static', filename='images/s-bfls.jpg')}}" alt="">
-      <div class="card-body d-flex flex-column">
-        <h4 class="card-title">Sorghum BFLS</h4>
-        <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
-        <a class="btn btn-primary mt-auto" href="/s-bfls/">View</a>
+  <div class="column">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-3by2">
+          <img src="{{ url_for('static', filename='images/s-bfls.jpg')}}" alt="Placeholder image">
+        </figure>
+      </div>
+      <div class="card-content">
+          <p class="title">Sorghum BFLS</p>
+          <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
+          <a class="button is-primary" href="/s-bfls/">View</a>
       </div>
     </div>
   </div>
-  <div class="col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="{{ url_for('static', filename='images/tsp_map.jpg')}}" alt="">
-      <div class="card-body d-flex flex-column">
-        <h4 class="card-title">TSP Example</h4>
+
+  <div class="column">
+    <div class="card">
+      <div class="card-image">
+        <figure class="image is-3by2">
+          <img src="{{ url_for('static', filename='images/tsp_map.jpg')}}" alt="Placeholder image">
+        </figure>
+      </div>
+      <div class="card-content">
+        <p class="title">TSP Example</p>
         <p>A traveling salesman problem example.</p>
-        <a class="btn btn-primary mt-auto" href="/tsp/">View</a>
+        <a class="button is-primary" href="/tsp/">View</a>
       </div>
     </div>
   </div>
-
+  
 </div>
 {% endblock %}
 {% block myscript %}{% endblock %}

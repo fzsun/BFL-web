@@ -1,53 +1,69 @@
 {% extends "layout.html" %}
-{% set active_page = "team" %}
 {% set title = "Team" %}
 {% block content %}
-<div class="row my-4">
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="{{ url_for('static', filename='images/subhash-sarin-w.jpg')}}" alt="">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">Subhash C. Sarin</h5>
-        <p>Paul T. Norton Endowed Professor</p>
-        <a class="btn btn-primary mt-auto" href="https://www.ise.vt.edu/people/faculty/sarin.html">View More</a>
+<div class="columns">
+
+    <div class="column is-3">
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-1by1">
+            <img src="{{ url_for('static', filename='images/subhash-sarin-w.jpg')}}">
+          </figure>
+        </div>
+        <div class="card-content">
+            <p class="title is-5">Subhash C. Sarin</p>
+            <p>Paul T. Norton Endowed Professor</p>
+            <a class="button is-primary is-fullwidth" href="https://www.ise.vt.edu/people/faculty/sarin.html">View More</a>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="https://placehold.it/300x300" alt="">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">Fangzhou Sun</h5>
-        <p>Graduate Research Assistant</p>
-        <a class="btn btn-primary mt-auto" href="#">View More</a>
-      </div>
-    </div>
-  </div>
-
-
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="https://placehold.it/300x300" alt="">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">More People</h5>
-        <p>Short bio.</p>
-        <a class="btn btn-primary mt-auto" href="#">View More</a>
-      </div>
-    </div>
-  </div>
   
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-    <div class="card h-100">
-      <img class="card-img-top" src="https://placehold.it/300x300" alt="">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">More People</h5>
-        <p>Short bio.</p>
-        <a class="btn btn-primary mt-auto" href="#">View More</a>
+    <div class="column is-3" >
+      <div class="card">
+        <div class="card-image">
+          <figure class="image is-1by1">
+            <img src="https://placehold.it/300x300">
+          </figure>
+        </div>
+        <div class="card-content">
+          <p class="title is-5">More People</p>
+          <p>Short bio.</p>
+          <a class="button is-primary is-fullwidth" href="#">View More</a>
+        </div>
       </div>
     </div>
-  </div>
 
+    <div class="column is-3">
+        <div class="card">
+          <div class="card-image">
+            <figure class="image is-1by1">
+              <img src="https://placehold.it/300x300">
+            </figure>
+          </div>
+          <div class="card-content">
+            <p class="title is-5">More People</p>
+            <p>Short bio.</p>
+            <a class="button is-primary" href="#">View More</a>
+          </div>
+        </div>
+      </div>    
+      
+      <div class="column is-3">
+          <div class="card">
+            <div class="card-image">
+              <figure class="image is-1by1">
+                <img src="https://placehold.it/300x300">
+              </figure>
+            </div>
+            <div class="card-content">
+              <p class="title is-5">More People</p>
+              <p>Short bio.</p>
+              <a class="button is-primary" href="#">View More</a>
+            </div>
+          </div>
+        </div>
+
+      
 </div>
 {% endblock %}
 {% block myscript %}{% endblock %}
