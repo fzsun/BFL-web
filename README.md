@@ -12,6 +12,7 @@ Or use command
 conda config --add channels http://conda.anaconda.org/gurobi
 conda install gurobi
 ```
+You will need to get a Gurobi free academic license at http://www.gurobi.com/downloads/licenses/license-center
 
 Install Flask and Waitress
 ```
