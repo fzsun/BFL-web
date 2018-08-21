@@ -3,7 +3,7 @@ A Flask-based web application for BFL
 
 # Installation
 
-Install Anaconda Python 3.5 version at https://www.anaconda.com/download/
+Install Anaconda Python 3.6 version at https://www.anaconda.com/download/
 
 Install the latest Gurobi, follow the instruction at http://www.gurobi.com/downloads/get-anaconda
 Or use command
