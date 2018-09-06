@@ -1,6 +1,6 @@
 # BFL-web
 A Flask-based web application for BFL
-Developed by: Fangzhou, Robert, ...
+Developed by: Fangzhou, Robert, ... 
 
 # Installation
 
