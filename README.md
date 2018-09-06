@@ -1,5 +1,6 @@
 # BFL-web
 A Flask-based web application for BFL
+Developed by: Fangzhou, Robert, ... 
 
 # Installation
 
@@ -25,5 +26,8 @@ For development, `cd` to the project folder, then use `python myapp.py` to start
 
 A Waitress production server can be started by `python production.py`.
 
+
 Nate
+I made a change. -Hannah
+
 
