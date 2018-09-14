@@ -29,6 +29,13 @@ Run an example
 ```sh
 $ python s_bfl.py example_input.yaml 9 -o example_output.yaml
 ```
-Important functions are documented in code.
+
+In Python
+```python
+from s_bfl import s_bfl
+output = s_bfl('example_input.yaml', 9, out_file='example_output.yaml')
+print(output)
+```
+Note, important functions are documented in code.
 
 
