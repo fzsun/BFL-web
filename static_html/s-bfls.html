@@ -3,8 +3,8 @@
 {% block hero %}{% endblock %}
 {% block content %}
 <div id="s_bfl">
-    <button @click="getObjectiveFromBackend">Run Optimization</button>
-    ${ message }
+    <button @click="getObjectiveFromBackend" v-model="message">Run Optimization</button>
+    <span>[[ message ]] </span>
 </div>
 
 {% endblock %}
@@ -14,7 +14,7 @@
     
     var url = "http://localhost:5000/s-bfls/";
     var s_bfl = new Vue({
-        delimiters: ['${', '}'],
+        delimiters: ['[[', ']]'],
         el: "#s_bfl",
         data: {
             message: "something"
