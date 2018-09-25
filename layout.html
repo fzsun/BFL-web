@@ -7,7 +7,7 @@
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-  <title>{{ title|striptags }} - VT BFL Team</title>
+  <title>%% title|striptags %% - VT BFL Team</title>
 
   <!-- Style Sheets-->
   <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/flatly/bulmaswatch.min.css">
@@ -67,7 +67,7 @@
 
   <section class="section">
     <div class="container">
-      <h1 class="title">{{ title|safe }}</h1>
+      <h1 class="title">%% title|safe %%</h1>
       {% block content %}{% endblock %}
     </div>
   </section>
@@ -91,7 +91,8 @@
       });
     })();
   </script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
   <script src="{{ url_for('static', filename='js/my_util.js') }}"></script>
   {% block myscript %}{% endblock %}
 

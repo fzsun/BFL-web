@@ -11,7 +11,15 @@ import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify
 from algorithm.tsp import tsp
 
-app = Flask(__name__, template_folder='')
+class CustomFlask(Flask):
+    jinja_options = Flask.jinja_options.copy()
+    jinja_options.update(dict(
+        variable_start_string='%%',  # Default is '{{', I'm changing this because Vue.js uses '{{' / '}}'
+        variable_end_string='%%',
+    ))
+
+
+app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 
 # ============== Page Rendering ==============
 @app.route('/')
@@ -43,3 +51,11 @@ def render_tsp():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only
+
+@app.route('/s-bfl/', methods=['GET'])
+def s_bfl():
+    response = {
+        'message': "Got this far"
+    }
+    return jsonify(response)
+    

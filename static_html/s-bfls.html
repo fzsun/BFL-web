@@ -1,5 +1,35 @@
 {% extends "layout.html" %}
 {% set title = "Sorghum BFLS" %}
 {% block hero %}{% endblock %}
-{% block content %}{% endblock %}
-{% block myscript %}{% endblock %}
+{% block content %}
+<div id="s_bfl">
+    <button @click="getObjectiveFromBackend">Run Optimization</button>
+    ${ message }
+</div>
+
+{% endblock %}
+{% block myscript %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js">
+    import axios from 'axios'
+    
+    var url = "http://localhost:5000/s-bfls/";
+    var s_bfl = new Vue({
+        delimiters: ['${', '}'],
+        el: "#s_bfl",
+        data: {
+            message: "something"
+        },
+        methodes: { 
+            getObjectiveFromBackend () {
+                anxios.get(this.url)
+                .then(response => {
+                    this.message = response.data.message;
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            }
+        }, 
+    });
+</script>
+{% endblock %}
