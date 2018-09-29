@@ -1,4 +1,4 @@
-// // listen on form submit and reset
+// listen on form submit and reset
 // $(document).ready(function () {
 //   $("form").on("submit", function (event) {
 //     event.preventDefault(); // prevent submit button from default post

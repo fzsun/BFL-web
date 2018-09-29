@@ -19,9 +19,9 @@
         data: {
             message: "something"
         },
-        methodes: { 
+        methodes: {     
             getObjectiveFromBackend () {
-                anxios.get(this.url)
+                axios.get(this.url)
                 .then(response => {
                     this.message = response.data.message;
                 })

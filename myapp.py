@@ -21,6 +21,7 @@ class CustomFlask(Flask):
 
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 
+
 # ============== Page Rendering ==============
 @app.route('/')
 def root():
@@ -34,6 +35,10 @@ def static_html(subpath):
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path,'static'),'favicon.ico')
+
+@app.route('/test/', methods=['GET'])
+def Sbfl():
+    return "<h1> Hello World </h1>"
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
@@ -52,10 +57,4 @@ def render_tsp():
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only
 
-@app.route('/s-bfl/', methods=['GET'])
-def s_bfl():
-    response = {
-        'message': "Got this far"
-    }
-    return jsonify(response)
     
