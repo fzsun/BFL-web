@@ -10,6 +10,7 @@ import os
 import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify
 from algorithm.tsp import tsp
+from algorithm.s_bfl import s_bfl
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -21,6 +22,23 @@ class CustomFlask(Flask):
 
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 
+books = [
+    {'id': 0,
+     'title': 'A Fire Upon the Deep',
+     'author': 'Vernor Vinge',
+     'first_sentence': 'The coldsleep itself was dreamless.',
+     'year_published': '1992'},
+    {'id': 1,
+     'title': 'The Ones Who Walk Away From Omelas',
+     'author': 'Ursula K. Le Guin',
+     'first_sentence': 'With a clamor of bells that set the swallows soaring, the Festival of Summer came to the city Omelas, bright-towered by the sea.',
+     'published': '1973'},
+    {'id': 2,
+     'title': 'Dhalgren',
+     'author': 'Samuel R. Delany',
+     'first_sentence': 'to wound the autumnal city.',
+     'published': '1975'}
+]
 
 # ============== Page Rendering ==============
 @app.route('/')
@@ -36,9 +54,12 @@ def static_html(subpath):
 def favicon():
     return send_from_directory(os.path.join(app.root_path,'static'),'favicon.ico')
 
-@app.route('/test/', methods=['GET'])
+@app.route('/s-bfl/', methods=['GET'])
 def Sbfl():
-    return "<h1> Hello World </h1>"
+    my_s_bfl = s_bfl()
+    answer = my_s_bfl.s_bfl('./algorithm/example_input.json', 4)
+    print(answer)
+    return jsonify(answer)
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)

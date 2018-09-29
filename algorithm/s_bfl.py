@@ -5,7 +5,7 @@ Created on Wed Sep 13 10:10:09 2017
 @author: fangzhou
 """
 
-from s_bfl_utility import create_data, cli_s_bfl
+from algorithm.s_bfl_utility import create_data, cli_s_bfl
 import logging
 import os
 import numpy as np
@@ -15,16 +15,17 @@ from gurobipy import *
 import json
 import yaml
 
-class s_bfl(object):
-    def keyboard_terminate(self, model, where):
+
+logger = logging.getLogger(__name__)
+
+def keyboard_terminate(self, model, where):
         try:
             pass
         except KeyboardInterrupt:
             model.terminate()
 
 
-    logger = logging.getLogger(__name__)
-
+class s_bfl(object):
 
     def s_bfl(self, input_data, sysnum, t_lim=60, jit=False, out_file=None, **kwargs):
         """
