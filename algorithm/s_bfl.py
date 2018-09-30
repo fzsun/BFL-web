@@ -15,17 +15,15 @@ from gurobipy import *
 import json
 import yaml
 
-
 logger = logging.getLogger(__name__)
 
-def keyboard_terminate(self, model, where):
+class s_bfl(object):
+    def keyboard_terminate(self, model, where):
         try:
             pass
         except KeyboardInterrupt:
             model.terminate()
 
-
-class s_bfl(object):
 
     def s_bfl(self, input_data, sysnum, t_lim=60, jit=False, out_file=None, **kwargs):
         """
@@ -148,7 +146,7 @@ class s_bfl(object):
                 m.read(f'warm_starts/base_{sysnum}.mst')
             if os.path.isfile(f'warm_starts/hybrid_sys{sysnum}.mst'):
                 m.read(f'warm_starts/hybrid_sys{sysnum}.mst')
-        m.optimize(keyboard_terminate)
+        m.optimize()
 
         logger.info("Model solved. Begin post-processing.")
 
@@ -231,37 +229,37 @@ class s_bfl(object):
 
             logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
-            ret = {'params': params, 'solution': solution, 'summary': summary}
+            self.ret = {'params': params, 'solution': solution, 'summary': summary}
             if out_file:
                 with open(out_file, 'w') as f:
                     if out_file.split('.')[-1] == 'json':
-                        json.dump(ret, f)
+                        json.dump(self.ret, f)
                     else:
-                        yaml.dump(ret, f)
+                        yaml.dump(self.ret, f)
                 logger.info(f"Output {out_file} saved.\n")
-            return ret
+            return self.ret
         else:
             logger.info(f"{status[m.status]}\n")
 
 
-    if __name__ == '__main__':
-        if not logger.hasHandlers():
-            stream_handler = logging.StreamHandler()
-            file_handler = logging.FileHandler('RunLog.log')
-            formatter = logging.Formatter(
-                fmt='%(asctime)s %(filename)s:%(levelname)s - %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S')
-            file_handler.setFormatter(formatter)
-            logger.addHandler(stream_handler)
-            logger.addHandler(file_handler)
-            logger.setLevel(logging.DEBUG)
+if __name__ == '__main__':
+    if not logger.hasHandlers():
+        stream_handler = logging.StreamHandler()
+        file_handler = logging.FileHandler('RunLog.log')
+        formatter = logging.Formatter(
+            fmt='%(asctime)s %(filename)s:%(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+        logger.addHandler(file_handler)
+        logger.setLevel(logging.DEBUG)
 
-        args = cli_s_bfl()
-        s_bfl(
-            args.input_file,
-            args.sysnum,
-            t_lim=args.t_lim,
-            jit=args.jit,
-            seed=args.seed,
-            out_file=args.out_file)
-    #    s_bfl('cundiff_input.yaml', 2, t_lim=60, jit=True, out_file='outout.yaml')
+    args = cli_s_bfl()
+    s_bfl(
+        args.input_file,
+        args.sysnum,
+        t_lim=args.t_lim,
+        jit=args.jit,
+        seed=args.seed,
+        out_file=args.out_file)
+#    s_bfl('cundiff_input.yaml', 2, t_lim=60, jit=True, out_file='outout.yaml')

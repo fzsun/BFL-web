@@ -56,10 +56,10 @@ def favicon():
 
 @app.route('/s-bfl/', methods=['GET'])
 def Sbfl():
-    my_s_bfl = s_bfl()
-    answer = my_s_bfl.s_bfl('./algorithm/example_input.json', 4)
-    print(answer)
-    return jsonify(answer)
+    # my_s_bfl = s_bfl()
+    # answer = my_s_bfl.solve('./algorithm/example_input.json', 4)
+    # print(answer)
+    return jsonify(books)
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
@@ -69,7 +69,9 @@ def page_not_found(e):
 # ============== POST Actions ==============
 @app.route('/tsp/action/', methods=['POST'])
 def render_tsp():
-    n = request.form['num_cities']
+    json_data = request.get_json(force=True)
+    n = json_data['num_cities']
+    # n = request.form['num_cities']
     my_tsp = tsp()
     my_tsp.from_num_cities(int(n))
     my_tsp.solve()
