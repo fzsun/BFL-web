@@ -23,65 +23,39 @@ class s_bfl(object):
             pass
         except KeyboardInterrupt:
             model.terminate()
-
-
-    def s_bfl(self, input_data, sysnum, t_lim=60, jit=False, out_file=None, **kwargs):
-        """
-        Solve the Sorghum-BFL problem instance.
-
-        Parameters
-        ----------
-        input_data : str or dict
-            can be a *.yaml or *.json file name (str) or a dict object.
-        sysnum : int
-            system number.
-        out_file : str, optional
-            if specified write return value to a YAML or JSON file named out_file.
-        kwargs : other keywords in my_utility.create_data()
-            including seed and plot_coords.
-
-        Returns
-        -------
-        ret : dict
-            a dict object containing three sub-dicts params, solution, summary.
-
-            params is all the model parameters converted from input_data.
-
-            solution is all the decision variables and the optimal values.
-
-            summary is a summary of the solution.
-        """
-        func_args = locals()
-        args_str = yaml.dump(func_args, default_flow_style=True, width=np.inf)
-
-        logger.info(f"Code begins with {args_str} ")
-        params = create_data(input_data, sysnum, **kwargs)
-        (*_, a, c_op, c_op_jit, c_pen, cfs, cs, cs_jit, csk, d, hf, hs, U, UE,
-        UE_jit) = params.values()
-
-        T = list(range(1, len(d)))
-        F = list(range(len(cfs)))
-        S = list(range(len(csk)))
-        K = list(range(len(U)))
-        a = np.array(a)
+    
+    def input(self, input_data, sysnum, t_lim = 60, jit=False, **kwargs):
+        self.t_lim = t_lim
+        self.jit = jit
+        self.sysnum = sysnum
+        self.params = create_data(input_data, self.sysnum, **kwargs)
+        (*_, self.a, self.c_op, self.c_op_jit, self.c_pen, self.cfs, self.cs, self.cs_jit, 
+        self.csk, self.d, self.hf, self.hs, self.U, self.UE, self.UE_jit) = self.params.values()
+    
+    def solve(self):
+        T = list(range(1, len(self.d)))
+        F = list(range(len(self.cfs)))
+        S = list(range(len(self.csk)))
+        K = list(range(len(self.U)))
+        a = np.array(self.a)
         M = a.sum(axis=0)
-        c_zfs = (np.array(cfs) + c_op).tolist()
-        c_z_jit = (np.array(cs_jit)[None] + np.array(cfs) + c_op_jit).tolist()
+        c_zfs = (np.array(self.cfs) + self.c_op).tolist()
+        c_z_jit = (np.array(self.cs_jit)[None] + np.array(self.cfs) + self.c_op_jit).tolist()
 
         logger.info("Parameters created. Begin building model.")
 
         m = Model('ms1m_base')
 
         # ====== Create vars and objectives ======
-        w = m.addVars(S, K, obj=csk, vtype='B', name='w')
+        w = m.addVars(S, K, obj=self.csk, vtype='B', name='w')
         y = m.addVars(F, S, vtype='B', name='y')
         zfs = m.addVars(T, F, S, obj=c_zfs * len(T), name='zfs')
-        zs = m.addVars(T, S, obj=cs * len(T), name='zs')
-        Is = m.addVars([0] + T, S, obj=hs, name='Is')
-        If = m.addVars([0] + T, F, obj=hf, name='If')
-        if jit:
+        zs = m.addVars(T, S, obj=self.cs * len(T), name='zs')
+        Is = m.addVars([0] + T, S, obj=self.hs, name='Is')
+        If = m.addVars([0] + T, F, obj=self.hf, name='If')
+        if self.jit:
             z_jit = m.addVars(T, F, S, obj=c_z_jit * len(T), name='z_jit')
-        penalty = m.addVars(T, obj=c_pen, name='penalty')
+        penalty = m.addVars(T, obj=self.c_pen, name='penalty')
 
         m.setAttr('UB', Is.select(0, '*'), [0] * len(S))
         m.setAttr('UB', If.select(0, '*'), [0] * len(F))
@@ -95,23 +69,23 @@ class s_bfl(object):
         m.addConstrs((Is[t, s] == Is[t - 1, s] - zs[t, s] + zfs.sum(t, '*', s)
                     for t in T for s in S),
                     name='c4')
-        m.addConstrs((Is[t, s] <= quicksum([U[k] * w[s, k] for k in K]) for t in T
+        m.addConstrs((Is[t, s] <= quicksum([self.U[k] * w[s, k] for k in K]) for t in T
                     for s in S),
                     name='c7')
-        m.addConstrs((zfs.sum(t, '*', s) <= quicksum([UE[k] * w[s, k] for k in K])
+        m.addConstrs((zfs.sum(t, '*', s) <= quicksum([self.UE[k] * w[s, k] for k in K])
                     for t in T for s in S),
                     name='c9a')
-        if not jit:
+        if not self.jit:
             m.addConstrs((If[t, f] == If[t - 1, f] + a[t, f] - zfs.sum(t, f, '*')
                         for t in T for f in F),
                         name='c5')
-            m.addConstrs((zs.sum(t, '*') + penalty[t] == d[t] for t in T),
+            m.addConstrs((zs.sum(t, '*') + penalty[t] == self.d[t] for t in T),
                         name='c6')
             m.addConstrs(
                 (zfs.sum('*', f, s) <= M[f] * y[f, s] for f in F for s in S),
                 name='c8')
             m.addConstrs(
-                (zfs.sum(t, '*', s) <= quicksum([UE_jit[k] * w[s, k] for k in K])
+                (zfs.sum(t, '*', s) <= quicksum([self.UE_jit[k] * w[s, k] for k in K])
                 for t in T for s in S),
                 name='c9b')
         else:
@@ -119,7 +93,7 @@ class s_bfl(object):
                         z_jit.sum(t, f, '*') for t in T for f in F),
                         name='c5')
             m.addConstrs(
-                (z_jit.sum(t, '*', '*') + zs.sum(t, '*') + penalty[t] == d[t]
+                (z_jit.sum(t, '*', '*') + zs.sum(t, '*') + penalty[t] == self.d[t]
                 for t in T),
                 name='c6')
             m.addConstrs(
@@ -127,25 +101,24 @@ class s_bfl(object):
                 for f in F for s in S),
                 name='c8')
             m.addConstrs((z_jit.sum(t, '*', s) + zfs.sum(t, '*', s) <= quicksum(
-                [UE_jit[k] * w[s, k] for k in K]) for t in T for s in S),
+                [self.UE_jit[k] * w[s, k] for k in K]) for t in T for s in S),
                         name='c9b')
-
         logger.info("Model created. Begin solving.")
 
         # ====== Solve ======
         # m.update()
         # m.write('ms1m_grb.lp')
         # m.setParam('MIPGap', 0.01)
-        m.setParam('TimeLimit', t_lim)
+        m.setParam('TimeLimit', self.t_lim)
         m.setParam('Threads', 6)
         m.update()
         if not os.path.exists('warm_starts/'):
             os.makedirs('warm_starts/')
         else:
-            if os.path.isfile(f'warm_starts/base_{sysnum}.mst'):
-                m.read(f'warm_starts/base_{sysnum}.mst')
-            if os.path.isfile(f'warm_starts/hybrid_sys{sysnum}.mst'):
-                m.read(f'warm_starts/hybrid_sys{sysnum}.mst')
+            if os.path.isfile(f'warm_starts/base_{self.sysnum}.mst'):
+                m.read(f'warm_starts/base_{self.sysnum}.mst')
+            if os.path.isfile(f'warm_starts/hybrid_sys{self.sysnum}.mst'):
+                m.read(f'warm_starts/hybrid_sys{self.sysnum}.mst')
         m.optimize()
 
         logger.info("Model solved. Begin post-processing.")
@@ -164,33 +137,33 @@ class s_bfl(object):
 
         if m.SolCount:
             m.write('warm_starts/start.mst')
-            if jit:
-                m.write(f'warm_starts/hybrid_sys{sysnum}.mst')
+            if self.jit:
+                m.write(f'warm_starts/hybrid_sys{self.sysnum}.mst')
             else:
-                m.write(f'warm_starts/base_sys{sysnum}.mst')
+                m.write(f'warm_starts/base_sys{self.sysnum}.mst')
 
             cost_total_lb = m.objBound
             cost_total = m.objVal
             gap = (cost_total - cost_total_lb) / cost_total
-            cost_loc = w.prod({(s, k): csk[s][k] for s in S for k in K}).getValue()
+            cost_loc = w.prod({(s, k): self.csk[s][k] for s in S for k in K}).getValue()
 
-            cost_op = zfs.sum().getValue() * c_op
-            cfs_dict = {(t, f, s): cfs[f][s] for t, f, s in setprod(T, F, S)}
+            cost_op = zfs.sum().getValue() * self.c_op
+            cfs_dict = {(t, f, s): self.cfs[f][s] for t, f, s in setprod(T, F, S)}
             cost_tran_fs = zfs.prod(cfs_dict).getValue()
-            cost_tran_sb = zs.prod({(t, s): cs[s]
+            cost_tran_sb = zs.prod({(t, s): self.cs[s]
                                     for t in T for s in S}).getValue()
-            if jit:
-                cost_op += z_jit.sum().getValue() * c_op_jit
+            if self.jit:
+                cost_op += z_jit.sum().getValue() * self.c_op_jit
                 cost_tran_fs += z_jit.prod(cfs_dict).getValue()
-                cost_tran_sb += z_jit.prod({(t, f, s): cs_jit[s]
+                cost_tran_sb += z_jit.prod({(t, f, s): self.cs_jit[s]
                                             for t in T for f in F
                                             for s in S}).getValue()
 
-            cost_inv_S = Is.sum().getValue() * hs
-            cost_inv_F = If.sum().getValue() * hf
+            cost_inv_S = Is.sum().getValue() * self.hs
+            cost_inv_F = If.sum().getValue() * self.hf
 
             K_cnt = dict(Counter(k for s in S for k in K if w[s, k].x > 0.5))
-            jit_amount = z_jit.sum().getValue() if jit else np.nan
+            jit_amount = z_jit.sum().getValue() if self.jit else np.nan
 
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]
             summary = dict()
@@ -227,20 +200,9 @@ class s_bfl(object):
                 'jit': jit_amount
             }
 
-            logger.info(args_str + yaml.dump(summary, default_flow_style=False))
+            # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
-            self.ret = {'params': params, 'solution': solution, 'summary': summary}
-            if out_file:
-                with open(out_file, 'w') as f:
-                    if out_file.split('.')[-1] == 'json':
-                        json.dump(self.ret, f)
-                    else:
-                        yaml.dump(self.ret, f)
-                logger.info(f"Output {out_file} saved.\n")
-            return self.ret
-        else:
-            logger.info(f"{status[m.status]}\n")
-
+            self.optimization_result = {'params': self.params, 'solution': solution, 'summary': summary}
 
 if __name__ == '__main__':
     if not logger.hasHandlers():

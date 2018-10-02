@@ -54,12 +54,14 @@ def static_html(subpath):
 def favicon():
     return send_from_directory(os.path.join(app.root_path,'static'),'favicon.ico')
 
-@app.route('/s-bfl/', methods=['GET'])
+@app.route('/s-bfl/', methods=['POST'])
 def Sbfl():
-    # my_s_bfl = s_bfl()
-    # answer = my_s_bfl.solve('./algorithm/example_input.json', 4)
-    # print(answer)
-    return jsonify(books)
+    input_data = request.get_json(force=True)
+    my_s_bfl = s_bfl()
+    my_s_bfl.input(input_data, sysnum = 2)
+    my_s_bfl.solve()
+    print(my_s_bfl.optimization_result)
+    return jsonify(my_s_bfl.optimization_result)
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
@@ -71,7 +73,6 @@ def page_not_found(e):
 def render_tsp():
     json_data = request.get_json(force=True)
     n = json_data['num_cities']
-    # n = request.form['num_cities']
     my_tsp = tsp()
     my_tsp.from_num_cities(int(n))
     my_tsp.solve()
