@@ -2,34 +2,38 @@
 {% set title = "Sorghum BFLS" %}
 {% block hero %}{% endblock %}
 {% block content %}
-<div id="s_bfl">
-    <button @click="getObjectiveFromBackend" v-model="message">Run Optimization</button>
-    <span>[[ message ]] </span>
-</div>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+</head>
+<body>
+    <div id="s_bfl">
+        <div id="s_bfl">
+            <p>{{ message }}</p>
+            <button v-on:click="optimize">Optimize</button>
+            <p>Optimial solution: {{response}}</p>
+        </div>
+    </div>
+</body>
 
-{% endblock %}
-{% block myscript %}
-<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js">
-    import axios from 'axios'
-    
-    var url = "http://localhost:5000/s-bfls/";
-    var s_bfl = new Vue({
-        delimiters: ['[[', ']]'],
-        el: "#s_bfl",
-        data: {
-            message: "something"
-        },
-        methodes: {     
-            getObjectiveFromBackend () {
-                axios.get(this.url)
-                .then(response => {
-                    this.message = response.data.message;
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-            }
-        }, 
-    });
+
+<script>
+var post_body = {"input_format": "paper", "moisture": 0.7, "demand": 200000, "horizon": 26, "num_fields": 120, "num_ssls": 60, "ssl_sizes": [2500, 5000, 10000], "harvest_progress": [5, 5, 6, 7, 10, 11, 12, 11, 9, 8, 6, 5, 5], "field": {"dry_yield": 21, "radius": 32, "proportion_devoted": 0.03, "area_ratio": [1, 10]}, "price": 65, "interest_rate": 0.05, "insurance_rate": 0.008, "tax_rate": 0.01, "cost": {"equipment": {"loadout": [94000, 5, 28200, 0.37, 847], "press": [300000, 5, 120000, 0.1374, 908], "chopper": [22000, 5, 8800, 0, 9240], "bagger": [50000, 5, 20000, 0.7, 2000], "module_former": [450000, 5, 217234, 1.0319, 800], "module_hauler": [375000, 8, 73530, 0.2766, 3620]}, "bunker_annual_own": 5600, "ssl_annual_own": 0.36, "base_infield": 0.58, "base_highway": 0.1, "transport_coef": {"compressed": 0.8, "whole_stalk": 1.1, "in_module": 0.7}}, "degrade": {"whole_stalk": 9, "chopped": 5, "in_bunker": 80, "in_bag": 100}, "configurations": [["whole_stalk", "loadout", "chopper"], ["whole_stalk", "loadout", "chopper", "bagger"], ["whole_stalk", "loadout", "chopper", "bunker"], ["whole_stalk", "loadout", "chopper", "module_former", "module_hauler"], ["whole_stalk", "loadout", "chopper", "press"], ["whole_stalk", "loadout", "chopper", "press", "bagger"], ["whole_stalk", "loadout", "chopper", "press", "bunker"], ["whole_stalk", "loadout", "chopper", "press", "module_former", "module_hauler"], ["forage_chop", "loadout"], ["forage_chop", "loadout", "bagger"], ["forage_chop", "loadout", "bunker"], ["forage_chop", "loadout", "module_former", "module_hauler"], ["forage_chop", "loadout", "press"], ["forage_chop", "loadout", "press", "bagger"], ["forage_chop", "loadout", "press", "bunker"], ["forage_chop", "loadout", "press", "module_former", "module_hauler"]]};
+
+new Vue({
+    el: '#s_bfl',
+    data: {
+        message: 'Hello Vue.js!',
+        response: []
+    },
+    methods: {
+        optimize: function (event) {
+            console.log("I'm trying")
+            axios.post('http://localhost:5000/s-bfl/', {input_format: "paper", moisture: 0.7, demand: 200000, horizon: 26, num_fields: 120, num_ssls: 60, ssl_sizes: [2500, 5000, 10000], harvest_progress: [5, 5, 6, 7, 10, 11, 12, 11, 9, 8, 6, 5, 5], field: {"dry_yield": 21, radius: 32, proportion_devoted: 0.03, area_ratio: [1, 10]}, price: 65, interest_rate: 0.05, insurance_rate: 0.008, tax_rate: 0.01, cost: {equipment: {loadout: [94000, 5, 28200, 0.37, 847], press: [300000, 5, 120000, 0.1374, 908], chopper: [22000, 5, 8800, 0, 9240], bagger: [50000, 5, 20000, 0.7, 2000], module_former: [450000, 5, 217234, 1.0319, 800], module_hauler: [375000, 8, 73530, 0.2766, 3620]}, bunker_annual_own: 5600, ssl_annual_own: 0.36, base_infield: 0.58, base_highway: 0.1, transport_coef: {compressed: 0.8, whole_stalk: 1.1, in_module: 0.7}}, degrade: {whole_stalk: 9, chopped: 5, in_bunker: 80, in_bag: 100}, configurations: [["whole_stalk", "loadout", "chopper"], ["whole_stalk", "loadout", "chopper", "bagger"], ["whole_stalk", "loadout", "chopper", "bunker"], ["whole_stalk", "loadout", "chopper", "module_former", "module_hauler"], ["whole_stalk", "loadout", "chopper", "press"], ["whole_stalk", "loadout", "chopper", "press", "bagger"], ["whole_stalk", "loadout", "chopper", "press", "bunker"], ["whole_stalk", "loadout", "chopper", "press", "module_former", "module_hauler"], ["forage_chop", "loadout"], ["forage_chop", "loadout", "bagger"], ["forage_chop", "loadout", "bunker"], ["forage_chop", "loadout", "module_former", "module_hauler"], ["forage_chop", "loadout", "press"], ["forage_chop", "loadout", "press", "bagger"], ["forage_chop", "loadout", "press", "bunker"], ["forage_chop", "loadout", "press", "module_former", "module_hauler"]]}
+            ).then(response => {
+                this.response = response.data;
+            })
+        }
+    }
+})
 </script>
 {% endblock %}
