@@ -5,70 +5,75 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
 </head>
 
-<body id="tsp">
-  <div class="columns">
-    <div class="column is-4">
-      <img src="{{ url_for('static', filename='images/tsp_map.jpg')}}">
-    </div>
-    <div class="column">
-      <p>Some short description...</p> <br>
-      <a class="button is-primary" href="/tsp/description/">
-            View More
-          </a>
-    </div>
-  </div>
-
-  <div class="columns">
-
-    <div class="column">
-      <div class="card">
-        <header class="card-header">
-          <p class="card-header-title">Input</p>
-        </header>
-        <div class="card-content">
-          <form>
-            <div class="field">
-              <label class="label">Number of cities:</label>
-              <div class="control">
-                <input class="input" type="text" id="num_cities" name="num_cities" placeholder="integer, valid range [3,99]" required pattern="\b([3-9]|[1-8][0-9]|9[0-9])\b"
-                  title="integer, valid range [3,99]">
+<body>
+  <div id="tsp">
+      <div class="columns">
+          <div class="column is-4">
+            <img src="%%url_for('static', filename='images/tsp_map.jpg')%%">
+          </div>
+          <div class="column">
+            <p>Some short description...</p> <br>
+            <a class="button is-primary" href="/tsp/description/">
+                  View More
+                </a>
+          </div>
+      </div>
+      
+      <div class="columns">
+    
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">Input</p>
+            </header>
+            <div class="card-content">
+              <div class="field">
+                <label class="label">Number of cities:</label>
+                <div class="control">
+                  <input v-model="num_cities" class="input" type="number" placeholder="integer, valid range [3,99]">
+                  {{num_cities}}
+                </div>
+              </div>
+              <div class="field is-grouped">
+                <div class="control">
+                  <button v-on:click="runTsp" class="button is-primary">Solve</button>
+                </div>
+                <!-- <div class="control">
+                  <input type="reset" value="Reset" class="button">
+                </div> -->
               </div>
             </div>
-            <div class="field is-grouped">
-              <div class="control">
-                <input type="submit" class="button is-primary" value="Submit">
-              </div>
-              <div class="control">
-                <input type="reset" value="Reset" class="button">
-              </div>
+          </div>
+        </div>
+    
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">Result Summary</p>
+            </header>
+            <div class="card-content">
+              <table class="table is-bordered is-fullwidth">
+                <thead>
+                  <th>num_cities</th>
+                  <th>obj</th>
+                  <th>runtime (sec)</th>
+                </thead>
+                <tbody v-if="submitted">
+                  <tr>
+                    <td>{{ response.num_cities }}</td>
+                    <td>{{ response.obj }}</td>
+                    <td>{{ response.runtime }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <form>
+            <div class="card-content is-bottom has-text-centered">
+              <a id="detail" class="button is-primary " href="/tsp/result/">Detail</a>
+            </div>
+          </div>
         </div>
+    
       </div>
-    </div>
-
-    <div class="column">
-      <div class="card">
-        <header class="card-header">
-          <p class="card-header-title">Result Summary</p>
-        </header>
-        <div class="card-content">
-          <table class="table is-bordered is-fullwidth">
-            <thead>
-              <th>num_cities</th>
-              <th>obj</th>
-              <th>runtime (sec)</th>
-            </thead>
-            <tbody id="tbody">
-            </tbody>
-          </table>
-        </div>
-        <div class="card-content is-bottom has-text-centered">
-          <a id="detail" class="button is-primary " href="/tsp/result/">Detail</a>
-        </div>
-      </div>
-    </div>
-
   </div>
 </body>
 
@@ -76,14 +81,15 @@
   new Vue({
     el: "#tsp",
     data: {
-      num_cities = "",
-      obj = '',
-      runtime = '',
+      num_cities: 0,
+      submitted: false,
+      response: {},
     },
     methods: {
       runTsp: function (event) {
-            console.log("Solving TSP")
-            axios.post('http://localhost:5000/tsp/action', { num_cities: this.num_cities }
+            console.log("Solving TSP");
+            this.submitted = !this.submitted;
+            axios.post('http://localhost:5000/tsp/action/', { num_cities: this.num_cities }
             ).then(response => {
                 this.response = response.data;
             })
