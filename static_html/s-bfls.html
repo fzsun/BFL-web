@@ -4,14 +4,47 @@
 {% block content %}
 <head>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="./custom_style.css">
 </head>
 <body>
     <div id="s_bfl">
-        <div>
-            <p>{{ message }}</p>
-            <button v-on:click="optimize">Optimize</button>
-            <p>Optimial solution: {{response}}</p>
+        <div v-if="!started">
+            <div class="subtitle is-2">A tool for decision makers to determine the most cost effective way to produce and transport sorghum for use in biofuels</div>
+            <button class="button is-primary" v-on:click="toggleStarted">Get Started</button>
         </div>
+        
+        <form v-if="started" class="columns">
+            <div class="columns">
+                <div class="column is-one-third">
+                    <span class="subtitle is-4">Objective Information</span>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Projected demand </label>
+                        <input type="text" class="input forty-percent-width">
+                    </div>
+                    <button v-on:click="optimize" class="button is-primary">Optimize</button>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-one-third">
+                    <span class="subtitle is-4">Cost Information</span>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Price</label>
+                        <input type="text" class="input forty-percent-width">
+                        <label class="label">Interest Rate</label>
+                        <input type="text" class="input forty-percent-width">
+                        <label class="label">Insurance Rate</label>
+                        <input type="text" class="input forty-percent-width">
+                        <label class="label">Tax Rate</label>
+                        <input type="text" class="input forty-percent-width">
+                    </div>
+                    <button v-on:click="optimize" class="button is-primary">Optimize</button>
+                </div>
+            </div>
+        </form>
     </div>
 </body>
 
@@ -22,6 +55,7 @@ new Vue({
     el: '#s_bfl',
     data: {
         message: 'Hello Team',
+        started: false, 
         response: []
     },
     methods: {
@@ -31,6 +65,9 @@ new Vue({
             ).then(response => {
                 this.response = response.data;
             })
+        },
+        toggleStarted: function(event){
+            this.started = !this.started;
         }
     }
 })

@@ -31,16 +31,15 @@
                 <label class="label">Number of cities:</label>
                 <div class="control">
                   <input v-model="num_cities" class="input" type="number" placeholder="integer, valid range [3,99]">
-                  {{num_cities}}
                 </div>
               </div>
               <div class="field is-grouped">
                 <div class="control">
                   <button v-on:click="runTsp" class="button is-primary">Solve</button>
                 </div>
-                <!-- <div class="control">
-                  <input type="reset" value="Reset" class="button">
-                </div> -->
+                <div class="control">
+                  <button v-on:click="reset" class="button is-secondary">Reset</button>
+                </div>
               </div>
             </div>
           </div>
@@ -93,7 +92,10 @@
             ).then(response => {
                 this.response = response.data;
             })
-        }
+        },
+      reset: function (event) {
+        this.num_cities = 0;
+      }
     }
   })
 </script>
