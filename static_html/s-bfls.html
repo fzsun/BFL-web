@@ -3,29 +3,53 @@
 {% block hero %}{% endblock %}
 {% block content %}
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
-    <link rel="stylesheet" type="text/css" href="./custom_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>  
 </head>
 <body>
     <div id="s_bfl">
         <div v-if="!started">
-            <div class="subtitle is-2">A tool for decision makers to determine the most cost effective way to produce and transport sorghum for use in biofuels</div>
+            <div class="is-size-3">
+                A tool for decision makers to determine the most cost effective 
+                way to produce and transport sorghum for use in biofuels. The tool itself
+                is an optimization algorithm and simulization that work in tandem to find 
+                and test an optimial solution. To learn more about the algorithm 
+                <a>see here.</a> 
+            </div>
+            <br>
+            <div class="is-size-3">
+                Because this is a large optimization model with many inputs, we have 
+                created an excel template for users to input the details of their 
+                specific problem into the model we have developed.
+            </div>
+
             <button class="button is-primary" v-on:click="toggleStarted">Get Started</button>
         </div>
         
-        <form v-if="started" class="columns">
+        <form v-if="started">
             <div class="columns">
                 <div class="column is-one-third">
                     <span class="subtitle is-4">Objective Information</span>
                 </div>
                 <div class="column">
                     <div class="field">
-                        <label class="label">Projected demand </label>
-                        <input type="text" class="input forty-percent-width">
+                        <label class="label test">Projected demand </label>
+                        <input type="text" class="input">
                     </div>
-                    <button v-on:click="optimize" class="button is-primary">Optimize</button>
+                    <div class="field">
+                        <label class="label">Acceptable risk of not meeting demand</label>
+                        <div class="controls">
+                            <div class="select">
+                                <select>
+                                    <option>15%</option>
+                                    <option>10%</option>
+                                    <option>5%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
             <div class="columns">
                 <div class="column is-one-third">
                     <span class="subtitle is-4">Cost Information</span>
@@ -33,14 +57,28 @@
                 <div class="column">
                     <div class="field">
                         <label class="label">Price</label>
-                        <input type="text" class="input forty-percent-width">
+                        <input type="number" class="input">
                         <label class="label">Interest Rate</label>
-                        <input type="text" class="input forty-percent-width">
+                        <input type="number" class="input">
                         <label class="label">Insurance Rate</label>
-                        <input type="text" class="input forty-percent-width">
+                        <input type="number" class="input">
                         <label class="label">Tax Rate</label>
-                        <input type="text" class="input forty-percent-width">
+                        <input type="number" class="input">
                     </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-one-third">
+                    <span class="subtitle is-4">Logistics Information</span>
+                </div>
+                <div class="column">
+                    <label class="label">Available Farms</label>
+                    <input type="number" class="input">
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-one-third"></div>
+                <div class="column">
                     <button v-on:click="optimize" class="button is-primary">Optimize</button>
                 </div>
             </div>
@@ -56,7 +94,70 @@ new Vue({
     data: {
         message: 'Hello Team',
         started: false, 
-        response: []
+        response: [],
+        // optimization_input: {
+        //     input_format: "paper", 
+        //     moisture: 0.7, 
+        //     demand: 200000, 
+        //     horizon: 26, 
+        //     num_fields: 120, 
+        //     num_ssls: 60, 
+        //     ssl_sizes: [2500, 5000, 10000], 
+        //     harvest_progress: [5, 5, 6, 7, 10, 11, 12, 11, 9, 8, 6, 5, 5], 
+        //     field: 
+        //         {
+        //             dry_yield: 21, 
+        //             radius: 32, 
+        //             proportion_devoted: 0.03, 
+        //             area_ratio: [1, 10]}, 
+        //             price: 65, 
+        //             interest_rate: 0.05, 
+        //             insurance_rate: 0.008, 
+        //             tax_rate: 0.01, 
+        //             cost: {
+        //                 equipment: {
+        //                     loadout: [94000, 5, 28200, 0.37, 847], 
+        //                     press: [300000, 5, 120000, 0.1374, 908], 
+        //                     chopper: [22000, 5, 8800, 0, 9240], 
+        //                     bagger: [50000, 5, 20000, 0.7, 2000], 
+        //                     module_former: [450000, 5, 217234, 1.0319, 800], 
+        //                     module_hauler: [375000, 8, 73530, 0.2766, 3620]}, 
+        //                     bunker_annual_own: 5600, 
+        //                     ssl_annual_own: 0.36, 
+        //                     base_infield: 0.58, 
+        //                     base_highway: 0.1, 
+        //                     transport_coef: {
+        //                         compressed: 0.8, 
+        //                         whole_stalk: 1.1, 
+        //                         in_module: 0.7
+        //                         }
+        //                 }, 
+        //             degrade: {
+        //                 whole_stalk: 9, 
+        //                 chopped: 5, 
+        //                 in_bunker: 80, 
+        //                 in_bag: 100
+        //                 }, 
+        //     configurations: [
+        //         ["whole_stalk", "loadout", "chopper"], 
+        //         ["whole_stalk", "loadout", "chopper", "bagger"], 
+        //         ["whole_stalk", "loadout", "chopper", "bunker"], 
+        //         ["whole_stalk", "loadout", "chopper", "module_former", "module_hauler"],
+        //         ["whole_stalk", "loadout", "chopper", "press"], 
+        //         ["whole_stalk", "loadout", "chopper", "press", "bagger"], 
+        //         ["whole_stalk", "loadout", "chopper", "press", "bunker"], 
+        //         ["whole_stalk", "loadout", "chopper", "press", "module_former", "module_hauler"],
+        //         ["forage_chop", "loadout"], 
+        //         ["forage_chop", "loadout", "bagger"], 
+        //         ["forage_chop", "loadout", "bunker"], 
+        //         ["forage_chop", "loadout", "module_former", "module_hauler"], 
+        //         ["forage_chop", "loadout", "press"], 
+        //         ["forage_chop", "loadout", "press", "bagger"], 
+        //         ["forage_chop", "loadout", "press", "bunker"], 
+        //         ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
+        //         ]
+        //     }
+        // }
     },
     methods: {
         optimize: function (event) {
