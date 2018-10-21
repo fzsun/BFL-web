@@ -21,13 +21,14 @@
             specific problem into the model we have developed.
         </div><br>
         <tabs>
-            <tab name="About Us" :selected="true">
+            <tab name="Step 1" :selected="true">
                 <h1>Download</h1>
             </tab>
-            <tab name="About our culture">
+            <tab name="Step 2">
                 <h1>Upload</h1>
+                <input type="file">
             </tab>
-            <tab name="About our vision">
+            <tab name="Step 3">
                 <h1>Submit</h1>
             </tab>
         </tabs>
@@ -103,8 +104,7 @@ new Vue({
     data: {
         message: 'Hello Team',
         started: false, 
-        response: [],
-        
+        response: []
     },
     methods: {
         optimize: function (event) {
