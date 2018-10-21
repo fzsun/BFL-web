@@ -45,6 +45,15 @@ def Sbfl():
     print(my_s_bfl.optimization_result)
     return jsonify(my_s_bfl.optimization_result) #output
 
+@app.route('/upload/', methods=['POST'])
+def upload():
+    input_data = request.get_json(force=True)
+    my_s_bfl = s_bfl()
+    my_s_bfl.input(input_data, sysnum=2)
+    my_s_bfl.solve()
+    print(my_s_bfl.optimization_result)
+    return jsonify(my_s_bfl.optimization_result)
+
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
 def page_not_found(e):

@@ -24,14 +24,14 @@ class s_bfl(object):
         except KeyboardInterrupt:
             model.terminate()
     
-    def input(self, input_data, sysnum, t_lim = 60, jit=False, **kwargs):
+    def input(self, input_data, sysnum, t_lim = 10, jit=False, **kwargs):
         self.t_lim = t_lim
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
         (*_, self.a, self.c_op, self.c_op_jit, self.c_pen, self.cfs, self.cs, self.cs_jit, 
         self.csk, self.d, self.hf, self.hs, self.U, self.UE, self.UE_jit) = self.params.values()
-    
+
     def solve(self):
         T = list(range(1, len(self.d)))
         F = list(range(len(self.cfs)))
