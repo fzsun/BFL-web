@@ -56,7 +56,7 @@ def upload():
 
 @app.route('/download/', methods=['GET'])
 def download():
-    template = "./algorithm/example_input.json"
+    template = "./algorithm/input_template.csv"
     return send_file(template, as_attachment=True)
 
 @app.errorhandler(404)
