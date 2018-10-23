@@ -8,7 +8,7 @@ Created on Sat Jun 30 21:01:11 2018
 
 import os
 import jinja2
-from flask import Flask, render_template, request, send_from_directory, jsonify
+from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
 from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
 
@@ -53,6 +53,11 @@ def upload():
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
     return jsonify(my_s_bfl.optimization_result)
+
+@app.route('/download/', methods=['GET'])
+def download():
+    template = "./algorithm/example_input.json"
+    return send_file(template, as_attachment=True)
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
