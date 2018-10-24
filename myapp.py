@@ -56,7 +56,7 @@ def upload():
 
 @app.route('/download/', methods=['GET'])
 def download():
-    template = "./algorithm/input_template.csv"
+    template = "./algorithm/sbfl_template.xlsx"
     return send_file(template, as_attachment=True)
 
 @app.errorhandler(404)
