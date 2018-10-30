@@ -6,10 +6,10 @@ Created on Fri Sep 21 20:22:27 2018
 """
 
 import simpy
-import json 
+import json
 import numpy as np
 import re
-import math 
+import math
 import matplotlib.pyplot as plt
 
 # Define containers and resources and start process
@@ -26,7 +26,7 @@ with open("example_output1_jit.json") as output_file:
     output_data = json.load(output_file)
 with open("example_input.json") as algo_input:
     algo_input_data = json.load(algo_input)
-    
+
 log = open('log.txt','w+')
 num_trials = int(input('How many sample trials would you like to simulate? '))
  # assign variables from algo input
@@ -71,7 +71,7 @@ for equipment in configuration:
         former_rate = []
     if equipment == 'module_hauler':
         loadout_rate_module = equipment_data[equipment][4]/40
-    
+
 
 m = a.shape[0]
 n = a.shape[1]
@@ -99,8 +99,8 @@ Start Trials
 
 for trial in range(num_trials):
     env = simpy.Environment()
-   
-    
+
+
     farms = []
     # create farms
     for farm in range(n):
@@ -108,10 +108,10 @@ for trial in range(num_trials):
     refinery = simpy.Container(env, capacity=100000000, init=0)
     degraded_ensiled = simpy.Container(env, capacity=100000000, init=0)
     degraded_field = simpy.Container(env, capacity=100000000, init=0)
-    
-    farm_transport_schedule = [] 
+
+    farm_transport_schedule = []
     harvest_actual = []
-    jit_farm_transport = [] 
+    jit_farm_transport = []
     farm_level_actual = []
     farm_inventory = []
     for period in range(m):
@@ -126,13 +126,13 @@ for trial in range(num_trials):
             jit_farm_transport[period].append(0)
             farm_level_actual[period].append(0)
             farm_inventory[period].append(0)
-    
-    
+
+
     ssl_route = [] # distance from ssl to orgin (refinery)
     for coord in coord_s:
         ssl_route.append(math.sqrt(coord_s[coord][1]**(2)+coord_s[coord][0]**(2)))
-        
-    
+
+
     equip_in_ssl = {} # dictionary for ssl configuration
     before_ssl = {}
     ssl_container = {} # dictionary relating ssl site location to container with proper capacity
@@ -146,11 +146,11 @@ for trial in range(num_trials):
             before_ssl[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
             ssl_container[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
             ssl_location[bb[1]] = coord_s[bb[1]]
-    
-    
+
+
     ssl_level_actual = []
-    ssl_transport_schedule = [] 
-    ssl_inventory = []        
+    ssl_transport_schedule = []
+    ssl_inventory = []
     for period in range(m):
         ssl_transport_schedule.append([])
         ssl_inventory.append([])
@@ -159,10 +159,10 @@ for trial in range(num_trials):
             ssl_transport_schedule[period].append(0)
             ssl_inventory[period].append(0)
             ssl_level_actual[period].append(0)
-      
-    
+
+
     farm_route = [] # distance from farm n to designated ssl
-    farm_ssl = {} # shows which farm corresponds to using which ssl      
+    farm_ssl = {} # shows which farm corresponds to using which ssl
     for solution in solutions:
         aa = solution[0]
         cc = solution[1]
@@ -180,12 +180,12 @@ for trial in range(num_trials):
             ssl_inventory[int(bb[1])][int(bb[2])] = cc
         if bb[0] == 'If':
             farm_inventory[int(bb[1])][int(bb[2])] = cc
-    
+
     '''
     Functions Section
     '''
-    
-    # create functions      
+
+    # create functions
     def harvest(env):
         x = 0
         y = 0
@@ -210,8 +210,8 @@ for trial in range(num_trials):
             yield env.timeout(40)
         env.timeout(1)
         #print('total harvested = ',y)
-    
-    
+
+
     def preprocessing(env, period, farm):
         y = farm_transport_schedule[period][farm]
         x = min(y,farms[farm].level)
@@ -238,8 +238,8 @@ for trial in range(num_trials):
             ssl_container[str(farm_ssl[farm])].put(x)
             ssl_level_actual[period][farm_ssl[farm]] = ssl_container[str(farm_ssl[farm])].level
             i=1
-           
-    
+
+
     def moniter_ssl(env):
         yield env.timeout(10)
         for period in range(m):
@@ -252,8 +252,8 @@ for trial in range(num_trials):
                 env.process(refinery_transport(env, ssl_transport_schedule[period][ssl], ssl, period, loadout_rate))
             yield env.timeout(40)
             #mylog(env,'period is over', log)
-            
-            
+
+
     def refinery_transport(env, amount, ssl, period, loadout_rate):
         x=int(amount)
     #    travel_time = ssl_route[ssl]/np.random.uniform(low=rtruck_speed_low, high=rtruck_speed_high)
@@ -267,16 +267,16 @@ for trial in range(num_trials):
             refinery.put(y)
         else:
             pass
-          
-            
+
+
     def JIT_schedule(env, period, farm, loadout_rate):
         if jit_farm_transport[period][farm] > 0:
             env.process(JIT_delivery(env,period,farm,loadout_rate))
         else:
             pass
         yield env.timeout(0)
-    
-    
+
+
     def JIT_delivery(env, period, farm, loadout_rate):
         y = min(jit_farm_transport[period][farm],farms[farm].level)
         #travel_time_sr = ssl_route[farm_ssl[farm]]/np.random.uniform(low=rtruck_speed_low, high=rtruck_speed_high)
@@ -285,12 +285,12 @@ for trial in range(num_trials):
             if configuration[0] == 'whole_stalk':
                 yield env.timeout(y/config_rate['chopper'])
             yield env.timeout(y/(equip_in_ssl[str(farm_ssl[farm])][0]*loadout_rate))
-            #yield env.timeout(travel_time_sr)        
+            #yield env.timeout(travel_time_sr)
             refinery.put(y)
-    
-    
+
+
     degradation_farm_expected = []
-    def degradation_field(env): 
+    def degradation_field(env):
         x = 0
         y = 0
         for period in range(m):
@@ -318,8 +318,8 @@ for trial in range(num_trials):
             x=0
             degradation_farm_expected.append(y)
             yield env.timeout(20)
-                        
-    degradation_ensiled_expected = []     
+
+    degradation_ensiled_expected = []
     def degradation_ensiled(env):
         x=0
         y=0
@@ -354,9 +354,9 @@ for trial in range(num_trials):
             x=0
             degradation_ensiled_expected.append(y)
             yield env.timeout(1)
-    
-    
-   
+
+
+
     def record_data(env):
         total_harvest = []
         refinery_actual = []
@@ -366,7 +366,7 @@ for trial in range(num_trials):
         total = 0
         total5 = 0
         for period in range(m):
-            for farm in range(n):   
+            for farm in range(n):
                 total = total + harvest_actual[period][farm]
             total_harvest.append(total)
             for ssl in ssl_container:
@@ -381,17 +381,17 @@ for trial in range(num_trials):
         all_ssl_actual.append(actual_ssl)
         all_degradation_ensiled_actual.append(degradation_ensiled_actual)
         all_degradation_farm_actual.append(degradation_farm_actual)
-                                          
-                                          
+
+
     '''def mylog(env, string, log):
         print(f'@{env.now}: refinery inventory={refinery.level}| {string}')
         log.write(f'@{env.now}: refinery inventory={refinery.level}| {string} \n')'''
-            
-    
+
+
     '''
     Simulation Run
     '''
-    
+
     env.process(harvest(env))
     env.process(moniter_ssl(env))
     env.process(degradation_ensiled(env))
@@ -399,19 +399,19 @@ for trial in range(num_trials):
     env.process(record_data(env))
     env.run(until=SIM_TIME)
     all_demand.append(refinery.level)
-        
-        
+
+
 def graphs():
     total2 = 0
     total3 = 0
     total4 = 0
     for period in range(m):
         for farm in range(n):
-            total2 = total2 + a[period][farm] 
+            total2 = total2 + a[period][farm]
             total3 = total3 + jit_farm_transport[period][farm]
         harvest_hypothetical.append(total2)
         for ssl in range(num_ssl):
-            total3 = total3 + ssl_transport_schedule[period][ssl] 
+            total3 = total3 + ssl_transport_schedule[period][ssl]
             total4 = total4 + ssl_inventory[period][ssl]
         hypothetical_ssl.append(total4)
         refinery_hypothetical.append(total3)
@@ -430,12 +430,12 @@ def graphs():
         degradation_farm_average.append(total7/num_trials)
         ssl_average.append(total8/num_trials)
         refinery_average.append(total9/num_trials)
-        
-        
-        
-        
+
+
+
+
     X = np.linspace(0,1080,27)
-    
+
     print('\nRefinery Inventory level v.s. Time')
     plt.plot(X, refinery_hypothetical, color="blue", linewidth=1.0, linestyle="-", label='scheduled refinery inventory')
     plt.plot(X, refinery_average, color="red", linewidth=1.0, linestyle="-", label='actual refinery inventory')
@@ -445,7 +445,7 @@ def graphs():
     plt.yticks(np.linspace(0,230000,12,endpoint=True))
     plt.legend(loc='upper left', frameon=False)
     plt.show()
-    
+
     print('\nSum of Ensiled Sorghum v.s. Time')
     plt.plot(X, hypothetical_ssl, color="blue", linewidth=1.0, linestyle="-", label='scheduled total ssl inventory')
     plt.plot(X, ssl_average, color="red", linewidth=1.0, linestyle="-", label='actual total ssl inventory')
@@ -454,7 +454,7 @@ def graphs():
     plt.xticks(np.linspace(0,1080,10,endpoint=True))
     plt.legend(loc='upper left', frameon=False)
     plt.show()
-    
+
     print('\nDegradation of Ensiled Sorghum v.s. Time')
     plt.plot(X,degradation_ssl_average,label='Degraded sorghum in MG')
     plt.plot(X,degradation_ensiled_expected,label='Expected degraded sorghum in MG')
@@ -463,7 +463,7 @@ def graphs():
     plt.xticks(np.linspace(0,1080,10,endpoint=True))
     plt.legend(loc='upper left',frameon=False)
     plt.show()
-    
+
     print('\nDegradation of Harvested Field Sorghum v.s. Time')
     plt.plot(X,degradation_farm_average,label='Degraded sorghum in MG')
     plt.plot(X,degradation_farm_expected,label='Expected degraded sorghum in MG')
@@ -472,9 +472,9 @@ def graphs():
     plt.xticks(np.linspace(0,1080,10,endpoint=True))
     plt.legend(loc='upper left',frameon=False)
     plt.show()
-    
-   
-    
+
+
+
 graphs()
 for equipment in config_rate:
     if equipment == 'press':
@@ -487,7 +487,7 @@ for equipment in config_rate:
         print('The average module former rate in MG/hour:',np.mean(former_rate))
 
     if equipment == 'module_hauler':
-        print('The average loadout rate for module hauler in MG/hour:',np.mean(loadout_rates)) 
+        print('The average loadout rate for module hauler in MG/hour:',np.mean(loadout_rates))
 if 'module_hauler' in configuration:
     print('Average module hauler loadout rate in MG/hour:',np.mean(loadout_rates))
 else:
@@ -503,76 +503,53 @@ else:
 for period in range(m):
     degradation_cost = degradation_cost + ((degradation_ssl_average[period]-degradation_ensiled_expected[period])*65+(degradation_farm_average[period]-degradation_farm_expected[period])*65)
 print('The extra cost incured due to unforseen degradation is: ',degradation_cost,' dollars')'''
-    
-    
+
+
 =======
 
-def create_data():
-    with open("sim_example_data.json") as file: 
-        data = json.load(file)
-        
-    num_harvest_trucks = data['harvest_input']['num_trucks_harvest']
-    carry_capacity = data['harvest_input']['carry_capacity']
-    truck_speed_high = data['harvest_input']['truck_speed_high']
-    truck_speed_low = data['harvest_input']['truck_speed_low']
-    harvest_time = data['harvest_input']['harvest_time']
-    farm_distance = data['harvest_input']['farm_distance']        
-    farm_capacitys = data['harvest_input']['farm_capacity']
-    harvest_progress = data['harvest_input']['harvest_progress']
-    ssl_capacitys = data['ensilation_input']['SSL']
-    num_trucks_road = data['road_input']['num_trucks_road']
-    truck_capacity = data['road_input']['truck_capacity']
-    rtruck_speed_high = data['road_input']['rtruck_speed_high']
-    rtruck_speed_low = data['road_input']['rtruck_speed_low']
-    ssl_distance = data['road_input']['ssl_distance']
-    
-    ssl = []
-    farms = []
-      
-    for ssl_capacity in ssl_capacitys:
-        ssl.append(simpy.Container(env, ssl_capacity, init=0))
-    for farm_capacity in farm_capacitys:
-        farms.append(simpy.Container(env, farm_capacity, init=0))
-    harvest_trucks = simpy.Resource(env, capacity=num_harvest_trucks)
-    road_trucks = simpy.Resource(env, capacity=num_trucks_road)
-    refinery = simpy.Container(env, capacity=100000000, init=0)
-    
-    period_totals = np.zeros(shape=(len(harvest_progress),len(farms)))
-    i=0
-    j=0
-    
-    for row in period_totals:
-        for col in row:
-            period_totals[i][j] = farm_capacitys[j]*(harvest_progress[i]/100)
-            j=j+1
-        j=0
-        i=i+1    
+
+with open("sim_example_data.json") as file:
+    data = json.load(file)
+SIM_TIME = 1040
+num_harvest_trucks = data['harvest_input']['num_trucks_harvest']
+carry_capacity = data['harvest_input']['carry_capacity']
+truck_speed_high = data['harvest_input']['truck_speed_high']
+truck_speed_low = data['harvest_input']['truck_speed_low']
+harvest_time = data['harvest_input']['harvest_time']
+farm_distance = data['harvest_input']['farm_distance']
+farm_capacitys = data['harvest_input']['farm_capacity']
+harvest_progress = data['harvest_input']['harvest_progress']
+ssl_capacitys = data['ensilation_input']['SSL']
+num_trucks_road = data['road_input']['num_trucks_road']
+truck_capacity = data['road_input']['truck_capacity']
+rtruck_speed_high = data['road_input']['rtruck_speed_high']
+rtruck_speed_low = data['road_input']['rtruck_speed_low']
+ssl_distance = data['road_input']['ssl_distance']
+
+ssl = []
+farms = []
+
+def harvest(env, farms, period_totals, harvest_trucks, refinery):
     print(farms)
     print(period_totals)
-    harvest(env, farms, period_totals, harvest_trucks, refinery)
-
-            
-def harvest(env, farms, period_totals, harvest_trucks, refinery):
     i=0
     j=0
     z=0
     for period in period_totals:
-        for farm_num in period:
+        for farm_yield in period:
             farms[j].put(min(np.random.normal(period_totals[i][j]-1/100*period_totals[i][j], 2/100*period_totals[i][j]),period_totals[i][j]))
-            print('amount added to farm: ', j)
-            print(period_totals[i][j])
-            print('Total amount in farm: ', j)            
+            print('Total amount in farm: ', j)
             print(farms[j].level)
             j=j+1
         j=0
         i=i+1
         transport_harvest(env, farms, harvest_trucks, refinery)
-        print(env.now)
-        env.timeout(80)
+        yield env.timeout(80)
+        print('Current time', env.now)
 
 def ensilation():
     pass
-   
+
 
 def transport_harvest(env, farms, harvest_trucks, refinery):
     for farm in farms:
@@ -582,20 +559,33 @@ def transport_harvest(env, farms, harvest_trucks, refinery):
                 farm.get(23)
                 #mylog(env, '23 Mg loaded to truck')
                 env.timeout(1)
-                refinery.put(23)  
+                refinery.put(23)
     print(refinery.level)
-       
+
 
 #def mylog(env, string):
    #print(f'@{env.now}: {harvest_trucks.count} busy harvest tucks, field inventory={field.level}, ssl inventory={ssl.level}, {trucks.count} busy trucks, refinery inventory={refinery.level}| {string}')'''
 
 env = simpy.Environment()
-create_data()
-'''mylog(env, 'Begin simulation')
-demand = int(input('Enter desired demand for this period: '))
-env.run(until=11)
-if refinery.level >= demand:
-    print('Demand was met for this period')
-else:
-    print('Demand was not met for this period under current parameters and configuration')'''
->>>>>>> First git upload of simulation (incomplete)
+
+#for ssl_capacity in ssl_capacitys:
+#   ssl.append(simpy.Container(env, ssl_capacity, init=0))
+for farm_capacity in farm_capacitys:
+    farms.append(simpy.Container(env, farm_capacity, init=0))
+harvest_trucks = simpy.Resource(env, capacity=num_harvest_trucks)
+road_trucks = simpy.Resource(env, capacity=num_trucks_road)
+refinery = simpy.Container(env, capacity=100000000, init=0)
+period_totals = np.zeros(shape=(len(harvest_progress),len(farms)))
+i=0
+j=0
+#intialize harvest calendar
+for row in period_totals:
+    for col in row:
+        period_totals[i][j] = farm_capacitys[j]*(harvest_progress[i]/100)
+        j=j+1
+    j=0
+    i=i+1
+
+#start process
+env.process(harvest(env, farms, period_totals, harvest_trucks, refinery))
+env.run(until=SIM_TIME)
