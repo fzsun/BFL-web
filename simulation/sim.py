@@ -31,7 +31,7 @@ ssl_distance = data['road_input']['ssl_distance']
 ssl = []
 farms = []
             
-def harvest(env, farms, period_totals, harvest_trucks, refinery):
+def harvest(env, farms, period_totals, harvest_trucks, refinery, carry_capacity):
     print(farms)
     print(period_totals)
     i=0
@@ -39,13 +39,12 @@ def harvest(env, farms, period_totals, harvest_trucks, refinery):
     z=0
     for period in period_totals:
         for farm_yield in period:
-            farms[j].put(min(np.random.normal(period_totals[i][j]-1/100*period_totals[i][j], 2/100*period_totals[i][j]),period_totals[i][j]))
-            print('Total amount in farm: ', j)            
-            print(farms[j].level)
+            farms[j].put(np.random.normal(period_totals[i][j], 1/100*period_totals[i][j]))
+            print('Total amount in farm: ', j, ' ', farms[j].level)
             j=j+1
         j=0
         i=i+1
-        transport_harvest(env, farms, harvest_trucks, refinery)
+        yield env.process(transport_harvest(env, farms, harvest_trucks, refinery, carry_capacity))
         yield env.timeout(80)
         print('Current time', env.now)
 
@@ -53,25 +52,26 @@ def ensilation():
     pass
    
 
-def transport_harvest(env, farms, harvest_trucks, refinery):
+def transport_harvest(env, farms, harvest_trucks, refinery, carry_capacity):
     for farm in farms:
-        while farm.level>0:
+        while farm.level>carry_capacity:
             with harvest_trucks.request() as req:
                 yield req
-                farm.get(23)
+                farm.get(carry_capacity)
                 #mylog(env, '23 Mg loaded to truck')
+                print('Number of trucks busy: ', harvest_trucks.count)
                 env.timeout(1)
-                refinery.put(23)  
-    print(refinery.level)
+                refinery.put(carry_capacity)  
+    print('Amount in refinery: ', refinery.level)
        
 
-#def mylog(env, string):
-   #print(f'@{env.now}: {harvest_trucks.count} busy harvest tucks, field inventory={field.level}, ssl inventory={ssl.level}, {trucks.count} busy trucks, refinery inventory={refinery.level}| {string}')'''
+def mylog(env, string):
+   print(f'@{env.now}: {harvest_trucks.count} busy harvest tucks, ssl inventory={ssl.level}, {trucks.count} busy trucks, refinery inventory={refinery.level}| {string}')
 
 env = simpy.Environment()
 
-#for ssl_capacity in ssl_capacitys:
-#   ssl.append(simpy.Container(env, ssl_capacity, init=0))
+for ssl_capacity in ssl_capacitys:
+   ssl.append(simpy.Container(env, ssl_capacity, init=0))
 for farm_capacity in farm_capacitys:
     farms.append(simpy.Container(env, farm_capacity, init=0))
 harvest_trucks = simpy.Resource(env, capacity=num_harvest_trucks)
@@ -87,9 +87,17 @@ for row in period_totals:
         j=j+1
     j=0
     i=i+1  
-
+demand = 0
+for farm in farms:
+    demand = demand + farm.capacity
 #start process
-env.process(harvest(env, farms, period_totals, harvest_trucks, refinery))
+env.process(harvest(env, farms, period_totals, harvest_trucks, refinery, carry_capacity))
 env.run(until=SIM_TIME)
+
+if refinery.level >= demand:
+    print('Demand was met for your planning horizon')
+if refinery.level <= demand:
+    actual = 100-refinery.level/demand
+    print(actual, '% of your demand for the planning horizon was met' )
 
 
