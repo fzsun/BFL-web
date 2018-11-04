@@ -11,6 +11,8 @@ import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
 from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
+from flask_mail import Mail
+from flask_mail import Message
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -21,6 +23,18 @@ class CustomFlask(Flask):
 
 
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
+
+app.config.update(dict(
+    DEBUG = True,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 465,
+    MAIL_USE_TLS = False,
+    MAIL_USE_SSL = True,
+    MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
+    MAIL_PASSWORD = 'statistic31',
+))
+
+mail = Mail(app)
 
 # ============== Page Rendering ==============
 @app.route('/')
@@ -58,6 +72,16 @@ def upload():
 def download():
     template = "./algorithm/sbfl_template.xlsx"
     return send_file(template, as_attachment=True)
+
+@app.route('/email/', methods=['GET'])
+def email():
+    msg = Message("Hello everyb",
+                  sender="robert.b.shelton.42@gmail.com",
+                  recipients=["bobbylinebacker@gmail.com"])
+    mail.send(msg)
+    return "Sending Email"
+
+
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
