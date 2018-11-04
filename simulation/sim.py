@@ -528,13 +528,8 @@ ssl_distance = data['road_input']['ssl_distance']
 
 ssl = []
 farms = []
-<<<<<<< HEAD
 
 def harvest(env, farms, period_totals, harvest_trucks, refinery):
-=======
-            
-def harvest(env, farms, period_totals, harvest_trucks, refinery, carry_capacity):
->>>>>>> mend
     print(farms)
     print(period_totals)
     i=0
@@ -542,14 +537,9 @@ def harvest(env, farms, period_totals, harvest_trucks, refinery, carry_capacity)
     z=0
     for period in period_totals:
         for farm_yield in period:
-<<<<<<< HEAD
             farms[j].put(min(np.random.normal(period_totals[i][j]-1/100*period_totals[i][j], 2/100*period_totals[i][j]),period_totals[i][j]))
             print('Total amount in farm: ', j)
             print(farms[j].level)
-=======
-            farms[j].put(np.random.normal(period_totals[i][j], 1/100*period_totals[i][j]))
-            print('Total amount in farm: ', j, ' ', farms[j].level)
->>>>>>> mend
             j=j+1
         j=0
         i=i+1
@@ -570,15 +560,9 @@ def transport_harvest(env, farms, harvest_trucks, refinery, carry_capacity):
                 #mylog(env, '23 Mg loaded to truck')
                 print('Number of trucks busy: ', harvest_trucks.count)
                 env.timeout(1)
-<<<<<<< HEAD
                 refinery.put(23)
     print(refinery.level)
 
-=======
-                refinery.put(carry_capacity)  
-    print('Amount in refinery: ', refinery.level)
-       
->>>>>>> mend
 
 def mylog(env, string):
    print(f'@{env.now}: {harvest_trucks.count} busy harvest tucks, ssl inventory={ssl.level}, {trucks.count} busy trucks, refinery inventory={refinery.level}| {string}')
@@ -601,26 +585,8 @@ for row in period_totals:
         period_totals[i][j] = farm_capacitys[j]*(harvest_progress[i]/100)
         j=j+1
     j=0
-<<<<<<< HEAD
     i=i+1
 
-=======
-    i=i+1  
-demand = 0
-for farm in farms:
-    demand = demand + farm.capacity
->>>>>>> mend
 #start process
 env.process(harvest(env, farms, period_totals, harvest_trucks, refinery, carry_capacity))
 env.run(until=SIM_TIME)
-<<<<<<< HEAD
-=======
-
-if refinery.level >= demand:
-    print('Demand was met for your planning horizon')
-if refinery.level <= demand:
-    actual = 100-refinery.level/demand
-    print(actual, '% of your demand for the planning horizon was met' )
-
-
->>>>>>> mend
