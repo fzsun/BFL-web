@@ -36,6 +36,7 @@ a = np.array(output_data['params']['a']) # 26 harvest schedule (yield for each f
 d = output_data['params']['d'] # demand
 u = output_data['params']['u'] # capacities for ssl
 ue = output_data['params']['ue'] # processing rate of non-chopping methods
+ue = output_data['params']['ue'] # 
 
 print(coord_f["3"][0])  #this is how we access
 
@@ -58,9 +59,6 @@ def harvest(env, farms, a, m, n, harvest_trucks, refinery, carry_capacity):
             env.process(transport_harvest(env, farms[col], harvest_trucks, refinery, carry_capacity))
         yield env.timeout(40)
         print('Current time', env.now)
-
-def ensilation():
-    pass
    
 def transport_harvest(env, farm, harvest_trucks, refinery, carry_capacity):
     while farm.level>carry_capacity:
