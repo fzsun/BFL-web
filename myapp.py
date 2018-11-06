@@ -24,15 +24,14 @@ class CustomFlask(Flask):
 
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 
-app.config.update(dict(
+app.config.update(
     DEBUG = True,
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = 465,
-    MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
-    MAIL_PASSWORD = 'statistic31',
-))
+    MAIL_PASSWORD = 'awkfxsasolaunvtf',
+)
 
 mail = Mail(app)
 
@@ -75,11 +74,12 @@ def download():
 
 @app.route('/email/', methods=['GET'])
 def email():
-    msg = Message("Hello everyb",
+    msg = Message('Hello',
                   sender="robert.b.shelton.42@gmail.com",
-                  recipients=["bobbylinebacker@gmail.com"])
+                  recipients=["robes98@vt.edu"])
+    msg.body = "This is a test"
     mail.send(msg)
-    return "Sending Email"
+    return "Sent"
 
 
 
