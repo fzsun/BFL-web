@@ -1,20 +1,20 @@
 <template>
 <div>
-    <section class="hero  is-light is-bold">
-    <div class="hero-body">
-        <div class="container">
-        <h1 class="title">
-            Biomass Feedstock Logistics
-        </h1>
-        <h2 class="subtitle">
-            Some introduction about team. 
-        </h2>
-        <a class="button is-primary" href="/team/">View More</a>
+    <section class="hero is-light is-bold">
+        <div class="hero-body">
+            <div class="container">
+            <h1 class="title">
+                Biomass Feedstock Logistics
+            </h1>
+            <h2 class="subtitle">
+                Some introduction about team. 
+            </h2>
+            <a class="button is-primary" href="/team/">View More</a>
+            </div>
         </div>
-    </div>
     </section>
 
-    <div class="columns">
+    <div class="section columns">
 
     <div class="column is-4">
         <div class="card">

@@ -58,10 +58,6 @@ export default {
   margin-top: 60px;
 }
 
-body {
-  padding-top: 60px;
-}
-
 .columns {
   flex-wrap: wrap;
 }

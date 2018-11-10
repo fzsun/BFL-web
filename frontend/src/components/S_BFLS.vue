@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div id="s_bfl" class="container">
+    <div id="s_bfl" class="container section">
         <div class="is-size-4">
             A tool for decision makers to determine the most cost effective 
             way to produce and transport sorghum for use in biofuels. The tool itself
