@@ -64,7 +64,7 @@ def upload():
     my_s_bfl = s_bfl()
     my_s_bfl.input(input_data, sysnum=2)
     my_s_bfl.solve()
-    print(my_s_bfl.optimization_result)
+    print(input_data.email)
     return jsonify(my_s_bfl.optimization_result)
 
 @app.route('/download/', methods=['GET'])

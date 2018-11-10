@@ -31,9 +31,7 @@
             </tab>
             <tab name="Step 2">
               <div class="is-size-5">
-                Run the toJSON() script in the excel template
-                to generate a json file of your data. Upload that
-                file here.
+                Upload a csv file of your filled out template
               </div>
               <br>
               <input type="file" @change="updateFile">
@@ -44,7 +42,12 @@
                 so that our optimization can have time to run. Please 
                 provide your email below so that we can send you the results.
               </div>
-              <input class="input" type="email" placeholder="Enter your email here">
+              <input 
+                class="input" 
+                type="email" 
+                placeholder="Enter your email here"
+                v-model="email"
+              >
               <button @click="optimize" class="button">Email me the optimial results</button>
             </tab>
         </tabs>
@@ -118,7 +121,7 @@ Vue.component('tab', {
 new Vue({
     el: '#s_bfl',
     data: {
-        message: 'Hello Team',
+        email: "",
         selectedfile: null,
         response: []
     },
@@ -126,16 +129,22 @@ new Vue({
       updateFile(event){
         this.selectedfile = event.target.files[0];
       },
-      optimize(event) {
+      optimize(event){
+        let csvToJson = require('convert-csv-to-json');
         console.log("Optimizing")
         fd = new FormData();
         fd.append('optimizationInput', this.selectedfile, this.selectedfile.name);
-        axios.post('http://localhost:5000/upload/', this.selectedfile).then(response => {
-            this.response = response.data;
-            console.log(this.response);
-        })
+
+        let jsonInputData = csvToJson.getJsonFromCsv(this.selectedfile);
+
+        console.log(jsonInputData);
+
+        // axios.post('http://localhost:5000/upload/', this.selectedfile).then(response => {
+        //     this.response = response.data;
+        //     console.log(this.response);
+        // })
       },
-      download: function (event) {
+      download(event){
         console.log("Running Download");
         axios({
           url: 'http://localhost:5000/download/',
