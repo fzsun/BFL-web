@@ -29,14 +29,6 @@
   </nav>
 
   <div>
-    <router-link to="/">
-      <button> Home </button>
-    </router-link>
-
-    <router-link to="/s-bfls">
-      <button> S-BFLS </button>
-    </router-link>
-
     <router-view></router-view>
   </div>
 

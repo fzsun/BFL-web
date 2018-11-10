@@ -9,155 +9,103 @@
             <a>see here.</a> 
         </div>
         <br>
-        <div class="is-size-4">
-            Because this is a large optimization model with many inputs, we have 
-            created an excel template for users to input the details of their 
-            specific problem into the model we have developed.
-        </div><br>
-        <tabs>
-            <tab name="Step 1" :selected="true">
-              <div class="is-size-5">
-                To input the specifics of your problem please click download
-                to get an excel template for inputting your data.
-              </div>
-              <br>
-              <button @click="download" class="button">Download</button>
-            </tab>
-            <tab name="Step 2">
-              <div class="is-size-5">
-                Upload a csv file of your filled out template
-              </div>
-              <br>
-              <input type="file" @change="updateFile">
-            </tab>
-            <tab name="Step 3">
-              <div class="is-size-5">
-                So you don't have to leave the browser open for an hour
-                so that our optimization can have time to run. Please 
-                provide your email below so that we can send you the results.
-              </div>
-              <input 
-                class="input" 
-                type="email" 
-                placeholder="Enter your email here"
-                v-model="email"
-              >
-              <button @click="optimize" class="button">Email me the optimial results</button>
-            </tab>
-        </tabs>
+        <div class="panel-body">
+            <form>
+                <vue-form-generator :schema="schema" :model="model" :options="formOptions">
+                </vue-form-generator>
+            </form>
+        </div>
     </div>
 </div>
 </template>
 
-// <script>
+<script>
+import { validators, component as VueFormGenerator } from 'vue-form-generator'
 
-// Vue.component('tabs', {
-//   template: `
-//   <div>
-//     <div class="tabs is-boxed">
-//       <ul>
-//         <li v-for="tab in tabs" v-bind:class="{'is-active': tab.isActive}">
-//           <a @click="selectTab(tab)">
-//             {{ tab.name }}
-//           </a>
-//          </li>
-//       </ul>
-//     </div>
-//     <div class="tab-details">
-//       <slot></slot>
-//     </div>
-//   </div>
-// `,
-//   data() {
-//     return {
-//       tabs: [],
-//     }
-//   },
-//   created() {
-//     this.tabs = this.$children;
-//   },
-//   methods: {
-//     selectTab(selectedTab) {
-//      this.tabs.forEach(
-//       function(tab){
-//         tab.isActive = (selectedTab.name == tab.name)
-//       }
-//      ) 
-//     }
-//   }
-// });
+export default {
+  components: {
+      VueFormGenerator
+  },
+  data () {
+    return {
 
-// Vue.component('tab', {
-//   template: `
-//     <div v-show="isActive">
-//       <slot>
-//       </slot>
-//     </div>
-// `,
-//   props: {
-//     name: {
-//       required: true,
-//     },
-//     selected: {
-//       default: false
-//     }
-//   },
-//   data() {
-//     return {
-//       isActive: false
-//     }
-//   },
-//   mounted() {
-//     this.isActive = this.selected;
-//   }
-// });
+      model: {
+        id: 1,
+        name: "John Doe",
+        password: "J0hnD03!x4",
+        skills: ["Javascript", "VueJS"],
+        email: "john.doe@gmail.com",
+        status: true
+      },
 
-// new Vue({
-//     el: '#s_bfl',
-//     data: {
-//         email: "",
-//         selectedfile: null,
-//         response: []
-//     },
-//     methods: {
-//       updateFile(event){
-//         this.selectedfile = event.target.files[0];
-//       },
-//       optimize(event){
-//         let csvToJson = require('convert-csv-to-json');
-//         console.log("Optimizing")
-//         fd = new FormData();
-//         fd.append('optimizationInput', this.selectedfile, this.selectedfile.name);
+      schema: {
+        groups: [
+          {
+            legend: "User Details",
+            fields: [
+              {
+                type: "input",
+                inputType: "text",
+                label: "ID (disabled text field)",
+                model: "id",
+                readonly: true,
+                disabled: true
+              },
+              {
+                type: "input",
+                inputType: "text",
+                label: "Name",
+                model: "name",
+                id: "user_name",
+                placeholder: "Your name",
+                featured: true,
+                required: true
+              },
+              {
+                type: "input",
+                inputType: "email",
+                label: "E-mail",
+                model: "email",
+                placeholder: "User's e-mail address"
+              },
+              {
+                type: "input",
+                inputType: "password",
+                label: "Password",
+                model: "password",
+                min: 6,
+                required: true,
+                hint: "Minimum 6 characters",
+                validator: validators.string
+              }
+            ]
+          },
+          {
+            legend: "Skills & Status",
+            fields: [
+              {
+                type: "select",
+                label: "skills",
+                model: "type",
+                values: ["Javascript", "VueJS", "CSS3", "HTML5"]
+              },
+              {
+                type: "checkbox",
+                label: "Status",
+                model: "status",
+                default: true
+              }
+            ]
+          }
+          ],
 
-//         let jsonInputData = csvToJson.getJsonFromCsv(this.selectedfile);
-
-//         console.log(jsonInputData);
-
-//         // axios.post('http://localhost:5000/upload/', this.selectedfile).then(response => {
-//         //     this.response = response.data;
-//         //     console.log(this.response);
-//         // })
-//       },
-//       download(event){
-//         console.log("Running Download");
-//         axios({
-//           url: 'http://localhost:5000/download/',
-//           method: 'GET',
-//           responseType: 'blob',
-//           headers: {
-//             'Accept': 'application/vnd.openxmlformats-officedocument'
-//            + '.spreadsheetml.sheet',
-//           }
-//         }).then((response) => {
-//           const url = window.URL.createObjectURL(new Blob([response.data], ));
-//           const link = document.createElement('a');
-//           link.href = url;
-//           link.setAttribute('download', 'template.xlsx');
-//           document.body.appendChild(link);
-//           link.click();
-//           link.parentNode.removeChild(link);
-//         })
-//       }
-//     }
-// })
-// </script>
+          formOptions: {
+            validateAfterLoad: true,
+            validateAfterChanged: true,
+            fieldIdPrefix: 'user-'
+          }
+        }
+      }
+    }
+  }
+</script>
