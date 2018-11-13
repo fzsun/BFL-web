@@ -60,6 +60,12 @@ def Sbfl():
     print(my_s_bfl.optimization_result)
     response = jsonify(my_s_bfl.optimization_result)
     response.headers.add('Access-Control-Allow-Origin', '*')
+
+    msg = Message('S-BFLS',
+                    sender="robert.b.shelton.42@gmail.com",
+                    recipients=["robes98@vt.edu"])
+    msg.body = "The BFLS team is happy you tried out our optimization"
+    mail.send(msg)
     return response
 
 @app.route('/upload/', methods=['POST'])

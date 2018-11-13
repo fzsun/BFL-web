@@ -9,7 +9,7 @@
             <h2 class="subtitle">
                 Some introduction about team.
             </h2>
-            <a class="button is-primary" href="/team/">View More</a>
+            <router-link class="button is-primary" to="/about">View More</router-link>
             </div>
         </div>
     </section>
