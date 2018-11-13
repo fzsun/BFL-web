@@ -13,6 +13,7 @@ from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
 from flask_mail import Mail
 from flask_mail import Message
+from flask_cors import CORS
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -23,6 +24,7 @@ class CustomFlask(Flask):
 
 
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
+CORS(app)
 
 app.config.update(
     DEBUG = True,
@@ -49,14 +51,16 @@ def static_html(subpath):
 def favicon():
     return send_from_directory(os.path.join(app.root_path,'static'),'favicon.ico')
 
-@app.route('/s-bfl/', methods=['POST'])
+@app.route('/s-bfls/', methods=['POST'])
 def Sbfl():
     input_data = request.get_json(force=True)
     my_s_bfl = s_bfl()
     my_s_bfl.input(input_data, sysnum = 2)
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
-    return jsonify(my_s_bfl.optimization_result) #output
+    response = jsonify(my_s_bfl.optimization_result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/upload/', methods=['POST'])
 def upload():
@@ -64,7 +68,6 @@ def upload():
     my_s_bfl = s_bfl()
     my_s_bfl.input(input_data, sysnum=2)
     my_s_bfl.solve()
-    print(input_data.email)
     return jsonify(my_s_bfl.optimization_result)
 
 @app.route('/download/', methods=['GET'])

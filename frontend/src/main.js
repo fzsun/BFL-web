@@ -3,9 +3,8 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import VueFormGenerator from "vue-form-generator"
-import S_BFLS from "./components/S_BFLS";
-import './../node_modules/bulma/css/bulma.css';
+import VueFormGenerator from 'vue-form-generator'
+import './../node_modules/bulma/css/bulma.css'
 
 Vue.config.productionTip = false
 
@@ -14,7 +13,7 @@ Vue.use(VueFormGenerator)
 new Vue({
   el: '#app',
   router,
-  components: { 
+  components: {
     App,
     VueFormGenerator
   },

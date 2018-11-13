@@ -7,7 +7,7 @@
                 Biomass Feedstock Logistics
             </h1>
             <h2 class="subtitle">
-                Some introduction about team. 
+                Some introduction about team.
             </h2>
             <a class="button is-primary" href="/team/">View More</a>
             </div>
@@ -20,7 +20,7 @@
         <div class="card">
         <div class="card-image">
             <figure class="image is-3by2">
-            <img src="%% url_for('static', filename='images/s-bfls.jpg')%%" alt="Placeholder image">
+            <img src="../assets/images/s-bfls.jpg" alt="Placeholder image">
             </figure>
         </div>
         <div class="card-content">
@@ -35,4 +35,4 @@
 
     </div>
 </div>
-</template> 
+</template>

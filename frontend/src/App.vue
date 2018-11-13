@@ -1,10 +1,10 @@
 <template>
-<div>
+<div style="padding-top: 60px">
   <!-- Navigation -->
   <nav class="navbar is-fixed-top is-primary">
     <div class="container">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/"><img src="/favicon.ico"></a>
+        <a class="navbar-item" href="/"><img src="./assets/logo.png"></a>
         <span class="navbar-burger burger" data-target="navMenu">
           <span></span>
           <span></span>
@@ -38,7 +38,6 @@
     </div>
   </footer>
 </div>
-
 
 </template>
 
