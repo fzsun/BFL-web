@@ -17,6 +17,7 @@
             </form>
             <button v-on:click="optimize">Optimize</button>
         </div>
+        <div>{{ response }}</div>
     </div>
 </div>
 </template>
