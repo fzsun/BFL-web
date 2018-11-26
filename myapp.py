@@ -37,20 +37,6 @@ app.config.update(
 
 mail = Mail(app)
 
-# ============== Page Rendering ==============
-@app.route('/')
-def root():
-    return render_template('index.html')
-
-@app.route('/<path:subpath>/')
-def static_html(subpath):
-    """all htmls that do not need extra code in Flask"""
-    return render_template(f'static_html/{subpath}.html')
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path,'static'),'favicon.ico')
-
 @app.route('/s-bfls/', methods=['POST'])
 def Sbfl():
     input_data = request.get_json(force=True)
@@ -65,49 +51,15 @@ def Sbfl():
                     sender="robert.b.shelton.42@gmail.com",
                     recipients=["robes98@vt.edu"])
     msg.body = "Thanks for using SBFLS! Attached are our results."
-    with app.open_resource("./algorithm/example_output.yaml") as fp:
-        msg.attach("./algorthm/example_output.yaml", "yaml", fp.read())
-    mail.send(msg)
+    # with app.open_resource("./algorithm/example_output.yaml") as fp:
+    #     msg.attach("./algorthm/example_output.yaml", "yaml", fp.read())
+    # mail.send(msg)
     return response
-
-@app.route('/upload/', methods=['POST'])
-def upload():
-    input_data = request.get_json(force=True)
-    my_s_bfl = s_bfl()
-    my_s_bfl.input(input_data, sysnum=2)
-    my_s_bfl.solve()
-    return jsonify(my_s_bfl.optimization_result)
-
-@app.route('/download/', methods=['GET'])
-def download():
-    template = "./algorithm/sbfl_template.xlsx"
-    return send_file(template, as_attachment=True)
-
-@app.route('/email/', methods=['GET'])
-def email():
-    msg = Message('Hello',
-                  sender="robert.b.shelton.42@gmail.com",
-                  recipients=["robes98@vt.edu"])
-    msg.body = "This is a test"
-    mail.send(msg)
-    return "Sent"
-
-
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
 def page_not_found(e):
     return render_template('404.html'), 404
-
-# ============== POST Actions ==============
-@app.route('/tsp/action/', methods=['POST'])
-def render_tsp():
-    json_data = request.get_json(force=True)
-    n = json_data['num_cities']
-    my_tsp = tsp()
-    my_tsp.from_num_cities(int(n))
-    my_tsp.solve()
-    return jsonify(my_tsp.all_data_)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only
