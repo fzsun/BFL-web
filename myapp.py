@@ -64,7 +64,9 @@ def Sbfl():
     msg = Message('S-BFLS',
                     sender="robert.b.shelton.42@gmail.com",
                     recipients=["robes98@vt.edu"])
-    msg.body = "The BFLS team is happy you tried out our optimization"
+    msg.body = "Thanks for using SBFLS! Attached are our results."
+    with app.open_resource("./algorithm/example_output.yaml") as fp:
+        msg.attach("./algorthm/example_output.yaml", "yaml", fp.read())
     mail.send(msg)
     return response
 

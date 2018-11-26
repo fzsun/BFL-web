@@ -230,25 +230,6 @@ export default {
           type: "select",
           label: "configurations",
           model: "configurations",
-          values: [
-            // ["whole_stalk", "loadout", "chopper"], 
-            // ["whole_stalk", "loadout", "chopper", "bagger"], 
-            // ["whole_stalk", "loadout", "chopper", "bunker"], 
-            // ["whole_stalk", "loadout", "chopper", "module_former", "module_hauler"], 
-            // ["whole_stalk", "loadout", "chopper", "press"], 
-            // ["whole_stalk", "loadout", "chopper", "press", "bagger"], 
-            // ["whole_stalk", "loadout", "chopper", "press", "bunker"], 
-            // ["whole_stalk", "loadout", "chopper", "press", "module_former", "module_hauler"], 
-            // ["forage_chop", "loadout"], 
-            // ["forage_chop", "loadout", "bagger"], 
-            // ["forage_chop", "loadout", "bunker"], 
-            // ["forage_chop", "loadout", "module_former", "module_hauler"], 
-            // ["forage_chop", "loadout", "press"], 
-            // ["forage_chop", "loadout", "press", "bagger"], 
-            // ["forage_chop", "loadout", "press", "bunker"], 
-            // ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
-            "hello"
-          ]
         }
         ]
       },
