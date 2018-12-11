@@ -11,6 +11,7 @@ import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
 from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
+from email_credentials import credentials
 from flask_mail import Mail
 from flask_mail import Message
 from flask_cors import CORS
@@ -26,13 +27,17 @@ class CustomFlask(Flask):
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 CORS(app)
 
+c = credentials()
+c.setPassword()
+
+
 app.config.update(
     DEBUG = True,
     MAIL_SERVER = 'smtp.gmail.com',
     MAIL_PORT = 465,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
-    MAIL_PASSWORD = 'awkfxsasolaunvtf',
+    MAIL_PASSWORD = c.password,
 )
 
 mail = Mail(app)
@@ -51,9 +56,7 @@ def Sbfl():
                     sender="robert.b.shelton.42@gmail.com",
                     recipients=["robes98@vt.edu"])
     msg.body = "Thanks for using SBFLS! Attached are our results."
-    # with app.open_resource("./algorithm/example_output.yaml") as fp:
-    #     msg.attach("./algorthm/example_output.yaml", "yaml", fp.read())
-    # mail.send(msg)
+    mail.send(msg)
     return response
 
 @app.errorhandler(404)
