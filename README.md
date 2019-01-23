@@ -24,11 +24,10 @@ conda install flask waitress
 
 For development, `cd` to the project folder, then use `python myapp.py` to start the server.
 
+Next in a different terminal `cd` into the `frontend` folder and run `npm run dev` to start the client
+
 A Waitress production server can be started by `python production.py`.
 
 
-Nate
-I made a change. -Hannah
-Fangzhou
 
 
