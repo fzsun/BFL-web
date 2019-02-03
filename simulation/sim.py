@@ -28,6 +28,15 @@ import matplotlib.pyplot as plt
 Data Creation Section
 '''
 
+class Simulation(object):
+
+    # For testing simulation against algorithm
+    '''# open input and output files to be used
+    with open("example_output1_jit.json") as output_file:
+        output_data = json.load(output_file)
+    with open("example_input.json") as algo_input:
+        algo_input_data = json.load(algo_input)
+    log = open('log.txt','w+')'''
 
 # open input and output files to be used
 with open("example_output1_jit.json") as output_file:
@@ -81,28 +90,59 @@ for equipment in configuration:
         loadout_rate_module = equipment_data[equipment][4]/40
 
 
-m = a.shape[0]
-n = a.shape[1]
+        self.SIM_TIME = 1081
 
-all_refinery_actual = []
-all_ssl_actual = []
-all_degradation_ensiled_actual = []
-all_degradation_farm_actual = []
-all_demand = []
-harvest_hypothetical = []
-refinery_hypothetical = []
-hypothetical_ssl = []
-refinery_average = []
-ssl_average = []
-degradation_farm_average = []
-degradation_ssl_average = []
+        # assign variables from output file
+        self.coord_f = output_data['params']['Coord_f'] # coordinates x,y for self.farms (all possible)
+        self.coord_s = output_data['params']['self.Coord_s'] # coordinates x,y for ssl (all possible)
+        self.K = output_data['params']['K'] # ssl size and equipment loadout configurations
+        self.a = np.array(output_data['params']['a']) # 26 harvest schedule (yield for each farm in each period Mg)
+        self.d = output_data['params']['d'] # self.demand
+        self.u = output_data['params']['u'] # capacities for ssl
+        self.ue = output_data['params']['ue'] # processing rate of non-chopping methods
+        self.sysnum = output_data['params']['Sysnum']
+        self.solutions = output_data['solution'] # holds the algorithms solution dictionary
+        self.configuration = output_data['params']['Configuration']
+        self.num_ssl = len(self.coord_s)
 
 
-'''
+        self.config_rate = {}
+        self.loadout_rates = []
+        self.loadout_rates_jit = []
+        for equipment in self.configuration:
+            if equipment == 'loadout':
+                self.loadout_rate_standard = self.equipment_data[equipment][4]/40
+            if equipment == 'press':
+                self.config_rate.update({'press':self.equipment_data[equipment][4]/40})
+                self.press_rate = []
+            if equipment == 'chopper':
+                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/40})
+                self.chopper_rate = []
+            if equipment == 'bagger':
+                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/40})
+                self.bagger_rate = []
+            if equipment == 'module_former':
+                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/40})
+                self.former_rate = []
+            if equipment == 'module_hauler':
+                self.loadout_rate_module = self.equipment_data[equipment][4]/40
 
-Start Trials
 
-'''
+        self.m = a.shape[0]
+        self.n = a.shape[1]
+
+        self.all_self.refinery_actual = []
+        self.all_ssl_actual = []
+        self.all_degradation_ensiled_actual = []
+        self.all_degradation_farm_actual = []
+        self.all_demand = []
+        self.harvest_hypothetical = []
+        self.refinery_hypothetical = []
+        self.hypothetical_ssl = []
+        self.refinery_average = []
+        self.ssl_average = []
+        self.degradation_farm_average = []
+        self.degradation_ssl_average = []
 
 
 for trial in range(num_trials):
@@ -190,7 +230,9 @@ for trial in range(num_trials):
             farm_inventory[int(bb[1])][int(bb[2])] = cc
 
     '''
-    Functions Section
+
+    Start Trials
+
     '''
 
     # create functions
@@ -204,10 +246,66 @@ for trial in range(num_trials):
                 loadout_rate = np.random.normal(loadout_rate_standard, 1/5*loadout_rate_standard)
             loadout_rates.append(loadout_rate)
             for farm in range(n):
-                if a[period][farm] != 0:
-                    harvest_actual[period][farm]=max(0,np.random.normal(a[period][farm], 1/5*a[period][farm]))
-                    farms[farm].put(harvest_actual[period][farm])
-                    x=x+harvest_actual[period][farm]
+                self.harvest_actual[period].append(0)
+                self.farm_transport_schedule[period].append(0)
+                self.jit_farm_transport[period].append(0)
+                self.farm_level_actual[period].append(0)
+                self.farm_inventory[period].append(0)
+
+        for coord in self.coord_s:
+            self.ssl_route.append(math.sqrt(self.coord_s[coord][1]**(2)+self.coord_s[coord][0]**(2)))
+
+        for solution in self.solutions:
+            aa = solution[0]
+            cc = solution[1]
+            bb = re.split('\W', aa)
+            if bb[0] == 'w':
+                self.equip_in_ssl[bb[1]] = K[bb[2]][1:]
+                self.before_ssl[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
+                self.ssl_container[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
+                self.ssl_location[bb[1]] = self.coord_s[bb[1]]
+
+        for period in range(self.m):
+            self.ssl_transport_schedule.append([])
+            self.ssl_inventory.append([])
+            self.ssl_level_actual.append([])
+            for ssl in range(self.num_ssl):
+                self.ssl_transport_schedule[period].append(0)
+                self.ssl_inventory[period].append(0)
+                self.ssl_level_actual[period].append(0)
+
+        for solution in self.sol:
+            aa = solution[0]
+            cc = solution[1]
+            bb = re.split('\W', aa)
+            if bb[0] == 'y':
+                self.farm_route.append(math.sqrt((self.ssl_location[bb[2]][0]-self.coord_f[bb[1]][0])**(2)+(self.ssl_location[bb[2]][1]-self.coord_f[bb[1]][1])**(2)))
+                self.farm_ssl.update({int(bb[1]):int(bb[2])})
+            if bb[0] == 'zfs':  # populate the farm transport schedule from algorithm solution
+                self.farm_transport_schedule[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'zs':   # populate the ssl transportation schedule from algorithm solution
+                self.ssl_transport_schedule[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'z_jit':
+                self.jit_farm_transport[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'Is':
+                self.ssl_inventory[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'If':
+                self.farm_inventory[int(bb[1])][int(bb[2])] = cc
+
+        self.degradation_farm_expected = []
+        self.degradation_ensiled_expected = []
+
+        '''
+        Functions Section
+        '''
+
+        # create functions
+        def harvest(env, self):
+            self.harvest_total_period = 0
+            self.harvest_total = 0
+            for period in range(self.m):
+                if 'module_hauler' in self.configuration:
+                    self.loadout_rate = np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)
                 else:
                     pass
                 if jit_farm_transport[period][farm] != 0:
@@ -346,19 +444,21 @@ for trial in range(num_trials):
                         degraded_ensiled.put(degradation_amount)
                     if sysnum in [3,7,11,15]:
                         pass
-                else:
-                    pass
-                if ssl_inventory[period][int(ssl)] > 0:
-                    if sysnum in [0,4,8,12]:
-                        degradation_amount = ssl_inventory[period][int(ssl)]/5
-                        x=x+degradation_amount
-                    if sysnum in [1,5,9,13]:
-                        degradation_amount = ssl_inventory[period][int(ssl)]/100
-                        x=x+degradation_amount
-                    if sysnum in [2,6,10,14]:
-                        degradation_amount = ssl_inventory[period][int(ssl)]/80
-                        x=x+degradation_amount
-            y=y+x
+                    if self.farm_inventory[period][farm] > 0:
+                        if self.sysnum in [0,1,2,3,4,5,6,7]:
+                            self.degradation_amount = self.farm_inventory[period][farm]/9
+                            x=x+self.degradation_amount
+                        if self.sysnum in [8,9,10,11,12,13,14,15]:
+                            self.degradation_amount = self.farm_inventory[period][farm]/5
+                            x=x+self.degradation_amount
+                    else:
+                        pass
+                y=y+x
+                x=0
+                degradation_field_to.append(y)
+                yield env.timeout(20)
+
+        def degradation_ensiled(env, self):
             x=0
             degradation_ensiled_expected.append(y)
             yield env.timeout(1)
