@@ -16,7 +16,8 @@ import argparse
 from matplotlib import pyplot as plt
 
 
-def create_data(raw_data, sysnum, seed=None, out_file=None, plot_coords=False):
+def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
+                plot_coords=False):
     """
     Create data for the Sorghum-BFL model.
 
@@ -26,6 +27,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None, plot_coords=False):
         can be a *.yaml or *.json file name (str) or a dict object.
     sysnum : int
         system number.
+    mode : str
+        type of information available input file.
+        options: paper, coordinates.
     seed : int, optional
         random seed.
     out_file : str, optional
@@ -57,10 +61,16 @@ def create_data(raw_data, sysnum, seed=None, out_file=None, plot_coords=False):
     # ========== coordinates, harvest, demand data ==========
     radius = raw['field']['radius']
     np.random.seed(seed=seed)
-    sites = np.random.uniform(-radius, radius, size=(2 * (F + S), 2))
-    sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
-    coord_f = sits_in[:F]
-    coord_s = sits_in[-S:]
+    if mode == "paper":
+        sites = np.random.uniform(-radius, radius, size=(2 * (F + S), 2))
+        sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
+        coord_f = sits_in[:F]
+        coord_s = sits_in[-S:]
+    elif mode == "coordinates":
+        coord_f = np.array(list(raw["Coord_f"].values()))
+        coord_s = np.array(list(raw["Coord_s"].values()))
+        assert len(coord_f) == F
+        assert len(coord_s) == S
 
     if plot_coords:
         l1, = plt.plot(0, 'g^', markersize=7)
