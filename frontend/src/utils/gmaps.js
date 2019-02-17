@@ -2,12 +2,13 @@
 
 // Your personal API key.
 // Get it here: https://console.cloud.google.com/google/maps-apis
-const API_KEY = 'AIzaSyDDAtKrmPJTqpCmfqQkFg3_uAkEB4rj3wg';
-const CALLBACK_NAME = 'gmapsCallback';
+// const API_KEY = 'AIzaSyDDAtKrmPJTqpCmfqQkFg3_uAkEB4rj3wg';
+const API_KEY = 'AIzaSyCsjUcVoOYO7m30tvBJlCl-MZrlHAECmkE'
+const CALLBACK_NAME = 'gmapsCallback'
 
-let initialized = !!window.google;
-let resolveInitPromise;
-let rejectInitPromise;
+let initialized = !!window.google
+let resolveInitPromise
+let rejectInitPromise
 // This promise handles the initialization
 // status of the google maps script.
 const initPromise = new Promise((resolve, reject) => {
@@ -33,7 +34,8 @@ export default function init() {
   const script = document.createElement('script');
   script.async = true;
   script.defer = true;
-  script.src = src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsjUcVoOYO7m30tvBJlCl-MZrlHAECmkE&callback=gmapsCallback";
+  // script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=${CALLBACK_NAME}`;
+  script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCsjUcVoOYO7m30tvBJlCl-MZrlHAECmkE&callback=gmapsCallback";
   script.onerror = rejectInitPromise;
   document.querySelector('head').appendChild(script);
 
