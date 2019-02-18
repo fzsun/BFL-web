@@ -15,7 +15,7 @@
 				<a href="#" v-on:click="address">SUBMIT</a>
 		</form>
 		<form id="getLocations">
-				<input type="button" onclick="printLocations()" value="Locations">
+				<a href="#" v-on:click="locations">SUBMIT</a> 
 		</form>
 		<p id="locations"></p>
   </body>  
@@ -46,9 +46,10 @@ export default {
 
 			//Add points to map
 			addPushpin(){
+				var ref = this;
 				google.maps.event.addListener(this.map, 'click', function(event) {
 					 var farmname = prompt("Farm Name", "Farm");
-					 this.placeMarker(event.latLng, farmname);
+					 ref.placeMarker(event.latLng, farmname);
 				});
 			},
 		  placeMarker(location, farmname) {
@@ -77,10 +78,10 @@ export default {
 
 
 			//Get Locations
-			printLocations(){
+			locations : function(){
 				var locations = "Locations:\n";
 				var k;
-				for(k = 0; k < farmCounter; k++) {
+				for(k = 0; k < this.farmCounter; k++) {
 					locations = locations +
 											this.farms[k].farmname + ": " +
 											this.farms[k].latitude + " -- " +
