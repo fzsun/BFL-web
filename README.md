@@ -26,6 +26,10 @@ For development, `cd` to the project folder, then use `python myapp.py` to start
 
 Next in a different terminal `cd` into the `frontend` folder and run `npm run dev` to start the client
 
+To send an email from a gmail account, create a email credentials file NOT TRACKED BY GITHUB and securly
+import a password and of course change the email from the example.To generate the passcode itself
+setup two factor authentication and generate an app code from google. 
+
 A Waitress production server can be started by `python production.py`.
 
 

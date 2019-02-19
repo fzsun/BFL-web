@@ -248,6 +248,8 @@ export default {
         .post('http://localhost:5000/s-bfls/', this.model)
         .then(response => {
             this.response = response.data;
+            console.log("Optimization Results: ");
+            console.log(this.response);
         })
     }
   }
