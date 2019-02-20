@@ -33,6 +33,7 @@ class s_bfl(object):
         self.csk, self.d, self.hf, self.hs, self.U, self.UE, self.UE_jit) = self.params.values()
 
     def solve(self):
+        # variable names let's make it clear
         T = list(range(1, len(self.d)))
         F = list(range(len(self.cfs)))
         S = list(range(len(self.csk)))
@@ -143,13 +144,18 @@ class s_bfl(object):
                 m.write(f'warm_starts/base_sys{self.sysnum}.mst')
 
             cost_total_lb = m.objBound
+            # Total cost
             cost_total = m.objVal
             gap = (cost_total - cost_total_lb) / cost_total
+            # what does cost locations mean? 
             cost_loc = w.prod({(s, k): self.csk[s][k] for s in S for k in K}).getValue()
 
             cost_op = zfs.sum().getValue() * self.c_op
             cfs_dict = {(t, f, s): self.cfs[f][s] for t, f, s in setprod(T, F, S)}
+
+            # cost of transporting from f to s in time t
             cost_tran_fs = zfs.prod(cfs_dict).getValue()
+            # what does the b stand for? 
             cost_tran_sb = zs.prod({(t, s): self.cs[s]
                                     for t in T for s in S}).getValue()
             if self.jit:
@@ -165,6 +171,11 @@ class s_bfl(object):
             K_cnt = dict(Counter(k for s in S for k in K if w[s, k].x > 0.5))
             jit_amount = z_jit.sum().getValue() if self.jit else np.nan
 
+            # why do we need to send the user every variable value? 
+            # is there a cleaner way to do this? 
+            # maybe a function for getting all the variables that are active and convert to lat, lng? 
+            # getActiveRoutes()
+            # Binary encoding of open ssls
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]
             summary = dict()
             summary['others'] = {

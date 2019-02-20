@@ -37,6 +37,21 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     plot_coords : bool, optional
         plot all the coordinates.
 
+    Variable name replacements
+    T = num_weeks_horizon
+    F = num_farms
+    S = num_ssls
+    a = harvested
+    cfs = farm_ssl_trans_cost
+    cs = ssl_refinery_trans_cost
+    csk = fixed_cost_ssls
+    ck = cost_ssls
+    hf = farm_holding_cost
+    hs = ssl_holding_cost
+    d = demand
+    u = upperbound_inventory
+    ue = upperbound_equip_proc_rate
+
     Returns
     -------
     all_data : dict
@@ -54,28 +69,29 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
 
-    T = raw['horizon']
-    F = raw['num_fields']
-    S = raw['num_ssls']
+    num_weeks_horizon = raw['horizon']
+    num_farms = raw['num_fields']
+    num_ssls = raw['num_ssls']
 
     # ========== coordinates, harvest, demand data ==========
     radius = raw['field']['radius']
     np.random.seed(seed=seed)
     if mode == "paper":
-        sites = np.random.uniform(-radius, radius, size=(2 * (F + S), 2))
+        # generates random ssl locations
+        sites = np.random.uniform(-radius, radius, size=(2 * (num_farms + num_ssls), 2))
         sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
-        coord_f = sits_in[:F]
-        coord_s = sits_in[-S:]
+        coord_farms = sits_in[:num_farms]
+        coord_ssls = sits_in[-num_ssls:]
     elif mode == "coordinates":
-        coord_f = np.array(list(raw["Coord_f"].values()))
-        coord_s = np.array(list(raw["Coord_s"].values()))
-        assert len(coord_f) == F
-        assert len(coord_s) == S
+        coord_farms = np.array(list(raw["Coord_f"].values()))
+        coord_ssls = np.array(list(raw["Coord_s"].values()))
+        assert len(coord_farms) == num_farms
+        assert len(coord_ssls) == num_ssls
 
     if plot_coords:
         l1, = plt.plot(0, 'g^', markersize=7)
-        l2, = plt.plot(*coord_s.T, 'ro', markersize=2)
-        l3, = plt.plot(*coord_f.T, 'bx', markersize=3)
+        l2, = plt.plot(*coord_ssls.T, 'ro', markersize=2)
+        l3, = plt.plot(*coord_farms.T, 'bx', markersize=3)
         plt.legend([l3, l2, l1], ['Farm', 'SSL', 'Bio-refinery'])
         circles = [
             plt.Circle((0, 0),
@@ -94,19 +110,22 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     proportion_devoted = raw['field']['proportion_devoted']
     # 1 sqkm = 100 ha
     total_supply = 100 * pi * radius**2 * proportion_devoted * dry_yield
-    a_weight = np.zeros(T + 1, dtype=int)
+    # what is the a_weight? Is it just a way of configuring the matrix? 
+    a_weight = np.zeros(num_weeks_horizon + 1, dtype=int)
     a_weight[1:len(harvest_progress) + 1] = harvest_progress
     weekly_supply = a_weight / a_weight.sum() * total_supply
-    field_weight = np.random.uniform(1, 10, size=F)
+    field_weight = np.random.uniform(1, 10, size=num_farms)
     field_weight = field_weight / field_weight.sum()
-    a = weekly_supply[:, None] * field_weight[None]
-    a = a.round(0).astype(int)
+
+    #if a is the amount harvested in farm f at time t why is it a single number here? 
+    harvested = weekly_supply[:, None] * field_weight[None]
+    harvested = harvested.round(0).astype(int)
 
     total_demand = raw['demand']
-    d = [0] + [int(total_demand / T)] * T
+    demand = [0] + [int(total_demand / num_weeks_horizon)] * num_weeks_horizon
 
     # =================== system dependet data ==========================
-    tran_coef = raw['cost']['transport_coef']
+    tran_coef = raw['cost']['transport_coef'] #raw is the input file
     equipments = raw['cost']['equipment']
     config = raw['configurations'][sysnum]
     dry_part = 1 - raw['moisture']
@@ -116,37 +135,45 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     K = [(i, *j) for i in ssl_sizes for j in equip_arr]
 
     if 'whole_stalk' in config:
-        hf = raw['price'] / raw['degrade']['whole_stalk']
+        # farm_unit_holding_cost
+        farm_holding_cost = raw['price'] / raw['degrade']['whole_stalk']
     else:
-        hf = raw['price'] / raw['degrade']['chopped']
+        farm_holding_cost = raw['price'] / raw['degrade']['chopped']
 
     if 'bunker' in config:
-        hs = raw['price'] / raw['degrade']['in_bunker']
+        # ssl_unit_holding_cost
+        ssl_holding_cost = raw['price'] / raw['degrade']['in_bunker']
     elif 'bagger' in config or 'module_former' in config:
-        hs = raw['price'] / raw['degrade']['in_bag']
+        ssl_holding_cost = raw['price'] / raw['degrade']['in_bag']
     else:
-        hs = raw['price'] / raw['degrade']['chopped']
+        ssl_holding_cost = raw['price'] / raw['degrade']['chopped']
 
-    c_op = 0
+    # c_op = operating cost? 
+    operating_cost = 0
     for e in config[1:]:
         if e == 'bunker':
             continue
-        c_op += equipments[e][3]
-    c_op /= dry_part
-    c_op_jit = equipments['loadout'][3]
-    c_op_jit += equipments['chopper'][3] if 'chopper' in config else 0
-    c_op_jit /= dry_part
+        operating_cost += equipments[e][3]
+    operating_cost /= dry_part
+    operating_cost_jit = equipments['loadout'][3]
+    operating_cost_jit += equipments['chopper'][3] if 'chopper' in config else 0
+    operating_cost_jit /= dry_part
 
-    cfs_rate = raw['cost']['base_infield'] / dry_part
-    cfs_rate *= tran_coef['whole_stalk'] if 'whole_stalk' in config else 1
-    cfs = cdist(coord_f, coord_s) * cfs_rate
+    # cost per Mg to transport from farm f to ssl s
+    farm_ssl_trans_cost_rate = raw['cost']['base_infield'] / dry_part
+    farm_ssl_trans_cost_rate *= tran_coef['whole_stalk'] if 'whole_stalk' in config else 1
+    farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
-    cs_jit_rate = cs_rate = raw['cost']['base_highway'] / dry_part
-    cs_rate *= tran_coef['compressed'] if 'press' in config else 1
-    cs_rate *= tran_coef['in_module'] if 'module_former' in config else 1
-    cs = np.linalg.norm(coord_s, axis=1) * cs_rate
-    cs_jit = np.linalg.norm(coord_s, axis=1) * cs_jit_rate
+    # Cost per Mg to send from ssl to refinery 
+    ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
+    ssl_refinery_trans_cost_rate *= tran_coef['compressed'] if 'press' in config else 1
+    ssl_refinery_trans_cost_rate *= tran_coef['in_module'] if 'module_former' in config else 1
+ 
+    # use geolocation here, backward compatable (works with all ways it used to run)
+    ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
+    ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
 
+    # UE upperbound equipment processing rate 
     UE, UE_jit = dict(), dict()
     for v in equip_arr:
         caps_jit = [
@@ -162,47 +189,49 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
         UE[v] = int(min(caps_other) * dry_part)
         UE_jit[v] = int(min(caps_jit) * dry_part)
 
-    own_cost = {'bunker': raw['cost']['bunker_annual_own'] / 52 * T}
+    # what is own_cost? owner cost? owner of what? 
+    own_cost = {'bunker': raw['cost']['bunker_annual_own'] / 52 * num_weeks_horizon}
     for k, v in equipments.items():
         depreciation = (v[0] - v[2]) / v[1]
         interest = v[0] * raw['interest_rate']
         insurance_tax = (v[0] + v[2]) / 2 * (
             raw['insurance_rate'] + raw['tax_rate'])
-        own_cost[k] = (depreciation + interest + insurance_tax) / 52 * T
+        own_cost[k] = (depreciation + interest + insurance_tax) / 52 * num_weeks_horizon
 
-    ck = dict()
+    # cost per type of ssl
+    cost_ssls = dict()
     for k in K:
-        ssl_cost = k[0] * raw['cost']['ssl_annual_own'] / 52 * T
+        ssl_cost = k[0] * raw['cost']['ssl_annual_own'] / 52 * num_weeks_horizon
         equip_cost = [k[i + 1] * own_cost[e] for i, e in enumerate(config[1:])]
-        ck[k] = int(ssl_cost + sum(equip_cost))
+        cost_ssls[k] = int(ssl_cost + sum(equip_cost))
 
     # =================== output data ==========================
     all_data = {
         'Configuration': config,
-        'Coord_f': {i: v.tolist()
-                    for i, v in enumerate(coord_f)},
-        'Coord_s': {i: v.tolist()
-                    for i, v in enumerate(coord_s)},
+        'Coord_farms': {i: v.tolist()
+                    for i, v in enumerate(coord_farms)},
+        'Coord_ssls': {i: v.tolist()
+                    for i, v in enumerate(coord_ssls)},
         'K': {i: list(k)
               for i, k in enumerate(K)},
         'Seed': seed,
         'Sysnum': sysnum,
-        'a': a.tolist(),
-        'c_op': c_op,
-        'c_op_jit': c_op_jit,
+        'harvested': harvested.tolist(),
+        'operating_cost': operating_cost,
+        'operating_cost_jit': operating_cost_jit,
+        # what is this the "price" of? 
         'c_pen': raw['price'] * 3,
-        'cfs': np.round(cfs, 2).tolist(),
-        'cs': np.round(cs, 2).tolist(),
-        'cs_jit': np.round(cs_jit, 2).tolist(),
-        'csk': [list(ck.values())] * S,
-        'd': d,
-        'hf': hf,
-        'hs': hs,
-        'u': np.repeat(ssl_sizes, len(equip_arr)).tolist(),
-        'ue': list(UE.values()) * len(ssl_sizes),
-        'ue_jit': list(UE_jit.values()) * len(ssl_sizes)
+        'farm_ssl_trans_cost': np.round(farm_ssl_trans_cost, 2).tolist(),
+        'ssl_refinery_trans_cost': np.round(ssl_refinery_trans_cost, 2).tolist(),
+        'ssl_refinery_jit_trans_cost': np.round(ssl_refinery_jit_trans_cost, 2).tolist(),
+        'fixed_cost_ssls': [list(cost_ssls.values())] * num_ssls,
+        'demand': demand,
+        'farm_holding_cost': farm_holding_cost,
+        'ssl_holding_cost': ssl_holding_cost,
+        'upperbound_inventory': np.repeat(ssl_sizes, len(equip_arr)).tolist(),
+        'upperbound_equip_proc_rate': list(UE.values()) * len(ssl_sizes),
+        'upperbound_equip_proc_rate_jit': list(UE_jit.values()) * len(ssl_sizes)
     }
-    # %%
     if out_file is not None:
         with open(out_file, 'w') as f:
             if out_file.split('.')[-1] == 'json':
@@ -235,9 +264,11 @@ def cli_s_bfl():
     parser.add_argument(
         '-t',
         '--t_lim',
+        # not sure about this metaVar
         metavar='T',
         type=float,
         default=60,
+        # Looks like T was used for another purpose here
         help='set computation time limit T in seconds (default: 60)')
     parser.add_argument(
         '--seed',
