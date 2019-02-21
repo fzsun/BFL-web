@@ -29,36 +29,48 @@ class s_bfl(object):
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
-        (*_, self.a, self.c_op, self.c_op_jit, self.c_pen, self.cfs, self.cs, self.cs_jit, 
-        self.csk, self.d, self.hf, self.hs, self.U, self.UE, self.UE_jit) = self.params.values()
+        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, self.ssl_refinery_jit_trans_cost, 
+        self.fixed_cost_ssls, self.demand, self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
 
     def solve(self):
-        T = list(range(1, len(self.d)))
-        F = list(range(len(self.cfs)))
-        S = list(range(len(self.csk)))
-        K = list(range(len(self.U)))
-        a = np.array(self.a)
-        M = a.sum(axis=0)
-        c_zfs = (np.array(self.cfs) + self.c_op).tolist()
-        c_z_jit = (np.array(self.cs_jit)[None] + np.array(self.cfs) + self.c_op_jit).tolist()
+        # T, F, S, K : Set of time periods, farms, potential SSL sites, and available types of SSLs, respectively
+        # t, f, s, k : element of T, F, S, K
+        T = list(range(1, len(self.demand)))
+        F = list(range(len(self.farm_ssl_trans_cost)))
+        S = list(range(len(self.fixed_cost_ssls)))
+        K = list(range(len(self.upperbound_inventory)))
+
+        harvested = np.array(self.harvested)
+        M = harvested.sum(axis=0)
+        farm_ssl_cost_per_period = (np.array(self.farm_ssl_trans_cost) + self.operating_cost).tolist()
+        jit_trans_costs = (np.array(self.ssl_refinery_jit_trans_cost)[None] + np.array(self.farm_ssl_trans_cost) + self.operating_cost_jit).tolist()
 
         logger.info("Parameters created. Begin building model.")
 
         m = Model('ms1m_base')
 
+        # ++++++ Linear Programming Notation ++++++ 
         # ====== Create vars and objectives ======
-        w = m.addVars(S, K, obj=self.csk, vtype='B', name='w')
+
+        # w[s][k] = 1 => is an ssl of type k is built at site s; otherwise 0
+        w = m.addVars(S, K, obj=self.fixed_cost_ssls, vtype='B', name='w')
+        
+        # y[f][s] = 1 => if farm f supplies ssl s; 0 otherwise
         y = m.addVars(F, S, vtype='B', name='y')
-        zfs = m.addVars(T, F, S, obj=c_zfs * len(T), name='zfs')
-        zs = m.addVars(T, S, obj=self.cs * len(T), name='zs')
-        Is = m.addVars([0] + T, S, obj=self.hs, name='Is')
-        If = m.addVars([0] + T, F, obj=self.hf, name='If')
+        
+        shipped_farm_ssl = m.addVars(T, F, S, obj=farm_ssl_cost_per_period * len(T), name='shipped_farm_ssl')
+        shipped_ssl_refinery = m.addVars(T, S, obj=self.ssl_refinery_trans_cost * len(T), name='shipped_ssl_refinery')
+        
+        # Note: inventory levels taken at the end of period t
+        inventory_level_ssl = m.addVars([0] + T, S, obj=self.ssl_holding_cost, name='inventory_level_ssl')
+        inventory_level_farm = m.addVars([0] + T, F, obj=self.farm_holding_cost, name='inventory_level_farm')
+        
         if self.jit:
-            z_jit = m.addVars(T, F, S, obj=c_z_jit * len(T), name='z_jit')
+            z_jit = m.addVars(T, F, S, obj=jit_trans_costs * len(T), name='z_jit')
         penalty = m.addVars(T, obj=self.c_pen, name='penalty')
 
-        m.setAttr('UB', Is.select(0, '*'), [0] * len(S))
-        m.setAttr('UB', If.select(0, '*'), [0] * len(F))
+        m.setAttr('UB', inventory_level_ssl.select(0, '*'), [0] * len(S))
+        m.setAttr('UB', inventory_level_farm.select(0, '*'), [0] * len(F))
 
         m.ModelSense = GRB.MINIMIZE
 
@@ -66,42 +78,42 @@ class s_bfl(object):
         m.addConstrs((w.sum(s, '*') <= 1 for s in S), name='c1')
         m.addConstrs((y[f, s] <= w.sum(s, '*') for f in F for s in S), name='c2')
         m.addConstrs((y.sum(f, '*') == 1 for f in F), name='c3')
-        m.addConstrs((Is[t, s] == Is[t - 1, s] - zs[t, s] + zfs.sum(t, '*', s)
+        m.addConstrs((inventory_level_ssl[t, s] == inventory_level_ssl[t - 1, s] - shipped_ssl_refinery[t, s] + shipped_farm_ssl.sum(t, '*', s)
                     for t in T for s in S),
                     name='c4')
-        m.addConstrs((Is[t, s] <= quicksum([self.U[k] * w[s, k] for k in K]) for t in T
+        m.addConstrs((inventory_level_ssl[t, s] <= quicksum([self.upperbound_inventory[k] * w[s, k] for k in K]) for t in T
                     for s in S),
                     name='c7')
-        m.addConstrs((zfs.sum(t, '*', s) <= quicksum([self.UE[k] * w[s, k] for k in K])
+        m.addConstrs((shipped_farm_ssl.sum(t, '*', s) <= quicksum([self.upperbound_equip_proc_rate[k] * w[s, k] for k in K])
                     for t in T for s in S),
                     name='c9a')
         if not self.jit:
-            m.addConstrs((If[t, f] == If[t - 1, f] + a[t, f] - zfs.sum(t, f, '*')
+            m.addConstrs((inventory_level_farm[t, f] == inventory_level_farm[t - 1, f] + harvested[t, f] - shipped_farm_ssl.sum(t, f, '*')
                         for t in T for f in F),
                         name='c5')
-            m.addConstrs((zs.sum(t, '*') + penalty[t] == self.d[t] for t in T),
+            m.addConstrs((shipped_ssl_refinery.sum(t, '*') + penalty[t] == self.demand[t] for t in T),
                         name='c6')
             m.addConstrs(
-                (zfs.sum('*', f, s) <= M[f] * y[f, s] for f in F for s in S),
+                (shipped_farm_ssl.sum('*', f, s) <= M[f] * y[f, s] for f in F for s in S),
                 name='c8')
             m.addConstrs(
-                (zfs.sum(t, '*', s) <= quicksum([self.UE_jit[k] * w[s, k] for k in K])
+                (shipped_farm_ssl.sum(t, '*', s) <= quicksum([self.upperbound_equip_proc_rate_jit[k] * w[s, k] for k in K])
                 for t in T for s in S),
                 name='c9b')
         else:
-            m.addConstrs((If[t, f] == If[t - 1, f] + a[t, f] - zfs.sum(t, f, '*') -
+            m.addConstrs((inventory_level_farm[t, f] == inventory_level_farm[t - 1, f] + harvested[t, f] - shipped_farm_ssl.sum(t, f, '*') -
                         z_jit.sum(t, f, '*') for t in T for f in F),
                         name='c5')
             m.addConstrs(
-                (z_jit.sum(t, '*', '*') + zs.sum(t, '*') + penalty[t] == self.d[t]
+                (z_jit.sum(t, '*', '*') + shipped_ssl_refinery.sum(t, '*') + penalty[t] == self.demand[t]
                 for t in T),
                 name='c6')
             m.addConstrs(
-                (z_jit.sum('*', f, s) + zfs.sum('*', f, s) <= M[f] * y[f, s]
+                (z_jit.sum('*', f, s) + shipped_farm_ssl.sum('*', f, s) <= M[f] * y[f, s]
                 for f in F for s in S),
                 name='c8')
-            m.addConstrs((z_jit.sum(t, '*', s) + zfs.sum(t, '*', s) <= quicksum(
-                [self.UE_jit[k] * w[s, k] for k in K]) for t in T for s in S),
+            m.addConstrs((z_jit.sum(t, '*', s) + shipped_farm_ssl.sum(t, '*', s) <= quicksum(
+                [self.upperbound_equip_proc_rate_jit[k] * w[s, k] for k in K]) for t in T for s in S),
                         name='c9b')
         logger.info("Model created. Begin solving.")
 
@@ -143,60 +155,68 @@ class s_bfl(object):
                 m.write(f'warm_starts/base_sys{self.sysnum}.mst')
 
             cost_total_lb = m.objBound
+            # Total cost
             cost_total = m.objVal
             gap = (cost_total - cost_total_lb) / cost_total
-            cost_loc = w.prod({(s, k): self.csk[s][k] for s in S for k in K}).getValue()
+            # what does cost locations mean? 
+            cost_loc = w.prod({(s, k): self.fixed_cost_ssls[s][k] for s in S for k in K}).getValue()
 
-            cost_op = zfs.sum().getValue() * self.c_op
-            cfs_dict = {(t, f, s): self.cfs[f][s] for t, f, s in setprod(T, F, S)}
-            cost_tran_fs = zfs.prod(cfs_dict).getValue()
-            cost_tran_sb = zs.prod({(t, s): self.cs[s]
+            cost_op = shipped_farm_ssl.sum().getValue() * self.operating_cost
+            cfs_dict = {(t, f, s): self.farm_ssl_trans_cost[f][s] for t, f, s in setprod(T, F, S)}
+
+            # cost of transporting from f to s in time t
+            cost_tran_fs = shipped_farm_ssl.prod(cfs_dict).getValue()
+            cost_tran_sr = shipped_ssl_refinery.prod({(t, s): self.ssl_refinery_trans_cost[s]
                                     for t in T for s in S}).getValue()
             if self.jit:
-                cost_op += z_jit.sum().getValue() * self.c_op_jit
+                cost_op += z_jit.sum().getValue() * self.operating_cost_jit
                 cost_tran_fs += z_jit.prod(cfs_dict).getValue()
-                cost_tran_sb += z_jit.prod({(t, f, s): self.cs_jit[s]
+                cost_tran_sr += z_jit.prod({(t, f, s): self.ssl_refinery_jit_trans_cost[s]
                                             for t in T for f in F
                                             for s in S}).getValue()
 
-            cost_inv_S = Is.sum().getValue() * self.hs
-            cost_inv_F = If.sum().getValue() * self.hf
+            cost_inv_S = inventory_level_ssl.sum().getValue() * self.ssl_holding_cost
+            cost_inv_F = inventory_level_farm.sum().getValue() * self.farm_holding_cost
 
             K_cnt = dict(Counter(k for s in S for k in K if w[s, k].x > 0.5))
             jit_amount = z_jit.sum().getValue() if self.jit else np.nan
 
+            # maybe a function for getting all the variables that are active and convert to lat, lng? 
+            # getActiveRoutes()
+            # Binary encoding of open ssls
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]
             summary = dict()
             summary['others'] = {
                 'status': status[m.status],
                 'CPU_time': m.runtime,
                 'gap': gap,
-                'K': len(K),
-                'T': len(T),
-                'F': len(F),
-                'S': len(S),
-                'num_SSL': w.sum().getValue(),
+                'available_types_ssl': len(K),
+                'num_weeks_horizon': len(T),
+                'num_farms': len(F),
+                # I'm not super sure about the ssl one
+                'num_ssls_considered': len(S),
+                'num_ssls_used': w.sum().getValue(),
                 'SSL_type_cnt': K_cnt,
             }
             summary['cost'] = {
-                'lb': cost_total_lb,
-                'ub': cost_total,
+                'total_lb': cost_total_lb,
+                'total_ub': cost_total,
                 'penalty': penalty.sum().getValue(),
                 'operation': cost_op,
                 'loc_own': cost_loc,
-                'tran_fs': cost_tran_fs,
-                'tran_sb': cost_tran_sb,
-                'inv_f': cost_inv_F,
-                'inv_s': cost_inv_S,
+                'tran_farms_ssl': cost_tran_fs,
+                'tran_ssl_refinery': cost_tran_sr,
+                'farm_inventory': cost_inv_F,
+                'ssl_inventory': cost_inv_S,
             }
-            a_sum = float(a.sum())
+            harvested_sum = float(harvested.sum())
             summary['per_dry_Mg'] = {
-                k: v / a_sum
+                k: v / harvested_sum
                 for k, v in summary['cost'].items()
             }
             summary['trans_amount'] = {
-                'base_fs': zfs.sum().getValue(),
-                'base_sb': zs.sum().getValue(),
+                'base_fs': shipped_farm_ssl.sum().getValue(),
+                'base_sb': shipped_ssl_refinery.sum().getValue(),
                 'jit': jit_amount
             }
 
