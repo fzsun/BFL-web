@@ -11,9 +11,9 @@ import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
 from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
-from email_credentials import credentials
-from flask_mail import Mail
-from flask_mail import Message
+# from email_credentials import credentials
+# from flask_mail import Mail
+# from flask_mail import Message
 from flask_cors import CORS
 
 class CustomFlask(Flask):
@@ -27,20 +27,20 @@ class CustomFlask(Flask):
 app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
 CORS(app)
 
-c = credentials()
-c.setPassword()
+# c = credentials()
+# c.setPassword()
 
 
-app.config.update(
-    DEBUG = True,
-    MAIL_SERVER = 'smtp.gmail.com',
-    MAIL_PORT = 465,
-    MAIL_USE_SSL = True,
-    MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
-    MAIL_PASSWORD = c.password,
-)
+# app.config.update(
+#     DEBUG = True,
+#     MAIL_SERVER = 'smtp.gmail.com',
+#     MAIL_PORT = 465,
+#     MAIL_USE_SSL = True,
+#     MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
+#     MAIL_PASSWORD = c.password,
+# )
 
-mail = Mail(app)
+# mail = Mail(app)
 
 @app.route('/s-bfls/', methods=['POST'])
 def Sbfl():
@@ -50,13 +50,13 @@ def Sbfl():
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
     response = jsonify(my_s_bfl.optimization_result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    # response.headers.add('Access-Control-Allow-Origin', '*')
 
-    msg = Message('S-BFLS',
-                    sender="robert.b.shelton.42@gmail.com",
-                    recipients=["robes98@vt.edu"])
-    msg.body = "Thanks for using SBFLS! Attached are our results."
-    mail.send(msg)
+    # msg = Message('S-BFLS',
+    #                 sender="robert.b.shelton.42@gmail.com",
+    #                 recipients=["robes98@vt.edu"])
+    # msg.body = "Thanks for using SBFLS! Attached are our results."
+    # mail.send(msg)
     return response
 
 @app.errorhandler(404)
