@@ -11,7 +11,7 @@
 		<form id="refineryFormAddress">
 				<label>Refinery Location</label>
 				<input id="farmnameLatLon" type="text" placeholder="Farm">
-				<input id="Address" type="text" placeholder="Address">
+				<input id="address" type="text" placeholder="Address">
 				<a href="#" v-on:click="address">SUBMIT</a>
 		</form>
 		<form id="getLocations">
@@ -31,7 +31,8 @@ export default {
 			centerLon: 0,
       farmsCounter: 0,
 			farms: [],
-			storages: []
+			storages: [],
+			geocoder: null
     }},
   methods: {
 			//Initial retrieval of map
@@ -41,6 +42,7 @@ export default {
         center: {lat: 61, lng: -149},
         zoom: 4
         })
+				this.geocoder = new google.maps.Geocoder();
       },
 
 
@@ -58,9 +60,10 @@ export default {
 				  map: this.map,
 					title: farmname
 			  });
-				this.farms[this.farmsCounter++] = {name: farmname,
-																		latitude: location.lat,
-																	  longitude: location.lon}
+				this.farms[this.farmsCounter] = {name: farmname,
+																		latitude: location.lat(),
+																	  longitude: location.lng()}
+				this.farmsCounter = this.farmsCounter + 1;
 		  },  
 
 
@@ -73,19 +76,28 @@ export default {
 				this.placeMarker(myLatlng, farmname);
 			},
 			address : function(){
-
+				var ref = this;
+				var farmname = document.getElementById("farmnameLatLon").value;
+				var address = document.getElementById("address").value;
+				this.geocoder.geocode( { 'address' : address }, function( results, status ) {
+					if( status == google.maps.GeocoderStatus.OK ) {
+							ref.placeMarker(results[0].geometry.location, farmname);
+					} else {
+						alert( 'Geocode was not successful for the following reason: ' + status );
+					}
+				});
 			},
 
 
 			//Get Locations
 			locations : function(){
-				var locations = "Locations:\n";
+				var locations = "Locations: </br>";
 				var k;
-				for(k = 0; k < this.farmCounter; k++) {
+				for(k = 0; k < this.farmsCounter; k++) {
 					locations = locations +
-											this.farms[k].farmname + ": " +
+											this.farms[k].name + ": " +
 											this.farms[k].latitude + " -- " +
-											this.farms[k].longitude + "\n";
+											this.farms[k].longitude + "</br>";
 				}
 				document.getElementById("locations").innerHTML = locations;
 			}
