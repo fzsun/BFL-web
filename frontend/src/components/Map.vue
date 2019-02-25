@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name: 'Google Maps',
     data() {
@@ -32,7 +34,7 @@ export default {
             farmsCounter: 0,
             farms: [],
             storages: [],
-            geocoder: null
+            markers: []
     }},
     methods: {
         //Initial retrieval of map
@@ -42,27 +44,42 @@ export default {
             center: {lat: 61, lng: -149},
             zoom: 4
             })
-            this.geocoder = new google.maps.Geocoder();
         },
 
         //Add points to map
-        addPushpin(){
+        addPushpin() {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
                  var farmname = prompt("Farm Name", "Farm");
                  ref.placeMarker(event.latLng, farmname);
             });
         },
+
         placeMarker(location, farmname) {
+            var ref = this;
             var marker = new google.maps.Marker({
                 position: location,
                 map: this.map,
                 title: farmname
             });
+            var id = this.farmsCounter;
+            google.maps.event.addListener(marker, "rightclick", 
+                function (point) { ref.delMarker(id) });
+
+            this.markers[this.farmsCounter] = marker;
             this.farms[this.farmsCounter] = {name: farmname,
                                              latitude: location.lat(),
                                              longitude: location.lng()}
             this.farmsCounter = this.farmsCounter + 1;
+        },
+
+        delMarker(id) {
+            console.log(this.markers);
+            console.log(id);
+            var marker = this.markers[id]; 
+            marker.setMap(null);
+            this.farms[id] = null;
+            this.markers[id] = null;
         },
 
 
@@ -75,8 +92,30 @@ export default {
             this.placeMarker(myLatlng, farmname);
         },
         address : function(){
-//            var address = document.getElementById("address").value;
-//            main.get('geocode?q=' + address).then(response =>  console.log(response.data));
+            var address = document.getElementById("address").value;
+            var farmname = document.getElementById("farmnameLatLon").value;
+            var url = 'https://api.geocod.io/v1.3/geocode?' + 
+                      'q=' + address +
+                      '&api_key=' + '57cf5c27cf057777f7fd555f33f3b56d77f5da5';
+ 
+            console.log(url);
+            var result = axios
+                .get(url)
+                .then(response => {
+                     return response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            var ref = this;
+            result.then(data => {
+
+                var address_lat = data.results[0].location.lat;
+                var address_lng = data.results[0].location.lng;
+                ref.placeMarker(
+                    new google.maps.LatLng(address_lat, address_lng),
+                    farmname);
+            });
         },
 
 
@@ -85,10 +124,12 @@ export default {
             var locations = "Locations: </br>";
             var k;
             for(k = 0; k < this.farmsCounter; k++) {
-                locations = locations +
-                            this.farms[k].name + ": " +
-                            this.farms[k].latitude + " -- " +
-                            this.farms[k].longitude + "</br>";
+                if (this.farms[k] != null) {
+                    locations = locations +
+                                this.farms[k].name + ": " +
+                                this.farms[k].latitude + " -- " +
+                                this.farms[k].longitude + "</br>";
+                }
             }
             document.getElementById("locations").innerHTML = locations;
         }
