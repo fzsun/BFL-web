@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bulma": "^0.7.2",
+    "geocodio": "^2.0.0",
     "vue": "^2.5.2",
     "vue-form-generator": "^2.3.2",
     "vue-router": "^3.0.1"

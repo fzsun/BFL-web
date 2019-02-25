@@ -39,7 +39,6 @@ export default {
     methods: {
         //Initial retrieval of map
         getMap(){
-            console.log("map: ", google.maps)
             this.map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 61, lng: -149},
             zoom: 4
@@ -74,8 +73,6 @@ export default {
         },
 
         delMarker(id) {
-            console.log(this.markers);
-            console.log(id);
             var marker = this.markers[id]; 
             marker.setMap(null);
             this.farms[id] = null;
@@ -98,7 +95,6 @@ export default {
                       'q=' + address +
                       '&api_key=' + '57cf5c27cf057777f7fd555f33f3b56d77f5da5';
  
-            console.log(url);
             var result = axios
                 .get(url)
                 .then(response => {
