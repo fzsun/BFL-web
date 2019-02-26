@@ -65,6 +65,16 @@ def Sbfl():
     # mail.send(msg)
     return response
 
+@app.route('/geo/', methods=['POST'])
+def use_geo():
+    input_data = request.get_json(force=True)
+    # print(type(input_data))
+    # print(input_data['center'], " xxx ", len(input_data['coords']))
+    my_geo = Geo()
+    # distances = my_geo.distance_center(input_data['center'], input_data['coords'])
+    distance_matrix = my_geo.distance_points(input_data['coords_1'], input_data['coords_2'])
+    return distance_matrix
+
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)
 def page_not_found(e):
