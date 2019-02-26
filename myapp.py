@@ -15,7 +15,12 @@ from algorithm.s_bfl import s_bfl
 # from flask_mail import Mail
 # from flask_mail import Message
 from flask_cors import CORS
+<<<<<<< HEAD
 from simulation.sim import Simulation
+=======
+from algorithm.geo import Geo
+import json
+>>>>>>> intial class
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -60,10 +65,10 @@ def Sbfl():
     # mail.send(msg)
     return response
 
-@app.route('/simulation_temp/', methods=['POST'])
-def simulation():
-    input_data = request.get_json(force=True)
-    sim =
+@app.errorhandler(404)
+@app.errorhandler(jinja2.exceptions.TemplateNotFound)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only
