@@ -14,6 +14,7 @@ from math import pi
 import sys
 import argparse
 from matplotlib import pyplot as plt
+from algorithm.geo import Geo
 
 
 def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
@@ -85,6 +86,7 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     elif mode == "coordinates":
         coord_farms = np.array(list(raw["Coord_f"].values()))
         coord_ssls = np.array(list(raw["Coord_s"].values()))
+        refinery_location = list(raw["refinery_location"].values())
         assert len(coord_farms) == num_farms
         assert len(coord_ssls) == num_ssls
 
@@ -162,7 +164,11 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     # cost per Mg to transport from farm f to ssl s
     farm_ssl_trans_cost_rate = raw['cost']['base_infield'] / dry_part
     farm_ssl_trans_cost_rate *= tran_coef['whole_stalk'] if 'whole_stalk' in config else 1
-    farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
+    if mode == 'paper':
+        farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
+    elif mode == 'coordinates':
+        geo = Geo()
+        farm_ssl_trans_cost = geo.distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
     # Cost per Mg to send from ssl to refinery 
     ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
@@ -170,8 +176,12 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     ssl_refinery_trans_cost_rate *= tran_coef['in_module'] if 'module_former' in config else 1
  
     # use geolocation here, backward compatable (works with all ways it used to run)
-    ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
-    ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
+    if mode =='paper':
+        ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
+        ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
+    elif mode == 'coordinates':
+        ssl_refinery_trans_cost = geo.distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
+        ssl_refinery_jit_trans_cost = geo.distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 
     # UE upperbound equipment processing rate 
     UE, UE_jit = dict(), dict()

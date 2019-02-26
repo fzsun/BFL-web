@@ -217,12 +217,13 @@ class s_bfl(object):
             summary['trans_amount'] = {
                 'base_fs': shipped_farm_ssl.sum().getValue(),
                 'base_sb': shipped_ssl_refinery.sum().getValue(),
-                'jit': jit_amount
+                # 'jit': jit_amount
             }
 
             # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
-            self.optimization_result = {'params': self.params, 'solution': solution, 'summary': summary}
+            # self.optimization_result = {'params': self.params,'solution': solution, 'summary': summary}
+            self.optimization_result = {'summary': summary}
 
 if __name__ == '__main__':
     if not logger.hasHandlers():
