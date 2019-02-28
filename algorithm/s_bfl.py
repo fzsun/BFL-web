@@ -24,7 +24,7 @@ class s_bfl(object):
         except KeyboardInterrupt:
             model.terminate()
     
-    def input(self, input_data, sysnum, t_lim = 10, jit=False, **kwargs):
+    def input(self, input_data, sysnum, t_lim = 30, jit=False, **kwargs):
         self.t_lim = t_lim
         self.jit = jit
         self.sysnum = sysnum
