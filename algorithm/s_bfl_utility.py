@@ -16,8 +16,8 @@ import argparse
 from matplotlib import pyplot as plt
 from algorithm.geo import Geo
 
-
-def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
+# switch to variable mode 
+def create_data(raw_data, sysnum, seed=None, out_file=None,
                 plot_coords=False):
     """
     Create data for the Sorghum-BFL model.
@@ -73,6 +73,7 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
+    mode = raw['mode']
 
     # ========== coordinates, harvest, demand data ==========
     radius = raw['field']['radius']
@@ -86,7 +87,7 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     elif mode == "coordinates":
         coord_farms = np.array(list(raw["Coord_f"].values()))
         coord_ssls = np.array(list(raw["Coord_s"].values()))
-        refinery_location = list(raw["refinery_location"].values())
+        refinery_location = raw["refinery_location"]
         assert len(coord_farms) == num_farms
         assert len(coord_ssls) == num_ssls
 

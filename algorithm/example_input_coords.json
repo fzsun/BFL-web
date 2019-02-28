@@ -198,7 +198,9 @@
 		]
     ],
     
-    "refinery_location": [37, -80],
+	"refinery_location": [37, -80],
+	
+	"mode": "coordinates",
     
 	"Coord_f": {
 		"0": [
