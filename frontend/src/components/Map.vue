@@ -28,10 +28,6 @@
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
     <p id="locations"></p>
-    </br>
-    <form id="submitLocations">
-        <a href="#" v-on:click="submitLocations">Send Locations</a>
-    </form>
   </body>
 </template>
 
@@ -39,12 +35,12 @@
 import axios from 'axios'
 
 export default {
-    name: 'Google Maps',
+    name: 'Map',
     data() {
         return {
             //0 = farm, 1 = ssl, 2 = refinery
             type: 0,
-			name: 'Farm',
+			      name: 'Farm',
             msg: 'BFL Map',
             refinery: null,
             refineryMarker: null,
@@ -58,11 +54,11 @@ export default {
     methods: {
         farm_or_ssl : function() {
             this.type = (this.type + 1) % 3;
-			
+
 			if (this.type == 2) this.name = "Refinery"
             else if (this.type == 1) this.name = "SSL";
             else this.name = "Farm";
-           	
+
 			document.getElementById("choice").innerHTML = "Current choice: " + this.name;
             document.getElementById("farmnameLatLon").placeholder = this.name;
             document.getElementById("farmnameAddress").placeholder = this.name;
@@ -237,13 +233,25 @@ export default {
             var filteredSSL = this.ssls.filter(function (el) {
                 return el != null;
             });
-            console.log("submitting locations");
-            console.log(filteredFarm);
-            console.log(filteredSSL);
-            console.log(this.refinery.name);
 
-//            axios
-//                .post('http://localhost:5000/geo/',
+            if (this.refinery == null) return "Refinery Missing";
+
+            var mapInfo = {};
+            mapInfo.refinery_location =
+              [this.refinery.latitude, this.refinery.longitude];
+            mapInfo.mode = "coordintates";
+            mapInfo.Coord_f = {};
+            mapInfo.Coord_s = {};
+            var k;
+            for (k = 0; k < filteredFarm.length; k++) {
+              mapInfo.Coord_f[k] =
+                [filteredFarm[k].latitude, filteredFarm[k].longitude];
+            }
+            for (k = 0; k < filteredSSL.length; k++) {
+              mapInfo.Coord_s[k] =
+                [filteredSSL[k].latitude, filteredSSL[k].longitude];
+            }
+            return mapInfo;
         }
     },
     mounted: function() {
