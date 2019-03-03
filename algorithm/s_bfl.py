@@ -24,13 +24,17 @@ class s_bfl(object):
         except KeyboardInterrupt:
             model.terminate()
     
-    def input(self, input_data, sysnum, t_lim = 30, jit=False, **kwargs):
+    # Note: t_lim must be set to a number equal to or larger than 60sec because the optimization_result will break otherwise. 
+    def input(self, input_data, sysnum, t_lim = 60, jit=False, **kwargs):
         self.t_lim = t_lim
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
-        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, self.ssl_refinery_jit_trans_cost, 
-        self.fixed_cost_ssls, self.demand, self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
+        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, 
+        self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, 
+        self.ssl_refinery_jit_trans_cost, self.fixed_cost_ssls, self.demand, 
+        self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, 
+        self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
 
     def solve(self):
         # T, F, S, K : Set of time periods, farms, potential SSL sites, and available types of SSLs, respectively
@@ -43,6 +47,16 @@ class s_bfl(object):
         harvested = np.array(self.harvested)
         M = harvested.sum(axis=0)
         farm_ssl_cost_per_period = (np.array(self.farm_ssl_trans_cost) + self.operating_cost).tolist()
+        print("LOOK HERE ++++++++++++++++++++")
+        b = np.array(self.ssl_refinery_jit_trans_cost)[None]
+        print(b.shape)
+        print(b)
+        print("NEXT ONE _____________________")
+        a = np.array(self.farm_ssl_trans_cost)
+        print(a.shape)
+        print(a)
+        print("NEXT ONE _____________________")
+        print(self.operating_cost_jit )
         jit_trans_costs = (np.array(self.ssl_refinery_jit_trans_cost)[None] + np.array(self.farm_ssl_trans_cost) + self.operating_cost_jit).tolist()
 
         logger.info("Parameters created. Begin building model.")
