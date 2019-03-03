@@ -170,8 +170,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     if mode == 'paper':
         farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
     elif mode == 'coordinates':
-        geo_coords = Geo()
-        farm_ssl_trans_cost = geo_coords.distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
+        farm_ssl_trans_cost = Geo().distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
     # Cost per Mg to send from ssl to refinery 
     ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
@@ -184,8 +183,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
     elif mode == 'coordinates':
         geo_center = Geo()
-        ssl_refinery_trans_cost = geo_center.distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
-        ssl_refinery_jit_trans_cost = geo_center.distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
+        geo_center_jit = Geo()
+        ssl_refinery_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
+        ssl_refinery_jit_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 
     # UE upperbound equipment processing rate 
     UE, UE_jit = dict(), dict()

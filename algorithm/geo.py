@@ -9,6 +9,7 @@ class Geo(object):
         for coordinate in coordinates:
             distance = geodesic(center, coordinate).kilometers
             self.distances = np.append(self.distances, distance)
+        print("HERERERER: ", len(coordinates))
         return self.distances
     def distance_points(self, coords_1, coords_2 ):
         distance_matrix = cdist(coords_1, coords_2, lambda u, v: geodesic(u,v).miles)
