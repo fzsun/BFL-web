@@ -1,6 +1,9 @@
 <template>
 <div class="section">
     <h1 class="title">Sorghum BFLS</h1>
+    <div class="map_div">
+        <Map ref="map"> </Map>
+    </div>
     <div id="s_bfl" class="container">
         <div class="is-size-4">
             A tool for decision makers to determine the most cost effective
@@ -17,9 +20,6 @@
             </form>
             <button v-on:click="optimize">Optimize</button>
         </div> <br/>
-        <div class="map_div">
-            <Map ref="map"> </Map>
-        </div>
     </div>
 </div>
 </template>
@@ -38,7 +38,6 @@ export default {
   data() {
     return {
       model: {
-        "input_format": "paper",
         "moisture": 0.7,
         "demand": 200000,
         "horizon": 26,
@@ -249,7 +248,7 @@ export default {
       } else {
         this.model.Coord_f = mapInfo.Coord_f;
         this.model.Coord_s = mapInfo.Coord_s;
-        this.model.input_fromat = mapInfo.mode;
+        this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
         console.log("JSON: ", this.model)
         axios

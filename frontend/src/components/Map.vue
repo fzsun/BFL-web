@@ -89,7 +89,7 @@ export default {
 				var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    title: name,
+                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
                     }
@@ -104,7 +104,7 @@ export default {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    title: name,
+                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
                     }
@@ -123,7 +123,7 @@ export default {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    title: name,
+                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                     }
@@ -239,7 +239,7 @@ export default {
             var mapInfo = {};
             mapInfo.refinery_location =
               [this.refinery.latitude, this.refinery.longitude];
-            mapInfo.mode = "coordintates";
+            mapInfo.mode = "coordinates";
             mapInfo.Coord_f = {};
             mapInfo.Coord_s = {};
             var k;
