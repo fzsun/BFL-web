@@ -1,3 +1,4 @@
 __pycache__/
 *.log
 ngrok.exe
+email_credentials.py

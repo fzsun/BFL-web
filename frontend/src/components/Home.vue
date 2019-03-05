@@ -33,6 +33,22 @@
         </div>
     </div>
 
+        <div class="column is-4">
+        <div class="card">
+        <div class="card-image">
+            <figure class="image is-3by2">
+            <img src="https://picsum.photos?random" alt="Placeholder image">
+            </figure>
+        </div>
+        <div class="card-content">
+            <p class="title">Maps Example</p>
+        </div>
+        <div class="card-content is-bottom">
+            <router-link class="button is-primary is-fullwidth" :to="{ name: 'Map'}">View</router-link>
+        </div>
+        </div>
+    </div>
+
     </div>
 </div>
 </template>

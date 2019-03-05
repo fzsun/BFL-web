@@ -15,6 +15,7 @@ from algorithm.s_bfl import s_bfl
 # from flask_mail import Mail
 # from flask_mail import Message
 from flask_cors import CORS
+from simulation.sim import Simulation
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -24,7 +25,7 @@ class CustomFlask(Flask):
     ))
 
 
-app = CustomFlask(__name__,template_folder='')  # This replaces your existing "app = Flask(__name__)"
+app = CustomFlask(__name__)  # This replaces your existing "app = Flask(__name__)"
 CORS(app)
 
 # c = credentials()
@@ -59,12 +60,10 @@ def Sbfl():
     # mail.send(msg)
     return response
 
-@app.errorhandler(404)
-@app.errorhandler(jinja2.exceptions.TemplateNotFound)
-def page_not_found(e):
-    return render_template('404.html'), 404
+@app.route('/simulation_temp/', methods=['POST'])
+def simulation():
+    input_data = request.get_json(force=True)
+    sim =
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only
-
-    
