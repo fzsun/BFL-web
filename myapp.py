@@ -14,13 +14,10 @@ from algorithm.s_bfl import s_bfl
 # from email_credentials import credentials
 # from flask_mail import Mail
 # from flask_mail import Message
-from flask_cors import CORS
-<<<<<<< HEAD
-from simulation.sim import Simulation
-=======
+from flask_cors import CORS, cross_origin
+# from simulation.sim import Simulation
 from algorithm.geo import Geo
 import json
->>>>>>> intial class
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -31,7 +28,7 @@ class CustomFlask(Flask):
 
 
 app = CustomFlask(__name__)  # This replaces your existing "app = Flask(__name__)"
-CORS(app)
+CORS(app, supports_credentials = True)
 
 # c = credentials()
 # c.setPassword()
@@ -49,6 +46,7 @@ CORS(app)
 # mail = Mail(app)
 
 @app.route('/s-bfls/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def Sbfl():
     input_data = request.get_json(force=True)
     my_s_bfl = s_bfl()
@@ -64,16 +62,6 @@ def Sbfl():
     # msg.body = "Thanks for using SBFLS! Attached are our results."
     # mail.send(msg)
     return response
-
-@app.route('/geo/', methods=['POST'])
-def use_geo():
-    input_data = request.get_json(force=True)
-    print(type(input_data))
-    print(input_data['center'], " xxx ", len(input_data['coords']))
-    my_geo = Geo()
-    distances = my_geo.distance_center(input_data['center'], input_data['coords'])
-    # distance_matrix = my_geo.distance_points(input_data['coords_1'], input_data['coords_2'])
-    return distances
 
 @app.errorhandler(404)
 @app.errorhandler(jinja2.exceptions.TemplateNotFound)

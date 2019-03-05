@@ -69,11 +69,12 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         raw = raw_data
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
-
+    
+    print("Raw: ", raw)
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
-    mode = raw['mode']
+    mode = raw['input_format']
 
     # ========== coordinates, harvest, demand data ==========
     radius = raw['field']['radius']
@@ -182,8 +183,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
         ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
     elif mode == 'coordinates':
-        geo_center = Geo()
-        geo_center_jit = Geo()
         ssl_refinery_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
         ssl_refinery_jit_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 

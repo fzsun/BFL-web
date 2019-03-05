@@ -39,10 +39,10 @@ class Simulation(object):
     log = open('log.txt','w+')'''
 
 # open input and output files to be used
-with open("example_output1_jit.json") as output_file:
-    output_data = json.load(output_file)
-with open("example_input.json") as algo_input:
-    algo_input_data = json.load(algo_input)
+# with open("example_output1_jit.json") as output_file:
+#     output_data = json.load(output_file)
+# with open("example_input.json") as algo_input:
+#     algo_input_data = json.load(algo_input)
 
 log = open('log.txt','w+')
 num_trials = int(input('How many sample trials would you like to simulate? '))

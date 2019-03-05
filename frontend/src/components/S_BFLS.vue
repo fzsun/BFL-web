@@ -16,7 +16,7 @@
                 </vue-form-generator>
             </form>
             <button v-on:click="optimize">Optimize</button>
-        </div>
+        </div> <br/>
         <div class="map_div">
             <Map ref="map"> </Map>
         </div>
@@ -102,11 +102,6 @@ export default {
       response: [],
       schema: {
         fields: [{
-          type: "input",
-          inputType: "text",
-          label: "input_format",
-          model: "input_format",
-        },  {
           type: "input",
           inputType: "text",
           label: "moisture",
@@ -254,8 +249,9 @@ export default {
       } else {
         this.model.Coord_f = mapInfo.Coord_f;
         this.model.Coord_s = mapInfo.Coord_s;
-        this.model.mode = mapInfo.mode;
+        this.model.input_fromat = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
+        console.log("JSON: ", this.model)
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
