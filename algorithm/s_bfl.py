@@ -24,13 +24,17 @@ class s_bfl(object):
         except KeyboardInterrupt:
             model.terminate()
     
-    def input(self, input_data, sysnum, t_lim = 30, jit=False, **kwargs):
+    # Note: t_lim must be set to a number equal to or larger than 60sec because the optimization_result will break otherwise. 
+    def input(self, input_data, sysnum, t_lim = 60, jit=False, **kwargs):
         self.t_lim = t_lim
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
-        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, self.ssl_refinery_jit_trans_cost, 
-        self.fixed_cost_ssls, self.demand, self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
+        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, 
+        self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, 
+        self.ssl_refinery_jit_trans_cost, self.fixed_cost_ssls, self.demand, 
+        self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, 
+        self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
 
     def solve(self):
         # T, F, S, K : Set of time periods, farms, potential SSL sites, and available types of SSLs, respectively
@@ -193,7 +197,6 @@ class s_bfl(object):
                 'available_types_ssl': len(K),
                 'num_weeks_horizon': len(T),
                 'num_farms': len(F),
-                # I'm not super sure about the ssl one
                 'num_ssls_considered': len(S),
                 'num_ssls_used': w.sum().getValue(),
                 'SSL_type_cnt': K_cnt,
@@ -217,12 +220,13 @@ class s_bfl(object):
             summary['trans_amount'] = {
                 'base_fs': shipped_farm_ssl.sum().getValue(),
                 'base_sb': shipped_ssl_refinery.sum().getValue(),
+                # this value was reading to NaN and causing a json issue
                 'jit': jit_amount
             }
 
             # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
-            self.optimization_result = {'params': self.params, 'solution': solution, 'summary': summary}
+            self.optimization_result = {'params': self.params,'solution': solution, 'summary': summary}
 
 if __name__ == '__main__':
     if not logger.hasHandlers():
