@@ -47,16 +47,6 @@ class s_bfl(object):
         harvested = np.array(self.harvested)
         M = harvested.sum(axis=0)
         farm_ssl_cost_per_period = (np.array(self.farm_ssl_trans_cost) + self.operating_cost).tolist()
-        print("LOOK HERE ++++++++++++++++++++")
-        b = np.array(self.ssl_refinery_jit_trans_cost)[None]
-        print(b.shape)
-        print(b)
-        print("NEXT ONE _____________________")
-        a = np.array(self.farm_ssl_trans_cost)
-        print(a.shape)
-        print(a)
-        print("NEXT ONE _____________________")
-        print(self.operating_cost_jit )
         jit_trans_costs = (np.array(self.ssl_refinery_jit_trans_cost)[None] + np.array(self.farm_ssl_trans_cost) + self.operating_cost_jit).tolist()
 
         logger.info("Parameters created. Begin building model.")
@@ -207,7 +197,6 @@ class s_bfl(object):
                 'available_types_ssl': len(K),
                 'num_weeks_horizon': len(T),
                 'num_farms': len(F),
-                # I'm not super sure about the ssl one
                 'num_ssls_considered': len(S),
                 'num_ssls_used': w.sum().getValue(),
                 'SSL_type_cnt': K_cnt,
@@ -231,13 +220,13 @@ class s_bfl(object):
             summary['trans_amount'] = {
                 'base_fs': shipped_farm_ssl.sum().getValue(),
                 'base_sb': shipped_ssl_refinery.sum().getValue(),
-                # 'jit': jit_amount
+                # this value was reading to NaN and causing a json issue
+                'jit': jit_amount
             }
 
             # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
-            # self.optimization_result = {'params': self.params,'solution': solution, 'summary': summary}
-            self.optimization_result = {'solution': solution, 'summary': summary}
+            self.optimization_result = {'params': self.params,'solution': solution, 'summary': summary}
 
 if __name__ == '__main__':
     if not logger.hasHandlers():
