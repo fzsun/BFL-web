@@ -14,8 +14,10 @@ from algorithm.s_bfl import s_bfl
 # from email_credentials import credentials
 # from flask_mail import Mail
 # from flask_mail import Message
-from flask_cors import CORS
-from simulation.sim import Simulation
+from flask_cors import CORS, cross_origin
+# from simulation.sim import Simulation
+from algorithm.geo import Geo
+import json
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -26,7 +28,7 @@ class CustomFlask(Flask):
 
 
 app = CustomFlask(__name__)  # This replaces your existing "app = Flask(__name__)"
-CORS(app)
+CORS(app, supports_credentials = True)
 
 # c = credentials()
 # c.setPassword()
@@ -44,6 +46,7 @@ CORS(app)
 # mail = Mail(app)
 
 @app.route('/s-bfls/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def Sbfl():
     input_data = request.get_json(force=True)
     my_s_bfl = s_bfl()
@@ -60,10 +63,10 @@ def Sbfl():
     # mail.send(msg)
     return response
 
-@app.route('/simulation_temp/', methods=['POST'])
-def simulation():
-    input_data = request.get_json(force=True)
-    sim =
+@app.errorhandler(404)
+@app.errorhandler(jinja2.exceptions.TemplateNotFound)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000) # Note: development server only

@@ -1,6 +1,9 @@
 <template>
 <div class="section">
     <h1 class="title">Sorghum BFLS</h1>
+    <div class="map_div">
+        <Map ref="map"> </Map>
+    </div>
     <div id="s_bfl" class="container">
         <div class="is-size-4">
             A tool for decision makers to determine the most cost effective
@@ -16,11 +19,9 @@
                 </vue-form-generator>
             </form>
             <button v-on:click="optimize">Optimize</button>
-        </div>
-        <div class="map_div">
-            <Map ref="map"> </Map>
-        </div>
+        </div> <br/>
     </div>
+    <div> {{response}} </div>
 </div>
 </template>
 
@@ -38,7 +39,6 @@ export default {
   data() {
     return {
       model: {
-        "input_format": "paper",
         "moisture": 0.7,
         "demand": 200000,
         "horizon": 26,
@@ -102,11 +102,6 @@ export default {
       response: [],
       schema: {
         fields: [{
-          type: "input",
-          inputType: "text",
-          label: "input_format",
-          model: "input_format",
-        },  {
           type: "input",
           inputType: "text",
           label: "moisture",
@@ -248,14 +243,15 @@ export default {
   methods: {
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
-
+      
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
       } else {
         this.model.Coord_f = mapInfo.Coord_f;
         this.model.Coord_s = mapInfo.Coord_s;
-        this.model.mode = mapInfo.mode;
+        this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
+        console.log("JSON: ", this.model)
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {

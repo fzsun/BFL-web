@@ -14,9 +14,10 @@ from math import pi
 import sys
 import argparse
 from matplotlib import pyplot as plt
+from algorithm.geo import Geo
 
-
-def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
+# switch to variable mode 
+def create_data(raw_data, sysnum, seed=None, out_file=None,
                 plot_coords=False):
     """
     Create data for the Sorghum-BFL model.
@@ -68,10 +69,11 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
         raw = raw_data
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
-
+    
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
+    mode = raw['input_format']
 
     # ========== coordinates, harvest, demand data ==========
     radius = raw['field']['radius']
@@ -82,9 +84,12 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
         sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
         coord_farms = sits_in[:num_farms]
         coord_ssls = sits_in[-num_ssls:]
-    elif mode == "coordinates":
+    elif mode == "coordinates": 
         coord_farms = np.array(list(raw["Coord_f"].values()))
         coord_ssls = np.array(list(raw["Coord_s"].values()))
+        refinery_location = raw["refinery_location"]
+        num_farms = len(coord_farms)
+        num_ssls = len(coord_ssls)
         assert len(coord_farms) == num_farms
         assert len(coord_ssls) == num_ssls
 
@@ -162,7 +167,10 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     # cost per Mg to transport from farm f to ssl s
     farm_ssl_trans_cost_rate = raw['cost']['base_infield'] / dry_part
     farm_ssl_trans_cost_rate *= tran_coef['whole_stalk'] if 'whole_stalk' in config else 1
-    farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
+    if mode == 'paper':
+        farm_ssl_trans_cost = cdist(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
+    elif mode == 'coordinates':
+        farm_ssl_trans_cost = Geo().distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
     # Cost per Mg to send from ssl to refinery 
     ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
@@ -170,8 +178,12 @@ def create_data(raw_data, sysnum, mode="paper", seed=None, out_file=None,
     ssl_refinery_trans_cost_rate *= tran_coef['in_module'] if 'module_former' in config else 1
  
     # use geolocation here, backward compatable (works with all ways it used to run)
-    ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
-    ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
+    if mode =='paper':
+        ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
+        ssl_refinery_jit_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_jit_rate
+    elif mode == 'coordinates':
+        ssl_refinery_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
+        ssl_refinery_jit_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 
     # UE upperbound equipment processing rate 
     UE, UE_jit = dict(), dict()

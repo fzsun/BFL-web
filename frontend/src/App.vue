@@ -1,5 +1,5 @@
 <template>
-<div style="padding-top: 60px">
+<div>
   <!-- Navigation -->
   <nav class="navbar is-fixed-top is-primary">
     <div class="container">
@@ -48,13 +48,14 @@ export default {
 </script>
 
 <style>
-#app {
+
+html {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  color: #2c3e50; 
+  margin-top: 50px;
 }
 
 .columns {
