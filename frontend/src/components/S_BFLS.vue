@@ -21,6 +21,7 @@
             <button v-on:click="optimize">Optimize</button>
         </div> <br/>
     </div>
+    <div> {{response}} </div>
 </div>
 </template>
 

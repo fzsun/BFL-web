@@ -237,7 +237,7 @@ class s_bfl(object):
             # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
             # self.optimization_result = {'params': self.params,'solution': solution, 'summary': summary}
-            self.optimization_result = {'summary': summary}
+            self.optimization_result = {'solution': solution, 'summary': summary}
 
 if __name__ == '__main__':
     if not logger.hasHandlers():

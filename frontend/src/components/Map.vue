@@ -2,11 +2,16 @@
   <body>
     <div id="map"></div>
     <p id="choice">Current choice: Farm</p>
+    <!-- <select v-model = "type">
+        <option class="button" value="Refinery">Refinery</option>
+        <option class="button" value="Farm">Farm</option>
+        <option class="button" value="SSL">SSL</option>
+    </select> -->
     <form id="changeType">
         <a href="#" v-on:click="farm_or_ssl">CHANGE</a>
     </form>
-    </br>
-    </br>
+    <br>
+    <br>
     <form id="refineryFormLatLong">
         <label>Location</label>
         <input id="farmnameLatLon" type="text" placeholder="Farm">
@@ -14,16 +19,16 @@
         <input id="lonInput" type="number" placeholder="Lng">
         <a href="#" v-on:click="latlon">SUBMIT</a>
     </form>
-    </br>
-    </br>
+    <br>
+    <br>
     <form id="refineryFormAddress">
         <label>Location</label>
         <input id="farmnameAddress" type="text" placeholder="Farm">
         <input id="address" type="text" placeholder="Address">
         <a href="#" v-on:click="address">SUBMIT</a>
     </form>
-    </br>
-    </br>
+    <br>
+    <br>
     <form id="getLocations">
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
@@ -40,7 +45,7 @@ export default {
         return {
             //0 = farm, 1 = ssl, 2 = refinery
             type: 0,
-			      name: 'Farm',
+		    name: 'Farm',
             msg: 'BFL Map',
             refinery: null,
             refineryMarker: null,
@@ -49,7 +54,7 @@ export default {
             farms: [],
             ssls: [],
             farmMarkers: [],
-            sslMarkers: []
+            sslMarkers: [],
     }},
     methods: {
         farm_or_ssl : function() {
@@ -178,7 +183,8 @@ export default {
             var result = axios
                 .get(url)
                 .then(response => {
-                     return response.data;
+                    this.summary = response.data;
+                    return response.data;
                 })
                 .catch(error => {
                     console.log(error);
@@ -263,7 +269,7 @@ export default {
 
 <style>
 #map {
-    height: 500px;
+    height: 600px;
     width: 75%;
 }
 </style>
