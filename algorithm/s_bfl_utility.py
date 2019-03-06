@@ -70,7 +70,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
     
-    print("Raw: ", raw)
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
@@ -81,7 +80,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     np.random.seed(seed=seed)
     if mode == "paper":
         # generates random ssl locations
-        print("WRONG PLACE")
         sites = np.random.uniform(-radius, radius, size=(2 * (num_farms + num_ssls), 2))
         sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
         coord_farms = sits_in[:num_farms]
@@ -89,7 +87,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif mode == "coordinates": 
         coord_farms = np.array(list(raw["Coord_f"].values()))
         coord_ssls = np.array(list(raw["Coord_s"].values()))
-        print("coord_ssls: ", coord_ssls)
         refinery_location = raw["refinery_location"]
         num_farms = len(coord_farms)
         num_ssls = len(coord_ssls)
