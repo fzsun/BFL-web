@@ -1,34 +1,66 @@
 <template>
-  <body>
-    <div id="map"></div>
-    <p id="choice">Current choice: Farm</p>
-    <!-- <select v-model = "type">
-        <option class="button" value="Refinery">Refinery</option>
-        <option class="button" value="Farm">Farm</option>
-        <option class="button" value="SSL">SSL</option>
-    </select> -->
-    <form id="changeType">
-        <a href="#" v-on:click="farm_or_ssl">CHANGE</a>
-    </form>
-    <br>
-    <br>
-    <form id="refineryFormLatLong">
-        <label>Location</label>
-        <input id="farmnameLatLon" type="text" placeholder="Farm">
-        <input id="latInput" type="number" placeholder="Lat">
-        <input id="lonInput" type="number" placeholder="Lng">
-        <a href="#" v-on:click="latlon">SUBMIT</a>
-    </form>
-    <br>
-    <br>
-    <form id="refineryFormAddress">
-        <label>Location</label>
-        <input id="farmnameAddress" type="text" placeholder="Farm">
-        <input id="address" type="text" placeholder="Address">
-        <a href="#" v-on:click="address">SUBMIT</a>
-    </form>
-    <br>
-    <br>
+  <body class="wrapper">
+    <div class="mapDescription">
+        <div class="is-size-4 floatLeft">Create Network</div>
+        <div class="floatLeft is-size-5">Click map to place <b>{{name}}</b></div>
+        <div class="control is-size-5">
+            <label class="container">Refinery
+                <input
+                    v-model="name" 
+                    type="radio" 
+                    name="radio" 
+                    value="Refinery"
+                >
+                <span class="checkmark"></span>
+            </label>
+            <label class="container">Farm
+                <input 
+                    v-model="name" 
+                    type="radio" 
+                    name="radio" 
+                    value="Farm"
+                >
+                <span class="checkmark"></span>
+            </label>
+            <label class="container">SSL
+                <input 
+                    v-model="name" 
+                    type="radio" 
+                    name="radio" 
+                    value="SSL"
+                >
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        <!-- <form id="refineryFormLatLong">
+            <label>Location</label>
+            <input id="farmnameLatLon" type="text" placeholder="Farm">
+            <input id="latInput" type="number" placeholder="Lat">
+            <input id="lonInput" type="number" placeholder="Lng">
+            <a href="#" v-on:click="latlon">SUBMIT</a>
+        </form> -->
+        <form id="refineryFormAddress" class="is-size-5 paddingRight">
+            <br>
+            <div class="floatLeft is-size-5">Or enter address</div>
+            <input 
+                class="input"
+                v-model="addressName" 
+                type="text" 
+                placeholder="Location Name"
+            >
+            <input 
+                class="input"
+                v-model="address" 
+                type="text" 
+                placeholder="Address"
+            >
+            <span class="floatRight">
+                <button v-if="this.name != refinery" class="button is-info">Add</button>
+                <button class="button is-primary" v-on:click="submitAddress">Submit</button>
+            </span>
+        </form>
+    </div>
+    <div id="map" class="map"></div>
     <form id="getLocations">
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
@@ -40,12 +72,9 @@
 import axios from 'axios'
 
 export default {
-    name: 'Map',
     data() {
         return {
-            //0 = farm, 1 = ssl, 2 = refinery
-            type: 0,
-		    name: 'Farm',
+		    name: 'Refinery',
             msg: 'BFL Map',
             refinery: null,
             refineryMarker: null,
@@ -55,20 +84,10 @@ export default {
             ssls: [],
             farmMarkers: [],
             sslMarkers: [],
+            address: '',
+            addressName: '',
     }},
     methods: {
-        farm_or_ssl : function() {
-            this.type = (this.type + 1) % 3;
-
-			if (this.type == 2) this.name = "Refinery"
-            else if (this.type == 1) this.name = "SSL";
-            else this.name = "Farm";
-
-			document.getElementById("choice").innerHTML = "Current choice: " + this.name;
-            document.getElementById("farmnameLatLon").placeholder = this.name;
-            document.getElementById("farmnameAddress").placeholder = this.name;
-        },
-
         //Initial retrieval of map
         getMap(){
             this.map = new google.maps.Map(document.getElementById('map'), {
@@ -87,7 +106,7 @@ export default {
         },
         placeMarker(location, locationname) {
             var ref = this;
-			if (this.type == 2) {
+			if (this.name == 'Refinery') {
 				if (this.refinery != null) {
 					this.refineryMarker.setMap(null);
 				}
@@ -105,7 +124,7 @@ export default {
                                  latitude: location.lat(),
                                  longitude: location.lng()};
 				this.refineryMarker = marker;
-            } else if (this.type == 1) {
+            } else if (this.name == "SSL") {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
@@ -145,6 +164,7 @@ export default {
                 this.farmsCounter = this.farmsCounter + 1;
             }
         },
+        
         delMarker(id, type) {
 			if (type == "refinery") {
 				var marker = this.refineryMarker;
@@ -164,18 +184,21 @@ export default {
             }
         },
 
-
         //Submit Forms for farm locations (by lat,lng and by address)
-        latlon : function(){
+        latlon(){
             var lat = document.getElementById("latInput").value;
             var lon = document.getElementById("lonInput").value;
             var farmname = document.getElementById("farmnameLatLon").value;
             var myLatlng = new google.maps.LatLng(lat, lon);
             this.placeMarker(myLatlng, farmname);
         },
-        address : function() {
-            var address = document.getElementById("address").value;
-            var farmname = document.getElementById("farmnameAddress").value;
+
+        submitAddress() {
+            // var address = document.getElementById("address").value;
+            // var farmname = document.getElementById("farmnameAddress").value;
+            var address = this.address;
+            var addressName = this.addressName;
+            console.log("address: ", this.address)
             var url = 'https://api.geocod.io/v1.3/geocode?' +
                       'q=' + address +
                       '&api_key=' + '57cf5c27cf057777f7fd555f33f3b56d77f5da5';
@@ -191,12 +214,11 @@ export default {
                 });
             var ref = this;
             result.then(data => {
-
                 var address_lat = data.results[0].location.lat;
                 var address_lng = data.results[0].location.lng;
                 ref.placeMarker(
                     new google.maps.LatLng(address_lat, address_lng),
-                    farmname);
+                    addressName);
             });
         },
 
@@ -269,7 +291,34 @@ export default {
 
 <style>
 #map {
-    height: 600px;
-    width: 75%;
+    height: 400px;
+    width: 100%;
+}
+
+.map {
+    grid-area: map;
+}
+
+.mapDescription {
+    grid-area: mapDescription;
+}
+
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: auto;
+    grid-template-areas: "mapDescription map"
+}
+
+.floatLeft {
+    float: left;
+}
+
+.floatRight {
+    float: right;
+}
+
+.paddingRight {
+    padding-right: 1rem;
 }
 </style>

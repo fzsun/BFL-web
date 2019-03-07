@@ -1,26 +1,15 @@
 <template>
-<div class="section">
-    <h1 class="title">Sorghum BFLS</h1>
-    <div class="map_div">
-        <Map ref="map"> </Map>
-    </div>
-    <div id="s_bfl" class="container">
-        <div class="is-size-4">
-            A tool for decision makers to determine the most cost effective
-            way to produce and transport sorghum for use in biofuels. The tool itself
-            is an optimization algorithm and simulization that work in tandem to find
-            and test an optimial solution. To learn more about the algorithm
-            <a>see here.</a>
-        </div>
-        <br>
-        <div class="panel-body">
-            <form>
-                <vue-form-generator :schema="schema" :model="model" :options="formOptions">
-                </vue-form-generator>
-            </form>
-            <button v-on:click="optimize">Optimize</button>
-        </div> <br/>
-    </div>
+<div class="section wrap">
+    <h1 class="title">Sorghum - Logistics Support</h1>
+    <Map class="map"></Map>
+    <div class="paramDescription title is-4">Optimization Parameters</div>
+    <div class="params">
+        <form>
+            <vue-form-generator :schema="schema" :model="model" :options="formOptions">
+            </vue-form-generator>
+        </form>
+        <button v-on:click="optimize">Optimize</button>
+    </div> 
     <div> {{response}} </div>
 </div>
 </template>
@@ -266,7 +255,32 @@ export default {
 </script>
 
 <style>
-fieldset {
+/* fieldset {
   padding: 1rem;
+} */
+
+.title {
+  grid-area: title;
+  text-align: left;
+}
+
+.map {
+  grid-area: map;
+}
+
+.mapDescription {
+  grid-area: mapDescription;
+}
+
+.paramDescription {
+  grid-area: paramDescription; 
+}
+
+.wrap {
+    display: grid;
+    margin: 0;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: auto;
+    grid-template-areas: "title title" "map map" "paramDescription params";
 }
 </style>
