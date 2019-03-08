@@ -189,6 +189,17 @@ class s_bfl(object):
             # maybe a function for getting all the variables that are active and convert to lat, lng?
             # getActiveRoutes()
             # Binary encoding of open ssls
+
+            w_ = np.array(m.getAttr("X", w.values())).reshape(len(S), -1)
+            open_ssls_bin_coded = w_.sum(axis=1)
+            open_ssls = open_ssls_bin_coded.nonzero()[0].tolist()
+
+            y_ = np.array(m.getAttr("X", y.values())).reshape(len(F), -1)
+            allocation_bin_coded = y_
+            allocation_from_farm = allocation_bin_coded.nonzero()[0].tolist()
+            allocation_to_ssl = allocation_bin_coded.nonzero()[1].tolist()
+
+
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]
             summary = dict()
             summary['others'] = {
@@ -224,6 +235,9 @@ class s_bfl(object):
                 # this value was reading to NaN and causing a json issue
                 'jit': jit_amount
             }
+            summary["open_ssls"] = open_ssls
+            summary["allocation_from_farm"] = allocation_from_farm
+            summary["allocation_to_ssl"] = allocation_to_ssl
 
             # logger.info(args_str + yaml.dump(summary, default_flow_style=False))
 
