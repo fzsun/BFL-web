@@ -23,17 +23,17 @@ class s_bfl(object):
             pass
         except KeyboardInterrupt:
             model.terminate()
-    
-    # Note: t_lim must be set to a number equal to or larger than 60sec because the optimization_result will break otherwise. 
+
+    # Note: t_lim must be set to a number equal to or larger than 60sec because the optimization_result will break otherwise.
     def input(self, input_data, sysnum, t_lim = 60, jit=False, **kwargs):
         self.t_lim = t_lim
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
-        (*_, self.harvested, self.operating_cost, self.operating_cost_jit, 
-        self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost, 
-        self.ssl_refinery_jit_trans_cost, self.fixed_cost_ssls, self.demand, 
-        self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory, 
+        (*_, self.harvested, self.operating_cost, self.operating_cost_jit,
+        self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost,
+        self.ssl_refinery_jit_trans_cost, self.fixed_cost_ssls, self.demand,
+        self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory,
         self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
 
     def solve(self):
@@ -53,22 +53,22 @@ class s_bfl(object):
 
         m = Model('ms1m_base')
 
-        # ++++++ Linear Programming Notation ++++++ 
+        # ++++++ Linear Programming Notation ++++++
         # ====== Create vars and objectives ======
 
         # w[s][k] = 1 => is an ssl of type k is built at site s; otherwise 0
         w = m.addVars(S, K, obj=self.fixed_cost_ssls, vtype='B', name='w')
-        
+
         # y[f][s] = 1 => if farm f supplies ssl s; 0 otherwise
         y = m.addVars(F, S, vtype='B', name='y')
-        
+
         shipped_farm_ssl = m.addVars(T, F, S, obj=farm_ssl_cost_per_period * len(T), name='shipped_farm_ssl')
         shipped_ssl_refinery = m.addVars(T, S, obj=self.ssl_refinery_trans_cost * len(T), name='shipped_ssl_refinery')
-        
+
         # Note: inventory levels taken at the end of period t
         inventory_level_ssl = m.addVars([0] + T, S, obj=self.ssl_holding_cost, name='inventory_level_ssl')
         inventory_level_farm = m.addVars([0] + T, F, obj=self.farm_holding_cost, name='inventory_level_farm')
-        
+
         if self.jit:
             z_jit = m.addVars(T, F, S, obj=jit_trans_costs * len(T), name='z_jit')
         penalty = m.addVars(T, obj=self.c_pen, name='penalty')
@@ -162,7 +162,7 @@ class s_bfl(object):
             # Total cost
             cost_total = m.objVal
             gap = (cost_total - cost_total_lb) / cost_total
-            # what does cost locations mean? 
+            # what does cost locations mean?
             cost_loc = w.prod({(s, k): self.fixed_cost_ssls[s][k] for s in S for k in K}).getValue()
 
             cost_op = shipped_farm_ssl.sum().getValue() * self.operating_cost
@@ -183,9 +183,10 @@ class s_bfl(object):
             cost_inv_F = inventory_level_farm.sum().getValue() * self.farm_holding_cost
 
             K_cnt = dict(Counter(k for s in S for k in K if w[s, k].x > 0.5))
-            jit_amount = z_jit.sum().getValue() if self.jit else np.nan
+            # jit_amount = z_jit.sum().getValue() if self.jit else np.nan
+            jit_amount = z_jit.sum().getValue() if self.jit else None
 
-            # maybe a function for getting all the variables that are active and convert to lat, lng? 
+            # maybe a function for getting all the variables that are active and convert to lat, lng?
             # getActiveRoutes()
             # Binary encoding of open ssls
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]

@@ -16,7 +16,7 @@ import argparse
 from matplotlib import pyplot as plt
 from algorithm.geo import Geo
 
-# switch to variable mode 
+# switch to variable mode
 def create_data(raw_data, sysnum, seed=None, out_file=None,
                 plot_coords=False):
     """
@@ -69,7 +69,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         raw = raw_data
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
-    
+
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
@@ -84,9 +84,12 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
         coord_farms = sits_in[:num_farms]
         coord_ssls = sits_in[-num_ssls:]
-    elif mode == "coordinates": 
-        coord_farms = np.array(list(raw["Coord_f"].values()))
-        coord_ssls = np.array(list(raw["Coord_s"].values()))
+    elif mode == "coordinates":
+        coord_farms = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_f"].items()])
+        coord_ssls = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_s"].items()])
+
+        # coord_farms = np.array(list(raw["Coord_f"].values()))
+        # coord_ssls = np.array(list(raw["Coord_s"].values()))
         refinery_location = raw["refinery_location"]
         num_farms = len(coord_farms)
         num_ssls = len(coord_ssls)
@@ -115,14 +118,14 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     proportion_devoted = raw['field']['proportion_devoted']
     # 1 sqkm = 100 ha
     total_supply = 100 * pi * radius**2 * proportion_devoted * dry_yield
-    # what is the a_weight? Is it just a way of configuring the matrix? 
+    # what is the a_weight? Is it just a way of configuring the matrix?
     a_weight = np.zeros(num_weeks_horizon + 1, dtype=int)
     a_weight[1:len(harvest_progress) + 1] = harvest_progress
     weekly_supply = a_weight / a_weight.sum() * total_supply
     field_weight = np.random.uniform(1, 10, size=num_farms)
     field_weight = field_weight / field_weight.sum()
 
-    #if a is the amount harvested in farm f at time t why is it a single number here? 
+    #if a is the amount harvested in farm f at time t why is it a single number here?
     harvested = weekly_supply[:, None] * field_weight[None]
     harvested = harvested.round(0).astype(int)
 
@@ -153,7 +156,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     else:
         ssl_holding_cost = raw['price'] / raw['degrade']['chopped']
 
-    # c_op = operating cost? 
+    # c_op = operating cost?
     operating_cost = 0
     for e in config[1:]:
         if e == 'bunker':
@@ -172,11 +175,11 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif mode == 'coordinates':
         farm_ssl_trans_cost = Geo().distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
-    # Cost per Mg to send from ssl to refinery 
+    # Cost per Mg to send from ssl to refinery
     ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
     ssl_refinery_trans_cost_rate *= tran_coef['compressed'] if 'press' in config else 1
     ssl_refinery_trans_cost_rate *= tran_coef['in_module'] if 'module_former' in config else 1
- 
+
     # use geolocation here, backward compatable (works with all ways it used to run)
     if mode =='paper':
         ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
@@ -185,7 +188,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         ssl_refinery_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
         ssl_refinery_jit_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 
-    # UE upperbound equipment processing rate 
+    # UE upperbound equipment processing rate
     UE, UE_jit = dict(), dict()
     for v in equip_arr:
         caps_jit = [
@@ -201,7 +204,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         UE[v] = int(min(caps_other) * dry_part)
         UE_jit[v] = int(min(caps_jit) * dry_part)
 
-    # what is own_cost? owner cost? owner of what? 
+    # what is own_cost? owner cost? owner of what?
     own_cost = {'bunker': raw['cost']['bunker_annual_own'] / 52 * num_weeks_horizon}
     for k, v in equipments.items():
         depreciation = (v[0] - v[2]) / v[1]
@@ -231,7 +234,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         'harvested': harvested.tolist(),
         'operating_cost': operating_cost,
         'operating_cost_jit': operating_cost_jit,
-        # what is this the "price" of? 
+        # what is this the "price" of?
         'c_pen': raw['price'] * 3,
         'farm_ssl_trans_cost': np.round(farm_ssl_trans_cost, 2).tolist(),
         'ssl_refinery_trans_cost': np.round(ssl_refinery_trans_cost, 2).tolist(),
