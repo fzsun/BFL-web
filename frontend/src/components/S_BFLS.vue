@@ -231,6 +231,7 @@ export default {
   },
   methods: {
     optimize(event) {
+      console.log("hello")
       var mapInfo = this.$refs.map.submitLocations();
 
       if (mapInfo == "Refinery Missing") {
