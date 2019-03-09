@@ -64,6 +64,7 @@
     <form id="getLocations">
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
+    <button v-on:click="submitLocations" class="button">Submit Locations</button>
     <p id="locations"></p>
   </body>
 </template>
@@ -87,12 +88,13 @@ export default {
             address: '',
             addressName: '',
     }},
+    props: ['mapInfo'],
     methods: {
         //Initial retrieval of map
         getMap(){
             this.map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.22904237824045, lng: -80.41982042804534},
-            zoom: 16
+            zoom: 4
             })
         },
 
@@ -104,6 +106,7 @@ export default {
                 ref.placeMarker(event.latLng, typeName);
             });
         },
+
         placeMarker(location, locationname) {
             var ref = this;
 			if (this.name == 'Refinery') {
@@ -261,10 +264,9 @@ export default {
             var filteredSSL = this.ssls.filter(function (el) {
                 return el != null;
             });
-
+            var mapInfo = {}
             if (this.refinery == null) return "Refinery Missing";
 
-            var mapInfo = {};
             mapInfo.refinery_location =
               [this.refinery.latitude, this.refinery.longitude];
             mapInfo.mode = "coordinates";
@@ -272,13 +274,19 @@ export default {
             mapInfo.Coord_s = {};
             var k;
             for (k = 0; k < filteredFarm.length; k++) {
-              mapInfo.Coord_f[k] =
-                [filteredFarm[k].latitude, filteredFarm[k].longitude];
+              mapInfo.Coord_f[k] = {
+                  "lat": filteredFarm[k].latitude,
+                  "lng": filteredFarm[k].longitude
+              }
             }
             for (k = 0; k < filteredSSL.length; k++) {
-              mapInfo.Coord_s[k] =
-                [filteredSSL[k].latitude, filteredSSL[k].longitude];
+              mapInfo.Coord_s[k] = {
+                  "lat": filteredSSL[k].latitude,
+                  "lng": filteredSSL[k].longitude
+              }
             }
+            console.log("child", mapInfo)
+            this.$emit('Emit stuff', mapInfo)
             return mapInfo;
         }
     },

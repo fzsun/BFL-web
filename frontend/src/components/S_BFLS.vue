@@ -1,7 +1,9 @@
 <template>
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
-    <Map class="map"></Map>
+    <!-- <div class="map_div"> -->
+      <Map class="map" v-model="mapInfo" ref="map"></Map>{{mapInfo}}
+    <!-- </div> -->
     <div class="paramDescription title is-4">Optimization Parameters</div>
     <div class="params">
         <form>
@@ -89,6 +91,7 @@ export default {
           ]
       },
       response: [],
+      mapInfo: {},
       schema: {
         fields: [{
           type: "input",
@@ -231,8 +234,8 @@ export default {
   },
   methods: {
     optimize(event) {
-      console.log("hello")
       var mapInfo = this.$refs.map.submitLocations();
+      console.log("map info: ", mapInfo)
 
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
