@@ -30,8 +30,8 @@ class s_bfl(object):
         self.jit = jit
         self.sysnum = sysnum
         self.params = create_data(input_data, self.sysnum, **kwargs)
-        (*_, self.harvested, self.operating_cost, self.operating_cost_jit,
-        self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost,
+        (*_, self.harvested, self.operating_cost, 
+        self.operating_cost_jit,self.c_pen, self.farm_ssl_trans_cost, self.ssl_refinery_trans_cost,
         self.ssl_refinery_jit_trans_cost, self.fixed_cost_ssls, self.demand,
         self.farm_holding_cost, self.ssl_holding_cost, self.upperbound_inventory,
         self.upperbound_equip_proc_rate, self.upperbound_equip_proc_rate_jit) = self.params.values()
@@ -199,6 +199,7 @@ class s_bfl(object):
             allocation_from_farm = allocation_bin_coded.nonzero()[0].tolist()
             allocation_to_ssl = allocation_bin_coded.nonzero()[1].tolist()
 
+            
 
             solution = [[v.VarName, v.X] for v in m.getVars() if v.X > 1e-6]
             summary = dict()

@@ -64,7 +64,7 @@
     <form id="getLocations">
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
-    <button v-on:click="submitLocations" class="button">Submit Locations</button>
+    <button v-on:click="addRoutes" class="button">Add Route</button>
     <p id="locations"></p>
   </body>
 </template>
@@ -91,7 +91,7 @@ export default {
     props: ['mapInfo'],
     methods: {
         //Initial retrieval of map
-        getMap(){
+        getMap() {
             this.map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.22904237824045, lng: -80.41982042804534},
             zoom: 4
@@ -226,7 +226,7 @@ export default {
         },
 
         //Print Locations to website
-        locations : function() {
+        locations() {
             var locations = "Locations: </br>";
             var k;
             for(k = 0; k < this.farmsCounter; k++) {
@@ -257,7 +257,7 @@ export default {
         },
 
         //Submit locations to background for optimization
-        submitLocations : function() {
+        submitLocations() {
             var filteredFarm = this.farms.filter(function (el) {
                 return el != null;
             });
@@ -288,6 +288,17 @@ export default {
             console.log("child", mapInfo)
             this.$emit('Emit stuff', mapInfo)
             return mapInfo;
+        },
+        addRoutes(routeCoordinates){
+        var flightPath = new google.maps.Polyline({
+          path: routeCoordinates,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        flightPath.setMap(this.map)
         }
     },
     mounted: function() {

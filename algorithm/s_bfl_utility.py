@@ -16,7 +16,6 @@ import argparse
 from matplotlib import pyplot as plt
 from algorithm.geo import Geo
 
-# switch to variable mode
 def create_data(raw_data, sysnum, seed=None, out_file=None,
                 plot_coords=False):
     """

@@ -233,9 +233,26 @@ export default {
     };
   },
   methods: {
+    parseApplyRoutes(response) {
+      var len = response.summary.allocation_from_farm.length;
+      var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}
+      var routes = [];
+      var i;
+    
+      for (i=0; i < len; i++){
+        var route = [];
+        var f_id = response.summary.allocation_from_farm[i];
+        var s_id = response.summary.allocation_to_ssl[i];
+        var farm = this.model.Coord_f[f_id];
+        var ssl = this.model.Coord_s[s_id];
+        route.push(farm);
+        route.push(ssl);
+        route.push(refinery);
+        this.$refs.map.addRoutes(route);
+      }
+    },
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
-      console.log("map info: ", mapInfo)
 
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
@@ -244,13 +261,17 @@ export default {
         this.model.Coord_s = mapInfo.Coord_s;
         this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
-        console.log("JSON: ", this.model)
+        var flightPlanCoordinates = [
+            {lat: 37.772, lng: -122.214},
+            {lat: 21.291, lng: -157.821},
+            {lat: -18.142, lng: 178.431},
+            {lat: -27.467, lng: 153.027}
+        ];
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
               this.response = response.data;
-              console.log("Optimization Results: ");
-              console.log(this.response);
+              this.parseApplyRoutes(this.response);
           })
       }
     }
