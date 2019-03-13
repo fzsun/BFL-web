@@ -1,18 +1,208 @@
 <template>
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
-    <!-- <div class="map_div"> -->
-      <Map class="map" v-model="mapInfo" ref="map"></Map>{{mapInfo}}
-    <!-- </div> -->
+    <Map class="map" v-model="mapInfo" ref="map"></Map>
     <div class="paramDescription title is-4">Optimization Parameters</div>
     <div class="params">
-        <form>
-            <vue-form-generator :schema="schema" :model="model" :options="formOptions">
-            </vue-form-generator>
-        </form>
-        <button v-on:click="optimize">Optimize</button>
+      <div class="field">
+        <label class="label">Moisture</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.moisture">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Demand (Mg)</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.demand">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Horizon (weeks)</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.horizon">
+        </div>
+      </div>
+      <!-- <div class="field">
+        <label class="label">Number Farms</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.num_fields">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Number SSL</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.demand">
+        </div>
+      </div> -->
+      <div class="field">
+        <label class="label">SSL Sizes [small, medium, large]</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.ssl_sizes">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Harvest Progress</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.harvest_progress">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Field - Dry Yield</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.field.dry_yield">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Field - Radius</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.field.radius">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Field - Proportion Devoted</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.field.proportion_devoted">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Field - Area Ratio</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.field.area_ratio">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Price per Mg</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.price">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Interest Rate</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.interest_rate">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Insurance Rate</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.insurance_rate">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Tax Rate</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.tax_rate">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Loadout Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.loadout">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Press Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.press">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Chopper Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.chopper">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Bagger Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.bagger">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Module Former Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.module_former">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Equipment Module Hauler Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.equipment.module_hauler">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Bunker Annual Ownership Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.bunker_annual_own">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">SSL Annual Ownership Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.ssl_annual_own">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Base Infield Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.base_infield">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Base Highway Cost</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.base_highway">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Transportation Coefficient - Compressed</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.transport_coef.compressed">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Transportation Coefficient - Whole Stalk</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.transport_coef.whole_stalk">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Transportation Coefficient - In Module</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.cost.transport_coef.in_module">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Whole Stalk Degrade</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.degrade.whole_stalk">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Chopped Degrade</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.degrade.chopped">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">In Bunker Degrade</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.degrade.in_bunker">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">In Bag Degrade</label>
+        <div class="control">
+          <input class="input" type="text" v-model="model.degrade.in_bag">
+        </div>
+      </div>
     </div> 
-    <div> {{response}} </div>
+    <button 
+      class="button optimize is-primary" 
+      v-on:click="optimize"
+    >
+      Optimize
+    </button>
 </div>
 </template>
 
@@ -92,144 +282,6 @@ export default {
       },
       response: [],
       mapInfo: {},
-      schema: {
-        fields: [{
-          type: "input",
-          inputType: "text",
-          label: "moisture",
-          model: "moisture",
-        }, {
-          type: "input",
-          inputType: "text",
-          label: "ssl_sizes",
-          model: "ssl_sizes",
-        }, {
-          type: "input",
-          inputType: "text",
-          label: "field.dry_yield",
-          model: "field.dry_yield",
-        }, {
-          type: "input",
-          inputType: "text",
-          label: "field.radius",
-          model: "field.radius",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "field - proportion devoted",
-          model: "field.proportion_devoted",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "price",
-          model: "price",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "interest rate",
-          model: "interest_rate",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "tax rate",
-          model: "tax_rate",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.loadout",
-          model: "cost.equipment.loadout",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.press",
-          model: "cost.equipment.press",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.chopper",
-          model: "cost.equipment.chopper",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.bagger",
-          model: "cost.equipment.bagger",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.module_former",
-          model: "cost.equipment.module_former",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.equipment.module_hauler",
-          model: "cost.equipment.module_hauler",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.bunker_annual_own",
-          model: "cost.bunker_annual_own",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.ssl_annual_own",
-          model: "cost.ssl_annual_own",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.base_infield",
-          model: "cost.base_infield",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.base_highway",
-          model: "cost.base_highway",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.transport_coef.compressed",
-          model: "cost.transport_coef.compressed",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.transport_coef.whole_stalk",
-          model: "cost.transport_coef.whole_stalk",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "cost.transport_coef.in_module",
-          model: "cost.transport_coef.in_module",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "degrade.whole_stalk",
-          model: "degrade.whole_stalk",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "degrade.chopped",
-          model: "degrade.chopped",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "degrade.in_bunker",
-          model: "degrade.in_bunker",
-        },{
-          type: "input",
-          inputType: "text",
-          label: "degrade.in_bag",
-          model: "degrade.in_bag",
-        },{
-          type: "select",
-          label: "configurations",
-          model: "configurations",
-        }
-        ]
-      },
-
-      formOptions: {
-        validateAfterLoad: true,
-        validateAfterChanged: true
-      }
     };
   },
   methods: {
@@ -261,12 +313,6 @@ export default {
         this.model.Coord_s = mapInfo.Coord_s;
         this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
-        var flightPlanCoordinates = [
-            {lat: 37.772, lng: -122.214},
-            {lat: 21.291, lng: -157.821},
-            {lat: -18.142, lng: 178.431},
-            {lat: -27.467, lng: 153.027}
-        ];
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
@@ -304,8 +350,24 @@ export default {
 .wrap {
     display: grid;
     margin: 0;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr;
     grid-template-rows: auto;
-    grid-template-areas: "title title" "map map" "paramDescription params";
+    grid-template-areas: "title" "map" "paramDescription" "params" "optimize";
+}
+
+.params {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.params .input {
+  width: 20rem;
+}
+
+.optimize {
+  grid-area: optimize;
+  width: 110px;
+  float: right;
 }
 </style>

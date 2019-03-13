@@ -32,13 +32,6 @@
                 <span class="checkmark"></span>
             </label>
         </div>
-        <!-- <form id="refineryFormLatLong">
-            <label>Location</label>
-            <input id="farmnameLatLon" type="text" placeholder="Farm">
-            <input id="latInput" type="number" placeholder="Lat">
-            <input id="lonInput" type="number" placeholder="Lng">
-            <a href="#" v-on:click="latlon">SUBMIT</a>
-        </form> -->
         <form id="refineryFormAddress" class="is-size-5 paddingRight">
             <br>
             <div class="floatLeft is-size-5">Or enter address</div>
@@ -64,7 +57,6 @@
     <form id="getLocations">
         <a href="#" v-on:click="locations">Print Locations</a>
     </form>
-    <button v-on:click="addRoutes" class="button">Add Route</button>
     <p id="locations"></p>
   </body>
 </template>
@@ -227,7 +219,7 @@ export default {
 
         //Print Locations to website
         locations() {
-            var locations = "Locations: </br>";
+            var locations = "Farm Locations: </br>";
             var k;
             for(k = 0; k < this.farmsCounter; k++) {
                 if (this.farms[k] != null) {
@@ -246,7 +238,7 @@ export default {
                                 this.ssls[k].longitude + "</br>";
                 }
             }
-			locations = locations + "Refinery: </br>";
+			locations = locations + "Refinery Location: </br>";
 			if (this.refinery != null) {
 				locations = locations +
               	            this.refinery.name + ": " +
