@@ -301,6 +301,7 @@ export default {
         route.push(ssl);
         route.push(refinery);
         this.$refs.map.addRoutes(route);
+        // routes.append(route);
       }
     },
     optimize(event) {
@@ -317,6 +318,8 @@ export default {
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
               this.response = response.data;
+              console.log("Allocation Farm: ", response.data.summary.allocation_from_farm);
+              console.log("Allocation ssl: ", response.data.summary.allocation_to_ssl);
               this.parseApplyRoutes(this.response);
           })
       }

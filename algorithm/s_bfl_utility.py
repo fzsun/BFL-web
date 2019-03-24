@@ -86,14 +86,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif mode == "coordinates":
         coord_farms = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_f"].items()])
         coord_ssls = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_s"].items()])
-
-        # coord_farms = np.array(list(raw["Coord_f"].values()))
-        # coord_ssls = np.array(list(raw["Coord_s"].values()))
         refinery_location = raw["refinery_location"]
         num_farms = len(coord_farms)
         num_ssls = len(coord_ssls)
-        assert len(coord_farms) == num_farms
-        assert len(coord_ssls) == num_ssls
 
     if plot_coords:
         l1, = plt.plot(0, 'g^', markersize=7)

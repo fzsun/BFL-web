@@ -32,7 +32,7 @@
                 <span class="checkmark"></span>
             </label>
         </div>
-        <form id="refineryFormAddress" class="is-size-5 paddingRight">
+        <form id="refineryFormAddress" class="is-size-5 paddingRight" @submit.prevent="submitAddress()">
             <br>
             <div class="floatLeft is-size-5">Or enter address</div>
             <input 
@@ -95,7 +95,7 @@ export default {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
             	var typeName = prompt(ref.name + " Name", this.name);
-                ref.placeMarker(event.latLng, typeName);
+                if (typeName !== null) ref.placeMarker(event.latLng, typeName);
             });
         },
 
@@ -108,10 +108,15 @@ export default {
 				var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
                     }
+                });
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
                 });
 				google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(0, "refinery") });
@@ -123,12 +128,16 @@ export default {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
                     }
                 });
-
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
+                });
                 var id = this.sslCounter;
                 google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(id, "ssl") });
@@ -142,12 +151,16 @@ export default {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                     }
                 });
-
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
+                });
                 var id = this.farmsCounter;
                 google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(id, "farm") });

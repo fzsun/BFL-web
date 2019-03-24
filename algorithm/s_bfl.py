@@ -194,6 +194,7 @@ class s_bfl(object):
             open_ssls_bin_coded = w_.sum(axis=1)
             open_ssls = open_ssls_bin_coded.nonzero()[0].tolist()
 
+            print("y ", y)
             y_ = np.array(m.getAttr("X", y.values())).reshape(len(F), -1)
             allocation_bin_coded = y_
             allocation_from_farm = allocation_bin_coded.nonzero()[0].tolist()
