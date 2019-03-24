@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 #with open('example_input.json') as algo_input:
  #   algo_input_data = json.load(algo_input)
 
-class Continuous_Simulation(object):
+class Simulation(object):
     
     '''
     -init defines all of the data that will saty constant throughout the simulation trials
