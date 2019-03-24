@@ -226,7 +226,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
                     for i, v in enumerate(coord_farms)},
         'Coord_ssls': {i: v.tolist()
                     for i, v in enumerate(coord_ssls)},
-        'K': {i: list(k)
+        'SSL_configuration': {i: list(k)
               for i, k in enumerate(K)},
         'Seed': seed,
         'Sysnum': sysnum,

@@ -38,7 +38,7 @@ class Simulation(object):
         # assign variables from output file
         self.coord_f = self.output_data['params']['Coord_farms'] # coordinates x,y for farms (all possible)
         self.coord_s = self.output_data['params']['Coord_ssls'] # coordinates x,y for ssl (all possible)
-        self.K = self.output_data['params']['ssl_configurations'] # ssl size and equipment loadout configurations
+        self.K = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
         self.a = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
         self.ue = self.output_data['params']['upperbound_equip_proc_rate'] # processing rate of non-chopping methods
         self.sysnum = self.output_data['params']['Sysnum']
