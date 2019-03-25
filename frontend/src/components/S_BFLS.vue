@@ -2,6 +2,11 @@
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
     <Map class="map" v-model="mapInfo" ref="map"></Map>
+    <ListInput 
+      v-bind:list='temp' 
+      v-on:listChange='temp = $event'
+      v-bind:label="'list label'"
+    ></ListInput>
     <div class="paramDescription title is-4">Optimization Parameters</div>
     <div class="params">
       <div class="field">
@@ -34,6 +39,11 @@
           <input class="input" type="text" v-model="model.demand">
         </div>
       </div> -->
+      <ListInput 
+        v-bind:list='model.ssl_sizes' 
+        v-on:listChange='model.ssl_sizes = $event'
+        v-bind:label="'SSL Sizes [small, medium, large]'"
+      ></ListInput>
       <div class="field">
         <label class="label">SSL Sizes [small, medium, large]</label>
         <div class="control">
@@ -211,14 +221,18 @@
 import { validators, component as VueFormGenerator } from 'vue-form-generator'
 import axios from 'axios'
 import Map from './Map'
+import ListInput from './ListInput'
 
 export default {
   components: {
       VueFormGenerator,
-      'Map' : Map
+      'Map' : Map,
+      'ListInput' : ListInput,
   },
   data() {
     return {
+      temp: [1, 2, 3],
+      listData: [],
       model: {
         "moisture": 0.7,
         "demand": 200000,
@@ -285,6 +299,9 @@ export default {
     };
   },
   methods: {
+    assignListData(data) {
+
+    },
     parseApplyRoutes(response) {
       var len = response.summary.allocation_from_farm.length;
       var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}

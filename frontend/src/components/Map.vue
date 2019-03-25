@@ -290,7 +290,6 @@ export default {
                   "lng": filteredSSL[k].longitude
               }
             }
-            console.log("child", mapInfo)
             this.$emit('Emit stuff', mapInfo)
             return mapInfo;
         },
