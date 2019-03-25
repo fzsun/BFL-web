@@ -28,18 +28,19 @@ class Simulation(object):
         self.output_data = output_data
                    
         self.num_trials = int(input('How many sample trials would you like to simulate? '))
+        self.work_week = 40
          # assign variables from algo input
         self.demand = self.algo_input_data['demand']
         self.equipment_data = self.algo_input_data['cost']['equipment']
         self.degradation = self.algo_input_data['degrade']
         
-        self.SIM_TIME = self.algo_input_data['horizon']*40 + 40
+        self.SIM_TIME = self.algo_input_data['horizon']*self.work_week + self.work_week
         
         # assign variables from output file
         self.coord_f = self.output_data['params']['Coord_farms'] # coordinates x,y for farms (all possible)
         self.coord_s = self.output_data['params']['Coord_ssls'] # coordinates x,y for ssl (all possible)
-        self.K = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
-        self.a = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
+        self.ssl_configurations = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
+        self.harvest_schedule = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
         self.ue = self.output_data['params']['upperbound_equip_proc_rate'] # processing rate of non-chopping methods
         self.sysnum = self.output_data['params']['Sysnum']
         self.solutions = self.output_data['solution'] # holds the algorithms solution dictionary
@@ -52,25 +53,25 @@ class Simulation(object):
         self.loadout_rates_module_jit = []
         for equipment in self.configuration:
             if equipment == 'loadout':
-                self.loadout_rate_standard = self.equipment_data[equipment][4]/40
+                self.loadout_rate_standard = self.equipment_data[equipment][4]/self.work_week
             elif equipment == 'press':
-                self.config_rate.update({'press':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'press':self.equipment_data[equipment][4]/self.work_week})
                 self.press_rate = []
             elif equipment == 'chopper':
-                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/self.work_week})
                 self.chopper_rate = []
             elif equipment == 'bagger':
-                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/self.work_week})
                 self.bagger_rate = []
             elif equipment == 'module_former':
-                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/self.work_week})
                 self.former_rate = []
             elif equipment == 'module_hauler':
-                self.loadout_rate_module = self.equipment_data[equipment][4]/40
+                self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
             
         
-        self.m = self.a.shape[0]
-        self.n = self.a.shape[1]
+        self.m = self.harvest_schedule.shape[0]
+        self.n = self.harvest_schedule.shape[1]
         
         self.all_refinery_actual = []
         self.all_ssl_actual = []
@@ -142,13 +143,13 @@ class Simulation(object):
         for period in range(self.m):
             self.create_loadout_rate()
             for farm in range(self.n):
-                if self.a[period][farm] != 0:
+                if self.harvest_schedule[period][farm] != 0:
                     #self.harvest_actual[period][farm]=max(0,np.random.normal(self.a[period][farm], 1/5*self.a[period][farm]))
-                    self.harvest_actual[period][farm] = max(0,self.a[period][farm])
+                    self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
                     self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
                     pass
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
     
     def farm_transport(self):
         for period in range(self.m):
@@ -157,7 +158,7 @@ class Simulation(object):
                     self.env.process(self.JIT_delivery(period, farm))
                 if self.farm_transport_schedule != 0:
                     self.env.process(self.preprocessing(period, farm))
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
 
             
     
@@ -202,7 +203,7 @@ class Simulation(object):
                     self.env.process(self.refinery_transport(ssl, period))
                 else:
                     pass
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
             
             
     def refinery_transport(self, ssl, period):
@@ -252,7 +253,7 @@ class Simulation(object):
         x = 0
         y = 0
         for period in range(self.m):
-            yield self.env.timeout(39)
+            yield self.env.timeout(self.work_week-1)
             for farm in range(self.n):
                 if self.farms[farm].level > 0:
                     if self.sysnum in [0,1,2,3,4,5,6,7]:
@@ -281,7 +282,7 @@ class Simulation(object):
         x=0
         y=0
         for period in range(self.m):
-            yield self.env.timeout(39)
+            yield self.env.timeout(self.work_week-1)
             for ssl in self.ssl_container:
                 if self.ssl_container[ssl].level > 0:
                     if self.sysnum in [0,4,8,12]:
@@ -323,10 +324,10 @@ class Simulation(object):
         total4 = 0
         total5 = 0
         for period in range(self.m):
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
             for farm in range(self.n):   
                 total = total + self.harvest_actual[period][farm]
-                total2 = total2 + self.a[period][farm] 
+                total2 = total2 + self.harvest_schedule[period][farm] 
                 total3 = total3 + self.jit_farm_transport[period][farm]
             self.harvest_hypothetical.append(total2)
             self.total_harvest.append(total)
@@ -385,14 +386,14 @@ class Simulation(object):
             bb = re.split('\W', aa)
             if bb[0] == 'ssl_configuration_selection':
                 i=1
-                z = len(self.K[int(bb[2])])-1
+                z = len(self.ssl_configurations[int(bb[2])])-1
                 self.ssl[int(bb[1])] = []
                 for number in range(z):
                     self.ssl[int(bb[1])].append(simpy.Resource(self.env, capacity=1))
                     i=i+1
-                self.equip_in_ssl[int(bb[1])] = self.K[int(bb[2])][1:]
-                self.before_ssl[int(bb[1])] = simpy.Container(self.env, capacity=self.K[int(bb[2])][0], init=0)
-                self.ssl_container[int(bb[1])] = simpy.Container(self.env, capacity=self.K[int(bb[2])][0], init=0)
+                self.equip_in_ssl[int(bb[1])] = self.ssl_configurations[int(bb[2])][1:]
+                self.before_ssl[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
+                self.ssl_container[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
                 self.ssl_location[int(bb[1])] = self.coord_s[int(bb[1])]
             else:
                 pass    
