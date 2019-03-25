@@ -90,13 +90,11 @@ class Simulation(object):
             env = simpy.Environment() # sets up a new simpy env for every trial
             self.env = env
             self.trial_reset() # resets the simpy constructs and data structures for recording the information
-            print(self.m)
-            print(self.farm_transport_schedule)
             self.env.process(self.harvest()) #triggers the harvest schedule, JIT_schedule and preprocessing every period
             self.env.process(self.farm_transport())
             self.env.process(self.moniter_ssl())# checks the ssl transport schedule for refinery deliveries
-            self.env.process(self.degradation_field()) # counts degredation of sitting sorghum at the fields
-            self.env.process(self.degradation_ensiled()) # counts degradation of ensiled sorghum
+            #self.env.process(self.degradation_field()) # counts degredation of sitting sorghum at the fields
+            #self.env.process(self.degradation_ensiled()) # counts degradation of ensiled sorghum
             self.env.process(self.record_data()) # Records all of the trial specific data and appends it to trial constant data
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
@@ -160,6 +158,7 @@ class Simulation(object):
                 if self.farm_transport_schedule != 0:
                     self.env.process(self.preprocessing(period, farm))
             yield self.env.timeout(40)
+
             
     
     def preprocessing(self, period, farm):
@@ -343,7 +342,7 @@ class Simulation(object):
             total4 = int(round(total4))
             total5 = int(round(total5))
             print('harvested amount @ ',self.env.now,'acutal: ', total, '   hypothetical: ', total2)
-            print('total ssl inventory @  ',self.env.now, '   acutal: ', total5, '   hypothetical: ', total4)
+            #print('total ssl inventory @  ',self.env.now, '   acutal: ', total5, '   hypothetical: ', total4)
             print('refinery level @ ',self.env.now, '   actual: ', self.refinery.level, '   hypothetical: ', total3)
             print('\n')
             self.degradation_ensiled_actual.append(self.degraded_ensiled.level)
@@ -384,7 +383,7 @@ class Simulation(object):
             aa = solution[0]
             cc = solution[1]
             bb = re.split('\W', aa)
-            if bb[0] == 'ssl_assignment':
+            if bb[0] == 'ssl_configuration_selection':
                 i=1
                 z = len(self.K[int(bb[2])])-1
                 self.ssl[int(bb[1])] = []
