@@ -6,7 +6,7 @@
       <div class="title is-size-4">Optimization Parameters</div>
       <button 
         class="button is-primary floatLeft"
-        v-on:click="showOptimize()"
+        v-on:click="useDefault()"
       >
         Accept Default Configuration
       </button>
@@ -28,8 +28,8 @@
       <OptimizationForm 
         v-if="customForm"
         ref = "opForm"
-        v-on:formChange='model = $event'
-        v-bind:model='model'
+        v-on:formChange='customModel = $event'
+        v-bind:model='defaultModel'
       ></OptimizationForm>
     </div> 
     <button 
@@ -60,7 +60,9 @@ export default {
       mapInfo: {},
       customForm: false,
       showOptButton: false,
-      model: {
+      customModel: {},
+      model: {},
+      defaultModel: {
         "moisture": 0.7,
         "demand": 200000,
         "horizon": 26,
@@ -124,6 +126,11 @@ export default {
     };
   },
   methods: {
+    useDefault() {
+      this.model = this.defaultModel;
+      this.showOptimize();
+      this.customForm = false;
+    },
     showOptimize() {
       this.showOptButton = true;
     },
@@ -157,6 +164,11 @@ export default {
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
 
+      if (this.customForm) {
+        this.model = this.customModel
+      } else {
+        this.model = this.defaultModel
+      }
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
       } else {
