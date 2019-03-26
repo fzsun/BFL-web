@@ -57,10 +57,10 @@ class s_bfl(object):
         # ====== Create vars and objectives ======
 
         # w[s][k] = 1 => is an ssl of type k is built at site s; otherwise 0
-        w = m.addVars(S, K, obj=self.fixed_cost_ssls, vtype='B', name='w')
+        w = m.addVars(S, K, obj=self.fixed_cost_ssls, vtype='B', name='ssl_configuration_selection')
 
         # y[f][s] = 1 => if farm f supplies ssl s; 0 otherwise
-        y = m.addVars(F, S, vtype='B', name='y')
+        y = m.addVars(F, S, vtype='B', name='farm_to_ssl')
 
         shipped_farm_ssl = m.addVars(T, F, S, obj=farm_ssl_cost_per_period * len(T), name='shipped_farm_ssl')
         shipped_ssl_refinery = m.addVars(T, S, obj=self.ssl_refinery_trans_cost * len(T), name='shipped_ssl_refinery')
@@ -194,6 +194,7 @@ class s_bfl(object):
             open_ssls_bin_coded = w_.sum(axis=1)
             open_ssls = open_ssls_bin_coded.nonzero()[0].tolist()
 
+            print("y ", y)
             y_ = np.array(m.getAttr("X", y.values())).reshape(len(F), -1)
             allocation_bin_coded = y_
             allocation_from_farm = allocation_bin_coded.nonzero()[0].tolist()

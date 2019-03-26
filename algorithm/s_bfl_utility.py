@@ -65,7 +65,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 raw = yaml.load(stream)
     elif type(raw_data) is dict:
+        int(raw_data['horizon'])
         raw = raw_data
+        raw['moisture'] = float(raw_data['moisture'])
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
 
@@ -86,14 +88,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif mode == "coordinates":
         coord_farms = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_f"].items()])
         coord_ssls = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_s"].items()])
-
-        # coord_farms = np.array(list(raw["Coord_f"].values()))
-        # coord_ssls = np.array(list(raw["Coord_s"].values()))
         refinery_location = raw["refinery_location"]
         num_farms = len(coord_farms)
         num_ssls = len(coord_ssls)
-        assert len(coord_farms) == num_farms
-        assert len(coord_ssls) == num_ssls
 
     if plot_coords:
         l1, = plt.plot(0, 'g^', markersize=7)
@@ -226,7 +223,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
                     for i, v in enumerate(coord_farms)},
         'Coord_ssls': {i: v.tolist()
                     for i, v in enumerate(coord_ssls)},
-        'K': {i: list(k)
+        'SSL_configuration': {i: list(k)
               for i, k in enumerate(K)},
         'Seed': seed,
         'Sysnum': sysnum,
