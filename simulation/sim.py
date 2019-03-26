@@ -27,7 +27,7 @@ class Simulation(object):
         self.algo_input_data = algo_input_data
         self.output_data = output_data
                    
-        self.num_trials = int(input('How many sample trials would you like to simulate? '))
+        self.num_trials = 5
         self.work_week = 40
          # assign variables from algo input
         self.demand = self.algo_input_data['demand']
@@ -130,9 +130,12 @@ class Simulation(object):
         
         if np.mean(self.all_demand) >= self.demand:
             print('The whole demand of ',self.demand,'MG was met over the current planning hrorizon for',self.num_trials,'samples')
+            self.sim_results.update({'demand':100})
         else:
             self.percent_met = np.mean(self.all_demand)/self.demand*100
+            self.sim_results.update({'demand':self.percent_met})
             print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
+            print(self.sim_results)
 
 
     '''
@@ -144,8 +147,8 @@ class Simulation(object):
             self.create_loadout_rate()
             for farm in range(self.n):
                 if self.harvest_schedule[period][farm] != 0:
-                    #self.harvest_actual[period][farm]=max(0,np.random.normal(self.a[period][farm], 1/5*self.a[period][farm]))
-                    self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
+                    self.harvest_actual[period][farm]=max(0,np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
+                    #self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
                     self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
                     pass
@@ -179,8 +182,8 @@ class Simulation(object):
     def use_equipment(self, period, farm, x):
         i=1
         for equipment in self.config_rate:
-            #equipment_rate = np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])
-            equipment_rate = self.config_rate[equipment]
+            equipment_rate = max(0,np.random.normal(self.config_rate[equipment],1/10*self.config_rate[equipment]))
+            #equipment_rate = self.config_rate[equipment]
             if equipment == 'press':
                 self.press_rate.append(equipment_rate)
             if equipment == 'chopper':
@@ -242,9 +245,9 @@ class Simulation(object):
 
     def create_loadout_rate(self):
         if 'module_hauler' in self.configuration:
-            #self.loadout_rate_module = np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)
+            self.loadout_rate_module = min(181,max(50,np.random.normal(self.loadout_rate_module, 1/10*self.loadout_rate_module)))
             self.loadout_rates_module.append(self.loadout_rates_module)
-        #self.loadout_rate_standard = np.random.normal(self.loadout_rate_standard, 1/5*self.loadout_rate_standard)
+        self.loadout_rate_standard = min(43.5,max(15,np.random.normal(self.loadout_rate_standard, 1/10*self.loadout_rate_standard)))
         self.loadout_rates_standard.append(self.loadout_rate_standard)
         
         
