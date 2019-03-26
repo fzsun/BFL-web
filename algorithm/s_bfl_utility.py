@@ -65,7 +65,9 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 raw = yaml.load(stream)
     elif type(raw_data) is dict:
+        int(raw_data['horizon'])
         raw = raw_data
+        raw['moisture'] = float(raw_data['moisture'])
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
 
