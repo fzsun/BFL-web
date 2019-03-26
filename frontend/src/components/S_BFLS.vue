@@ -3,6 +3,7 @@
     <h1 class="title">Sorghum - Logistics Support</h1>
     <Map class="map" v-model="mapInfo" ref="map"></Map>
     <div class="paramDescription title is-4">Optimization Parameters</div>
+    Sim: {{sim_response}}
     <div class="params">
       <div class="field">
         <label class="label">Moisture</label>
@@ -280,7 +281,8 @@ export default {
             ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
           ]
       },
-      response: [],
+      op_response: {},
+      sim_response: {},
       mapInfo: {},
     };
   },
@@ -317,10 +319,10 @@ export default {
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
-              this.response = response.data;
-              console.log("Allocation Farm: ", response.data.summary.allocation_from_farm);
-              console.log("Allocation ssl: ", response.data.summary.allocation_to_ssl);
-              this.parseApplyRoutes(this.response);
+              var r = response.data
+              this.op_response = r.op_response;
+              this.sim_response = r.sim_response;
+              this.parseApplyRoutes(this.op_response);
           })
       }
     }

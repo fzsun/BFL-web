@@ -54,9 +54,12 @@ def Sbfl():
     my_s_bfl.input(input_data, sysnum = 2)
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
-    response = jsonify(my_s_bfl.optimization_result)
+    response_dict = dict()
+    response_dict['op_response'] = my_s_bfl.optimization_result
     my_sim = Simulation(input_data,my_s_bfl.optimization_result)
     my_sim.main()
+    response_dict['sim_response'] = my_sim.sim_results
+    response = jsonify(response_dict)
     # response.headers.add('Access-Control-Allow-Origin', '*')
 
     # msg = Message('S-BFLS',
