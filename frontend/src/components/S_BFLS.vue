@@ -2,10 +2,6 @@
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
     <Map class="map" v-model="mapInfo" ref="map"></Map>
-<<<<<<< HEAD
-    <div class="paramDescription title is-4">Optimization Parameters</div>
-    Sim: {{sim_response}}
-=======
     <div class="paramDescription">
       <div class="title is-size-4">Optimization Parameters</div>
       <button 
@@ -28,7 +24,6 @@
         Cancel
       </button>
     </div>
->>>>>>> daa928899fdc9200e9dd39732ee99c952d5127f8
     <div class="params">
       <OptimizationForm 
         v-if="customForm"
@@ -44,6 +39,27 @@
     >
       Optimize
     </button>
+    <br></br>
+    <div class="results">
+      <div class="title is-size-3">Simulation Results</div>
+      <div class="sim_results">
+        Demand Met: {{sim_response['demand']}} %
+        <br></br>
+        Telehandler Rate: {{sim_response['telehandler rate']}} MG/hr
+        <br></br>
+        Press Rate: {{sim_response['press rate']}} MG/hr
+        <br></br>
+        Chopper Rate: {{sim_response['chopper rate']}} MG/hr
+        <br></br>
+        Bagger Rate: {{sim_response['bagger rate']}} MG/hr
+        <br></br>
+        Module Former Rate: {{sim_response['module former rate']}} MG/hr
+        <br></br>
+        Module Hauler Rate: {{sim_response['module hauler rate']}} MG/hr
+        <br></br>
+      </div>
+    </div>
+
 </div>
 </template>
 
@@ -128,12 +144,8 @@ export default {
             ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
         ]
       },
-<<<<<<< HEAD
       op_response: {},
       sim_response: {},
-      mapInfo: {},
-=======
->>>>>>> daa928899fdc9200e9dd39732ee99c952d5127f8
     };
   },
   methods: {
@@ -229,12 +241,17 @@ export default {
     margin: 0;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
-    grid-template-areas: "title" "map" "paramDescription" "params" "optimize";
+    grid-template-areas: "title" "map" "paramDescription" "params" "optimize" "results";
 }
 
 .optimize {
   grid-area: optimize;
   width: 110px;
   float: right;
+}
+
+.results {
+  grid-area: results;
+  text-align: left;
 }
 </style>

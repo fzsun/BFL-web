@@ -100,7 +100,7 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
-        self.sim_results = {}
+        self.sim_results = {'demand':0, 'telehandler rate':0, 'press rate':0, 'chopper rate':0, 'bagger rate':0, 'module former rate':0, 'module hauler rate':0}
         self.simulation_results()
         #degradation_cost = 0
         #for period in range(self.m):
@@ -111,26 +111,26 @@ class Simulation(object):
         for equipment in self.config_rate:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
-                self.sim_results.update({'press':np.mean(self.press_rate)})
+                self.sim_results['press rate'] = np.mean(self.press_rate)
             if equipment == 'chopper':
                 print('The average chopper rate in MG/hour:',np.mean(self.chopper_rate))
-                self.sim_results.update({'chopper':np.mean(self.chopper_rate)})
+                self.sim_results['chopper rate'] = np.mean(self.chopper_rate)
             if equipment == 'bagger':
                 print('The average bagger rate in MG/hour:',np.mean(self.bagger_rate))
-                self.sim_results.update({'bagger':np.mean(self.bagger_rate)})
+                self.sim_results['bagger rate'] = np.mean(self.bagger_rate)
             if equipment == 'module_former':
                 print('The average module former rate in MG/hour:',np.mean(self.former_rate))
-                self.sim_results.update({'module_former':np.mean(self.former_rate)})
+                self.sim_results['module former rate'] = np.mean(self.former_rate)
             if equipment == 'module_hauler':
                 print('The average loadout rate for module hauler in MG/hour:',np.mean(self.loadout_rates_module)) 
-                self.sim_results.update({'module hauler':np.mean(self.loadout_rates_module)})
+                self.sim_results['module hauler rate'] = np.mean(self.loadout_rates_module)
             if 'loadout' in self.configuration:
                 print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
-                self.sim_results.update({'loadout':np.mean(self.loadout_rates_standard)})
+                self.sim_results['telehandler rate'] = np.mean(self.loadout_rates_standard)
         
         if np.mean(self.all_demand) >= self.demand:
             print('The whole demand of ',self.demand,'MG was met over the current planning hrorizon for',self.num_trials,'samples')
-            self.sim_results.update({'demand':100})
+            self.sim_results['demand'] = 100
         else:
             self.percent_met = np.mean(self.all_demand)/self.demand*100
             self.sim_results.update({'demand':self.percent_met})
