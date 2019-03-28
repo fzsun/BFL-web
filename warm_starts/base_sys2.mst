@@ -17,7 +17,7 @@ ssl_configuration_selection[0,14] 0
 ssl_configuration_selection[0,15] 0
 ssl_configuration_selection[0,16] 0
 ssl_configuration_selection[0,17] 0
-ssl_configuration_selection[0,18] 0
+ssl_configuration_selection[0,18] 1
 ssl_configuration_selection[0,19] 0
 ssl_configuration_selection[0,20] 0
 ssl_configuration_selection[0,21] 0
@@ -71,7 +71,7 @@ ssl_configuration_selection[0,68] 0
 ssl_configuration_selection[0,69] 0
 ssl_configuration_selection[0,70] 0
 ssl_configuration_selection[0,71] 0
-ssl_configuration_selection[0,72] 1
+ssl_configuration_selection[0,72] 0
 ssl_configuration_selection[0,73] 0
 ssl_configuration_selection[0,74] 0
 ssl_configuration_selection[0,75] 0
@@ -98,7 +98,7 @@ ssl_configuration_selection[1,14] 0
 ssl_configuration_selection[1,15] 0
 ssl_configuration_selection[1,16] 0
 ssl_configuration_selection[1,17] 0
-ssl_configuration_selection[1,18] 0
+ssl_configuration_selection[1,18] 1
 ssl_configuration_selection[1,19] 0
 ssl_configuration_selection[1,20] 0
 ssl_configuration_selection[1,21] 0
@@ -152,7 +152,7 @@ ssl_configuration_selection[1,68] 0
 ssl_configuration_selection[1,69] 0
 ssl_configuration_selection[1,70] 0
 ssl_configuration_selection[1,71] 0
-ssl_configuration_selection[1,72] 1
+ssl_configuration_selection[1,72] 0
 ssl_configuration_selection[1,73] 0
 ssl_configuration_selection[1,74] 0
 ssl_configuration_selection[1,75] 0
@@ -179,7 +179,7 @@ ssl_configuration_selection[2,14] 0
 ssl_configuration_selection[2,15] 0
 ssl_configuration_selection[2,16] 0
 ssl_configuration_selection[2,17] 0
-ssl_configuration_selection[2,18] 0
+ssl_configuration_selection[2,18] 1
 ssl_configuration_selection[2,19] 0
 ssl_configuration_selection[2,20] 0
 ssl_configuration_selection[2,21] 0
@@ -233,7 +233,7 @@ ssl_configuration_selection[2,68] 0
 ssl_configuration_selection[2,69] 0
 ssl_configuration_selection[2,70] 0
 ssl_configuration_selection[2,71] 0
-ssl_configuration_selection[2,72] 1
+ssl_configuration_selection[2,72] 0
 ssl_configuration_selection[2,73] 0
 ssl_configuration_selection[2,74] 0
 ssl_configuration_selection[2,75] 0
@@ -242,6 +242,7 @@ ssl_configuration_selection[2,77] 0
 ssl_configuration_selection[2,78] 0
 ssl_configuration_selection[2,79] 0
 ssl_configuration_selection[2,80] 0
+<<<<<<< HEAD
 ssl_configuration_selection[3,0] 0
 ssl_configuration_selection[3,1] 0
 ssl_configuration_selection[3,2] 0
@@ -2573,3 +2574,14 @@ farm_to_ssl[35,18] 0
 farm_to_ssl[35,19] 0
 farm_to_ssl[35,20] 0
 farm_to_ssl[35,21] 0
+=======
+farm_to_ssl[0,0] 1
+farm_to_ssl[0,1] 0
+farm_to_ssl[0,2] 0
+farm_to_ssl[1,0] 0
+farm_to_ssl[1,1] 0
+farm_to_ssl[1,2] 1
+farm_to_ssl[2,0] 0
+farm_to_ssl[2,1] 1
+farm_to_ssl[2,2] 0
+>>>>>>> daa928899fdc9200e9dd39732ee99c952d5127f8

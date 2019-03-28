@@ -58,6 +58,18 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         a dict object containing all the data for modeling.
     """
     # %%
+    def toFloat(inputList):
+        floatList = list()
+        for value in inputList:
+            floatList.append(float(value))
+        return floatList
+
+    def toInt(inputList):
+        floatList = list()
+        for value in inputList:
+            floatList.append(int(value))
+        return floatList
+    
     if type(raw_data) is str:
         with open(raw_data, 'r') as stream:
             if raw_data.split('.')[-1] == 'json':
@@ -65,7 +77,40 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 raw = yaml.load(stream)
     elif type(raw_data) is dict:
+        int(raw_data['horizon'])
         raw = raw_data
+        raw['moisture'] = float(raw_data['moisture'])
+        raw['demand'] = int(raw_data['demand'])
+        raw['horizon'] = int(raw_data['horizon'])
+        raw['num_fields'] = int(raw_data['num_fields'])
+        raw['num_ssls'] = int(raw_data['num_ssls'])
+        raw['ssl_sizes'] = toInt(raw_data['ssl_sizes'])
+        raw['ssl_sizes'] = toFloat(raw_data['ssl_sizes'])
+        raw['field']['dry_yield'] = int(raw_data['field']['dry_yield'])
+        raw['field']['radius'] = int(raw_data['field']['radius'])
+        raw['field']['proportion_devoted'] = float(raw_data['field']['proportion_devoted'])
+        raw['field']['area_ratio'] = toInt(raw_data['field']['area_ratio'])
+        raw['price'] = float(raw_data['price'])
+        raw['interest_rate'] = float(raw_data['interest_rate'])
+        raw['insurance_rate'] = float(raw_data['insurance_rate'])
+        raw['tax_rate'] = float(raw_data['tax_rate'])
+        raw['cost']['equipment']['loadout'] = toFloat(raw_data['cost']['equipment']['loadout'])
+        raw['cost']['equipment']['press'] = toFloat(raw_data['cost']['equipment']['press'])
+        raw['cost']['equipment']['chopper'] = toFloat(raw_data['cost']['equipment']['chopper'])
+        raw['cost']['equipment']['bagger'] = toFloat(raw_data['cost']['equipment']['bagger'])
+        raw['cost']['equipment']['module_former'] = toFloat(raw_data['cost']['equipment']['module_former'])
+        raw['cost']['equipment']['module_hauler'] = toFloat(raw_data['cost']['equipment']['module_hauler'])
+        raw['cost']['bunker_annual_own'] = float(raw_data['cost']['bunker_annual_own'])
+        raw['cost']['ssl_annual_own'] = float(raw_data['cost']['ssl_annual_own']) 
+        raw['cost']['base_infield'] = float(raw_data['cost']['base_infield']) 
+        raw['cost']['base_highway'] = float(raw_data['cost']['base_highway'])
+        raw['cost']['transport_coef']['compressed'] = float(raw_data['cost']['transport_coef']['compressed'])
+        raw['cost']['transport_coef']['whole_stalk'] = float(raw_data['cost']['transport_coef']['whole_stalk'])
+        raw['cost']['transport_coef']['in_module'] = float(raw_data['cost']['transport_coef']['in_module'])
+        raw['degrade']['whole_stalk'] = int(raw_data['degrade']['whole_stalk'])
+        raw['degrade']['chopped'] = int(raw_data['degrade']['chopped'])
+        raw['degrade']['in_bunker'] = int(raw_data['degrade']['in_bunker'])
+        raw['degrade']['in_bag'] = int(raw_data['degrade']['in_bag'])
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
 
@@ -248,7 +293,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 yaml.dump(all_data, f)
     return all_data
-
 
 def check_filename(value):
     if value.split('.')[-1] not in ['json', 'yaml']:
