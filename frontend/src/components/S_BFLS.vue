@@ -43,20 +43,7 @@
     <div class="results">
       <div class="title is-size-3">Simulation Results</div>
       <div class="sim_results">
-        Demand Met: {{sim_response['demand']}} %
-        <br></br>
-        Telehandler Rate: {{sim_response['telehandler rate']}} MG/hr
-        <br></br>
-        Press Rate: {{sim_response['press rate']}} MG/hr
-        <br></br>
-        Chopper Rate: {{sim_response['chopper rate']}} MG/hr
-        <br></br>
-        Bagger Rate: {{sim_response['bagger rate']}} MG/hr
-        <br></br>
-        Module Former Rate: {{sim_response['module former rate']}} MG/hr
-        <br></br>
-        Module Hauler Rate: {{sim_response['module hauler rate']}} MG/hr
-        <br></br>
+        {{sim_response}}
       </div>
     </div>
 

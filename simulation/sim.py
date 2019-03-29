@@ -9,6 +9,7 @@ import numpy as np
 import re
 import math 
 import matplotlib.pyplot as plt
+from scipy import stats as stat
 
 #open input and output files to be used
 #with open('output_0.json') as output_file:
@@ -100,7 +101,7 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
-        self.sim_results = {'demand':0, 'telehandler rate':0, 'press rate':0, 'chopper rate':0, 'bagger rate':0, 'module former rate':0, 'module hauler rate':0}
+        self.sim_results = {'demand':{}, 'telehandler rate':{}, 'press rate':{}, 'chopper rate':{}, 'bagger rate':{}, 'module former rate':{}, 'module hauler rate':{}}
         self.simulation_results()
         #degradation_cost = 0
         #for period in range(self.m):
@@ -111,29 +112,52 @@ class Simulation(object):
         for equipment in self.config_rate:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
-                self.sim_results['press rate'] = np.mean(self.press_rate)
+                self.sim_results['press rate'].update({'average':np.mean(self.press_rate)})
+                self.sim_results['press rate'].update({'stdev':np.std(self.press_rate)})
+                self.sim_results['press rate'].update({'sem':stat.sem(self.press_rate)})
+                self.sim_results['press rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.press_rate),np.std(self.press_rate))})
             if equipment == 'chopper':
                 print('The average chopper rate in MG/hour:',np.mean(self.chopper_rate))
-                self.sim_results['chopper rate'] = np.mean(self.chopper_rate)
+                self.sim_results['chopper rate'].update({'average':np.mean(self.chopper_rate)})
+                self.sim_results['chopper rate'].update({'stdev':np.std(self.chopper_rate)})
+                self.sim_results['chopper rate'].update({'sem':stat.sem(self.chopper_rate)})
+                self.sim_results['chopper rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.chopper_rate),np.std(self.chopper_rate))})
             if equipment == 'bagger':
                 print('The average bagger rate in MG/hour:',np.mean(self.bagger_rate))
-                self.sim_results['bagger rate'] = np.mean(self.bagger_rate)
+                self.sim_results['bagger rate'].update({'average':np.mean(self.bagger_rate)})
+                self.sim_results['bagger rate'].update({'stdev':np.std(self.bagger_rate)})
+                self.sim_results['bagger rate'].update({'sem':stat.sem(self.bagger_rate)})
+                self.sim_results['bagger rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.bagger_rate),np.std(self.bagger_rate))})
             if equipment == 'module_former':
                 print('The average module former rate in MG/hour:',np.mean(self.former_rate))
-                self.sim_results['module former rate'] = np.mean(self.former_rate)
+                self.sim_results['module former rate'].update({'average':np.mean(self.former_rate)})
+                self.sim_results['module former rate'].update({'stdev':np.std(self.former_rate)})
+                self.sim_results['module former rate'].update({'sem':stat.sem(self.former_rate)})
+                self.sim_results['module former rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.former_rate),np.std(self.former_rate))})
             if equipment == 'module_hauler':
                 print('The average loadout rate for module hauler in MG/hour:',np.mean(self.loadout_rates_module)) 
-                self.sim_results['module hauler rate'] = np.mean(self.loadout_rates_module)
+                self.sim_results['module hauler rate'].update({'average':np.mean(self.loadout_rates_module)})
+                self.sim_results['module hauler rate'].update({'stdev':np.std(self.loadout_rates_module)})
+                self.sim_results['module hauler rate'].update({'sem':stat.sem(self.loadout_rates_module)})
+                self.sim_results['module hauler rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.loadout_rates_module),np.std(self.loadout_rates_module))})
             if 'loadout' in self.configuration:
                 print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
-                self.sim_results['telehandler rate'] = np.mean(self.loadout_rates_standard)
+                self.sim_results['telehandler rate'].update({'average':np.mean(self.loadout_rates_standard)})
+                self.sim_results['telehandler rate'].update({'stdev':np.std(self.loadout_rates_standard)})
+                self.sim_results['telehandler rate'].update({'sem':stat.sem(self.loadout_rates_standard)})
+                self.sim_results['telehandler rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.loadout_rates_standard),np.std(self.loadout_rates_standard))})
+
         
         if np.mean(self.all_demand) >= self.demand:
             print('The whole demand of ',self.demand,'MG was met over the current planning hrorizon for',self.num_trials,'samples')
             self.sim_results['demand'] = 100
         else:
             self.percent_met = np.mean(self.all_demand)/self.demand*100
-            self.sim_results.update({'demand':self.percent_met})
+            self.sim_results['demand'].update({'percent':self.percent_met})
+            self.sim_results['demand'].update({'average':np.mean(self.all_demand)})
+            self.sim_results['demand'].update({'stdev':np.std(self.all_demand)})
+            self.sim_results['demand'].update({'sem':stat.sem(self.all_demand)})
+            self.sim_results['demand'].update({'conf int':stat.norm.interval(.95,np.mean(self.all_demand),np.std(self.all_demand))})
             print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
             print(self.sim_results)
 
@@ -196,7 +220,7 @@ class Simulation(object):
                 yield req
                 yield self.env.timeout(x/(equipment_rate*self.equip_in_ssl[self.farm_ssl[farm]][i]))
             i=i+1
-            yield self.env.timeout(.25)
+            #yield self.env.timeout(.25)
     
 
     def moniter_ssl(self):
