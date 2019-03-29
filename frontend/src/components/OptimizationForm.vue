@@ -35,18 +35,11 @@
         v-on:listChange='model.ssl_sizes = $event'
         v-bind:label="'SSL Sizes [small, medium, large]'"
     ></ListInput>
-    <div class="field">
-        <label class="label">SSL Sizes [small, medium, large]</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.ssl_sizes">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Harvest Progress</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.harvest_progress">
-        </div>
-    </div>
+    <ListInput 
+        v-bind:list='model.harvest_progress' 
+        v-on:listChange='model.harvest_progress = $event'
+        v-bind:label="'Harvest Progress [Week1, ..., Week13]'"
+    ></ListInput>
     <div class="field">
         <label class="label">Field - Dry Yield</label>
         <div class="control">
@@ -65,12 +58,11 @@
             <input class="input" type="text" v-model="model.field.proportion_devoted">
         </div>
     </div>
-    <div class="field">
-        <label class="label">Field - Area Ratio</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.field.area_ratio">
-        </div>
-    </div>
+    <ListInput 
+        v-bind:list='model.field.area_ratio' 
+        v-on:listChange='model.field.area_ratio = $event'
+        v-bind:label="'Area Ratio (Explination)'"
+    ></ListInput>
     <div class="field">
         <label class="label">Price per Mg</label>
         <div class="control">
@@ -95,42 +87,36 @@
             <input class="input" type="text" v-model="model.tax_rate">
         </div>
     </div>
-    <div class="field">
-        <label class="label">Equipment Loadout Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.loadout">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Equipment Press Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.press">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Equipment Chopper Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.chopper">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Equipment Bagger Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.bagger">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Equipment Module Former Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.module_former">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Equipment Module Hauler Cost</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.cost.equipment.module_hauler">
-        </div>
-    </div>
+    <ListInput 
+        v-bind:list='model.cost.equipment.loadout' 
+        v-on:listChange='model.cost.equipment.loadout = $event'
+        v-bind:label="'Equipment Loadout Cost [Explination, ..., ]'"
+    ></ListInput>
+    <ListInput 
+        v-bind:list='model.cost.equipment.press' 
+        v-on:listChange='model.cost.equipment.press = $event'
+        v-bind:label="'Equipment Press Cost [Explination, ..., ]'"
+    ></ListInput>
+    <ListInput 
+        v-bind:list='model.cost.equipment.chopper' 
+        v-on:listChange='model.cost.equipment.chopper = $event'
+        v-bind:label="'Equipment Chopper Cost [Explination, ..., ]'"
+    ></ListInput>
+    <ListInput 
+        v-bind:list='model.cost.equipment.bagger' 
+        v-on:listChange='model.cost.equipment.bagger = $event'
+        v-bind:label="'Equipment Bagger Cost [Explination, ..., ]'"
+    ></ListInput>
+    <ListInput 
+        v-bind:list='model.cost.equipment.module_former' 
+        v-on:listChange='model.cost.equipment.module_former = $event'
+        v-bind:label="'Equipment Module Former Cost [Explination, ..., ]'"
+    ></ListInput>
+    <ListInput 
+        v-bind:list='model.cost.equipment.module_hauler' 
+        v-on:listChange='model.cost.equipment.module_hauler = $event'
+        v-bind:label="'Equipment Module Hauler Cost [Explination, ..., ]'"
+    ></ListInput>
     <div class="field">
         <label class="label">Bunker Annual Ownership Cost</label>
         <div class="control">
@@ -195,6 +181,12 @@
         <label class="label">In Bag Degrade</label>
         <div class="control">
             <input class="input" type="text" v-model="model.degrade.in_bag">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Configurations</label>
+        <div class="control">
+            <input class="input" type="text" v-model="model.configurations">
         </div>
     </div>
 </form>

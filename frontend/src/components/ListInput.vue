@@ -3,13 +3,28 @@
     <div class="control"> 
         <form v-on:change="emit()">
             <label class="label">{{label}}</label>
-            <input 
-                class="input short"
-                type="number"
-                v-bind:key="item" 
-                v-for="(item, index) in list"
-                v-model="data[index]"
-            >
+            <div v-if="showLess" class="flexCols">
+                <input 
+                    class="input"
+                    type="number"
+                    v-bind:key="index" 
+                    v-for="(item, index) in list.slice(0,2)"
+                    v-model="data[index]"
+                >
+            </div>
+            <div v-if="!showLess" class="flexCols">
+                <input 
+                    class="input"
+                    type="number"
+                    v-bind:key="index" 
+                    v-for="(item, index) in list"
+                    v-model="data[index]"
+                >
+            </div>
+            <button type="button" v-on:click="showAll()">
+                <span v-if="showLess">show all</span>
+                <span v-if="!showLess">show less</span>
+            </button>
         </form>
     </div>
 </div>
@@ -27,20 +42,25 @@ export default {
     },
     data() {
         return {
-            data: Array(this.list.length), 
-            // data: this.list
+            data: this.list,
+            showLess: true,
         }
     }, 
     methods: {
         emit() {
             this.$emit('listChange', this.data);
+        },
+        showAll() {
+            this.showLess = !this.showLess;
         }
     }
 }
 </script>
 
 <style>
-.short {
-    width: 5rem !important;
+
+.flexCols {
+    display: flex;
+    flex-direction: column;
 }
 </style>
