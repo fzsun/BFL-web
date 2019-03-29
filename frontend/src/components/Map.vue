@@ -79,6 +79,8 @@ export default {
             sslMarkers: [],
             address: '',
             addressName: '',
+            flight_paths: [],
+            num_flight_paths: 0,
     }},
     props: ['mapInfo'],
     methods: {
@@ -301,8 +303,17 @@ export default {
           strokeOpacity: 1.0,
           strokeWeight: 2
         });
-
-        flightPath.setMap(this.map)
+        
+        flightPath.setMap(this.map);
+        this.flight_paths[this.num_flight_paths++] = flightPath;
+        },
+        removeRoutes() {
+            var i;
+            for (i = 0; i < this.num_flight_paths; i++) {
+                this.flight_paths[i].setMap(null);
+            }
+            this.flight_paths = [];
+            this.num_flight_paths = 0;
         }
     },
     mounted: function() {

@@ -220,7 +220,7 @@ class Simulation(object):
                 yield req
                 yield self.env.timeout(x/(equipment_rate*self.equip_in_ssl[self.farm_ssl[farm]][i]))
             i=i+1
-            #yield self.env.timeout(.25)
+            yield self.env.timeout(.25)
     
 
     def moniter_ssl(self):
