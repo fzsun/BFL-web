@@ -101,8 +101,9 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
-        self.sim_results = {'demand':{}, 'telehandler rate':{}, 'press rate':{}, 'chopper rate':{}, 'bagger rate':{}, 'module former rate':{}, 'module hauler rate':{}}
+        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
         self.simulation_results()
+        self.round_conf_int()
         #degradation_cost = 0
         #for period in range(self.m):
          #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
@@ -112,40 +113,40 @@ class Simulation(object):
         for equipment in self.config_rate:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
-                self.sim_results['press rate'].update({'average':np.mean(self.press_rate)})
-                self.sim_results['press rate'].update({'stdev':np.std(self.press_rate)})
-                self.sim_results['press rate'].update({'sem':stat.sem(self.press_rate)})
-                self.sim_results['press rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.press_rate),np.std(self.press_rate))})
+                self.sim_results['press rate'].update({'average':round(np.mean(self.press_rate),2)})
+                self.sim_results['press rate'].update({'stdev':round(np.std(self.press_rate),2)})
+                self.sim_results['press rate'].update({'sem':round(stat.sem(self.press_rate),2)})
+                self.sim_results['press rate'].update({'conf int':stat.norm.interval(.95,round(np.mean(self.press_rate),1),round(np.std(self.press_rate),1))})
             if equipment == 'chopper':
                 print('The average chopper rate in MG/hour:',np.mean(self.chopper_rate))
-                self.sim_results['chopper rate'].update({'average':np.mean(self.chopper_rate)})
-                self.sim_results['chopper rate'].update({'stdev':np.std(self.chopper_rate)})
-                self.sim_results['chopper rate'].update({'sem':stat.sem(self.chopper_rate)})
-                self.sim_results['chopper rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.chopper_rate),np.std(self.chopper_rate))})
+                self.sim_results['chopper rate'].update({'average':round(np.mean(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'stdev':round(np.std(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'sem':round(stat.sem(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'conf int':stat.t.interval(0.95,len(self.chopper_rate)-1, loc=np.mean(self.chopper_rate), scale=stat.sem(self.chopper_rate))})
             if equipment == 'bagger':
                 print('The average bagger rate in MG/hour:',np.mean(self.bagger_rate))
-                self.sim_results['bagger rate'].update({'average':np.mean(self.bagger_rate)})
-                self.sim_results['bagger rate'].update({'stdev':np.std(self.bagger_rate)})
-                self.sim_results['bagger rate'].update({'sem':stat.sem(self.bagger_rate)})
-                self.sim_results['bagger rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.bagger_rate),np.std(self.bagger_rate))})
+                self.sim_results['bagger rate'].update({'average':round(np.mean(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'stdev':round(np.std(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'sem':round(stat.sem(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'conf int':stat.t.interval(0.95,len(self.bagger_rate)-1, loc=np.mean(self.bagger_rate), scale=stat.sem(self.bagger_rate))})
             if equipment == 'module_former':
                 print('The average module former rate in MG/hour:',np.mean(self.former_rate))
-                self.sim_results['module former rate'].update({'average':np.mean(self.former_rate)})
-                self.sim_results['module former rate'].update({'stdev':np.std(self.former_rate)})
-                self.sim_results['module former rate'].update({'sem':stat.sem(self.former_rate)})
-                self.sim_results['module former rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.former_rate),np.std(self.former_rate))})
+                self.sim_results['module former rate'].update({'average':round(np.mean(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'stdev':round(np.std(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'sem':round(stat.sem(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'conf int':stat.t.interval(0.95,len(self.former_rate)-1, loc=np.mean(self.former_rate), scale=stat.sem(self.former_rate))})
             if equipment == 'module_hauler':
                 print('The average loadout rate for module hauler in MG/hour:',np.mean(self.loadout_rates_module)) 
-                self.sim_results['module hauler rate'].update({'average':np.mean(self.loadout_rates_module)})
-                self.sim_results['module hauler rate'].update({'stdev':np.std(self.loadout_rates_module)})
-                self.sim_results['module hauler rate'].update({'sem':stat.sem(self.loadout_rates_module)})
-                self.sim_results['module hauler rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.loadout_rates_module),np.std(self.loadout_rates_module))})
+                self.sim_results['module hauler rate'].update({'average':round(np.mean(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'stdev':round(np.std(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'sem':round(stat.sem(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_module)-1, loc=np.mean(self.loadout_rates_module), scale=stat.sem(self.loadout_rates_module))})
             if 'loadout' in self.configuration:
                 print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
-                self.sim_results['telehandler rate'].update({'average':np.mean(self.loadout_rates_standard)})
-                self.sim_results['telehandler rate'].update({'stdev':np.std(self.loadout_rates_standard)})
-                self.sim_results['telehandler rate'].update({'sem':stat.sem(self.loadout_rates_standard)})
-                self.sim_results['telehandler rate'].update({'conf int':stat.norm.interval(.95,np.mean(self.loadout_rates_standard),np.std(self.loadout_rates_standard))})
+                self.sim_results['telehandler rate'].update({'average':round(np.mean(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'stdev':round(np.std(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'sem':round(stat.sem(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_standard)-1, loc=np.mean(self.loadout_rates_standard), scale=stat.sem(self.loadout_rates_standard))})
 
         
         if np.mean(self.all_demand) >= self.demand:
@@ -153,14 +154,15 @@ class Simulation(object):
             self.sim_results['demand'] = 100
         else:
             self.percent_met = np.mean(self.all_demand)/self.demand*100
-            self.sim_results['demand'].update({'percent':self.percent_met})
-            self.sim_results['demand'].update({'average':np.mean(self.all_demand)})
-            self.sim_results['demand'].update({'stdev':np.std(self.all_demand)})
-            self.sim_results['demand'].update({'sem':stat.sem(self.all_demand)})
-            self.sim_results['demand'].update({'conf int':stat.norm.interval(.95,np.mean(self.all_demand),np.std(self.all_demand))})
+            self.sim_results['demand'].update({'percent':round(self.percent_met,2)})
+            self.sim_results['demand'].update({'average':round(np.mean(self.all_demand),2)})
+            self.sim_results['demand'].update({'stdev':round(np.std(self.all_demand),2)})
+            self.sim_results['demand'].update({'sem':round(stat.sem(self.all_demand),2)})
+            self.sim_results['demand'].update({'conf int':stat.t.interval(0.95,len(self.all_demand)-1, loc=np.mean(self.all_demand), scale=stat.sem(self.all_demand))})
+            
             print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
             print(self.sim_results)
-
+        
 
     '''
     Simulation Environment 
@@ -457,6 +459,13 @@ class Simulation(object):
         self.degradation_ensiled_actual = []
         self.degradation_farm_actual = []
 
+    def round_conf_int(self):
+        for dic in self.sim_results:
+            if self.sim_results[dic]['conf int'] != 0:
+                x = list(self.sim_results[dic]['conf int'])
+                x[0] = round(x[0], 2)
+                x[1] = round(x[1], 2)
+                self.sim_results[dic]['conf int'] = x
                 
 
 #my_sim = Simulation()
