@@ -9,6 +9,7 @@ import numpy as np
 import re
 import math 
 import matplotlib.pyplot as plt
+from scipy import stats as stat
 
 #open input and output files to be used
 #with open('output_0.json') as output_file:
@@ -27,19 +28,20 @@ class Simulation(object):
         self.algo_input_data = algo_input_data
         self.output_data = output_data
                    
-        self.num_trials = int(input('How many sample trials would you like to simulate? '))
+        self.num_trials = 5
+        self.work_week = 40
          # assign variables from algo input
         self.demand = self.algo_input_data['demand']
         self.equipment_data = self.algo_input_data['cost']['equipment']
         self.degradation = self.algo_input_data['degrade']
         
-        self.SIM_TIME = self.algo_input_data['horizon']*40 + 40
+        self.SIM_TIME = self.algo_input_data['horizon']*self.work_week + self.work_week
         
         # assign variables from output file
         self.coord_f = self.output_data['params']['Coord_farms'] # coordinates x,y for farms (all possible)
         self.coord_s = self.output_data['params']['Coord_ssls'] # coordinates x,y for ssl (all possible)
-        self.K = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
-        self.a = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
+        self.ssl_configurations = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
+        self.harvest_schedule = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
         self.ue = self.output_data['params']['upperbound_equip_proc_rate'] # processing rate of non-chopping methods
         self.sysnum = self.output_data['params']['Sysnum']
         self.solutions = self.output_data['solution'] # holds the algorithms solution dictionary
@@ -52,25 +54,25 @@ class Simulation(object):
         self.loadout_rates_module_jit = []
         for equipment in self.configuration:
             if equipment == 'loadout':
-                self.loadout_rate_standard = self.equipment_data[equipment][4]/40
+                self.loadout_rate_standard = self.equipment_data[equipment][4]/self.work_week
             elif equipment == 'press':
-                self.config_rate.update({'press':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'press':self.equipment_data[equipment][4]/self.work_week})
                 self.press_rate = []
             elif equipment == 'chopper':
-                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/self.work_week})
                 self.chopper_rate = []
             elif equipment == 'bagger':
-                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/self.work_week})
                 self.bagger_rate = []
             elif equipment == 'module_former':
-                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/40})
+                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/self.work_week})
                 self.former_rate = []
             elif equipment == 'module_hauler':
-                self.loadout_rate_module = self.equipment_data[equipment][4]/40
+                self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
             
         
-        self.m = self.a.shape[0]
-        self.n = self.a.shape[1]
+        self.m = self.harvest_schedule.shape[0]
+        self.n = self.harvest_schedule.shape[1]
         
         self.all_refinery_actual = []
         self.all_ssl_actual = []
@@ -99,8 +101,9 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
-        self.sim_results = {}
+        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
         self.simulation_results()
+        self.round_conf_int()
         #degradation_cost = 0
         #for period in range(self.m):
          #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
@@ -110,29 +113,56 @@ class Simulation(object):
         for equipment in self.config_rate:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
-                self.sim_results.update({'press':np.mean(self.press_rate)})
+                self.sim_results['press rate'].update({'average':round(np.mean(self.press_rate),2)})
+                self.sim_results['press rate'].update({'stdev':round(np.std(self.press_rate),2)})
+                self.sim_results['press rate'].update({'sem':round(stat.sem(self.press_rate),2)})
+                self.sim_results['press rate'].update({'conf int':stat.norm.interval(.95,round(np.mean(self.press_rate),1),round(np.std(self.press_rate),1))})
             if equipment == 'chopper':
                 print('The average chopper rate in MG/hour:',np.mean(self.chopper_rate))
-                self.sim_results.update({'chopper':np.mean(self.chopper_rate)})
+                self.sim_results['chopper rate'].update({'average':round(np.mean(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'stdev':round(np.std(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'sem':round(stat.sem(self.chopper_rate),2)})
+                self.sim_results['chopper rate'].update({'conf int':stat.t.interval(0.95,len(self.chopper_rate)-1, loc=np.mean(self.chopper_rate), scale=stat.sem(self.chopper_rate))})
             if equipment == 'bagger':
                 print('The average bagger rate in MG/hour:',np.mean(self.bagger_rate))
-                self.sim_results.update({'bagger':np.mean(self.bagger_rate)})
+                self.sim_results['bagger rate'].update({'average':round(np.mean(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'stdev':round(np.std(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'sem':round(stat.sem(self.bagger_rate),2)})
+                self.sim_results['bagger rate'].update({'conf int':stat.t.interval(0.95,len(self.bagger_rate)-1, loc=np.mean(self.bagger_rate), scale=stat.sem(self.bagger_rate))})
             if equipment == 'module_former':
                 print('The average module former rate in MG/hour:',np.mean(self.former_rate))
-                self.sim_results.update({'module_former':np.mean(self.former_rate)})
+                self.sim_results['module former rate'].update({'average':round(np.mean(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'stdev':round(np.std(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'sem':round(stat.sem(self.former_rate),2)})
+                self.sim_results['module former rate'].update({'conf int':stat.t.interval(0.95,len(self.former_rate)-1, loc=np.mean(self.former_rate), scale=stat.sem(self.former_rate))})
             if equipment == 'module_hauler':
                 print('The average loadout rate for module hauler in MG/hour:',np.mean(self.loadout_rates_module)) 
-                self.sim_results.update({'module hauler':np.mean(self.loadout_rates_module)})
+                self.sim_results['module hauler rate'].update({'average':round(np.mean(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'stdev':round(np.std(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'sem':round(stat.sem(self.loadout_rates_module),2)})
+                self.sim_results['module hauler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_module)-1, loc=np.mean(self.loadout_rates_module), scale=stat.sem(self.loadout_rates_module))})
             if 'loadout' in self.configuration:
                 print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
-                self.sim_results.update({'loadout':np.mean(self.loadout_rates_standard)})
+                self.sim_results['telehandler rate'].update({'average':round(np.mean(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'stdev':round(np.std(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'sem':round(stat.sem(self.loadout_rates_standard),2)})
+                self.sim_results['telehandler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_standard)-1, loc=np.mean(self.loadout_rates_standard), scale=stat.sem(self.loadout_rates_standard))})
+
         
         if np.mean(self.all_demand) >= self.demand:
             print('The whole demand of ',self.demand,'MG was met over the current planning hrorizon for',self.num_trials,'samples')
+            self.sim_results['demand'] = 100
         else:
             self.percent_met = np.mean(self.all_demand)/self.demand*100
+            self.sim_results['demand'].update({'percent':round(self.percent_met,2)})
+            self.sim_results['demand'].update({'average':round(np.mean(self.all_demand),2)})
+            self.sim_results['demand'].update({'stdev':round(np.std(self.all_demand),2)})
+            self.sim_results['demand'].update({'sem':round(stat.sem(self.all_demand),2)})
+            self.sim_results['demand'].update({'conf int':stat.t.interval(0.95,len(self.all_demand)-1, loc=np.mean(self.all_demand), scale=stat.sem(self.all_demand))})
+            
             print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
-
+            print(self.sim_results)
+        
 
     '''
     Simulation Environment 
@@ -142,13 +172,13 @@ class Simulation(object):
         for period in range(self.m):
             self.create_loadout_rate()
             for farm in range(self.n):
-                if self.a[period][farm] != 0:
-                    #self.harvest_actual[period][farm]=max(0,np.random.normal(self.a[period][farm], 1/5*self.a[period][farm]))
-                    self.harvest_actual[period][farm] = max(0,self.a[period][farm])
+                if self.harvest_schedule[period][farm] != 0:
+                    self.harvest_actual[period][farm]=max(0,np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
+                    #self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
                     self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
                     pass
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
     
     def farm_transport(self):
         for period in range(self.m):
@@ -157,7 +187,7 @@ class Simulation(object):
                     self.env.process(self.JIT_delivery(period, farm))
                 if self.farm_transport_schedule != 0:
                     self.env.process(self.preprocessing(period, farm))
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
 
             
     
@@ -178,8 +208,8 @@ class Simulation(object):
     def use_equipment(self, period, farm, x):
         i=1
         for equipment in self.config_rate:
-            #equipment_rate = np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])
-            equipment_rate = self.config_rate[equipment]
+            equipment_rate = max(0,np.random.normal(self.config_rate[equipment],1/10*self.config_rate[equipment]))
+            #equipment_rate = self.config_rate[equipment]
             if equipment == 'press':
                 self.press_rate.append(equipment_rate)
             if equipment == 'chopper':
@@ -202,7 +232,7 @@ class Simulation(object):
                     self.env.process(self.refinery_transport(ssl, period))
                 else:
                     pass
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
             
             
     def refinery_transport(self, ssl, period):
@@ -241,9 +271,9 @@ class Simulation(object):
 
     def create_loadout_rate(self):
         if 'module_hauler' in self.configuration:
-            #self.loadout_rate_module = np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)
+            self.loadout_rate_module = min(181,max(50,np.random.normal(self.loadout_rate_module, 1/10*self.loadout_rate_module)))
             self.loadout_rates_module.append(self.loadout_rates_module)
-        #self.loadout_rate_standard = np.random.normal(self.loadout_rate_standard, 1/5*self.loadout_rate_standard)
+        self.loadout_rate_standard = min(43.5,max(15,np.random.normal(self.loadout_rate_standard, 1/10*self.loadout_rate_standard)))
         self.loadout_rates_standard.append(self.loadout_rate_standard)
         
         
@@ -252,7 +282,7 @@ class Simulation(object):
         x = 0
         y = 0
         for period in range(self.m):
-            yield self.env.timeout(39)
+            yield self.env.timeout(self.work_week-1)
             for farm in range(self.n):
                 if self.farms[farm].level > 0:
                     if self.sysnum in [0,1,2,3,4,5,6,7]:
@@ -281,7 +311,7 @@ class Simulation(object):
         x=0
         y=0
         for period in range(self.m):
-            yield self.env.timeout(39)
+            yield self.env.timeout(self.work_week-1)
             for ssl in self.ssl_container:
                 if self.ssl_container[ssl].level > 0:
                     if self.sysnum in [0,4,8,12]:
@@ -323,10 +353,10 @@ class Simulation(object):
         total4 = 0
         total5 = 0
         for period in range(self.m):
-            yield self.env.timeout(40)
+            yield self.env.timeout(self.work_week)
             for farm in range(self.n):   
                 total = total + self.harvest_actual[period][farm]
-                total2 = total2 + self.a[period][farm] 
+                total2 = total2 + self.harvest_schedule[period][farm] 
                 total3 = total3 + self.jit_farm_transport[period][farm]
             self.harvest_hypothetical.append(total2)
             self.total_harvest.append(total)
@@ -385,14 +415,14 @@ class Simulation(object):
             bb = re.split('\W', aa)
             if bb[0] == 'ssl_configuration_selection':
                 i=1
-                z = len(self.K[int(bb[2])])-1
+                z = len(self.ssl_configurations[int(bb[2])])-1
                 self.ssl[int(bb[1])] = []
                 for number in range(z):
                     self.ssl[int(bb[1])].append(simpy.Resource(self.env, capacity=1))
                     i=i+1
-                self.equip_in_ssl[int(bb[1])] = self.K[int(bb[2])][1:]
-                self.before_ssl[int(bb[1])] = simpy.Container(self.env, capacity=self.K[int(bb[2])][0], init=0)
-                self.ssl_container[int(bb[1])] = simpy.Container(self.env, capacity=self.K[int(bb[2])][0], init=0)
+                self.equip_in_ssl[int(bb[1])] = self.ssl_configurations[int(bb[2])][1:]
+                self.before_ssl[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
+                self.ssl_container[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
                 self.ssl_location[int(bb[1])] = self.coord_s[int(bb[1])]
             else:
                 pass    
@@ -429,6 +459,13 @@ class Simulation(object):
         self.degradation_ensiled_actual = []
         self.degradation_farm_actual = []
 
+    def round_conf_int(self):
+        for dic in self.sim_results:
+            if self.sim_results[dic]['conf int'] != 0:
+                x = list(self.sim_results[dic]['conf int'])
+                x[0] = round(x[0], 2)
+                x[1] = round(x[1], 2)
+                self.sim_results[dic]['conf int'] = x
                 
 
 #my_sim = Simulation()

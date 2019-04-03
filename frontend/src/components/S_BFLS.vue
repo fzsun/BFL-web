@@ -39,6 +39,72 @@
     >
       Optimize
     </button>
+    <br></br>
+    <div class="results">
+      <div class="title is-size-3">Simulation Results</div>
+      <div class="sim_results">
+        <div class="title is-size-5" v-html="'Percent of demand met: ' + sim_response['demand']['percent'] + '%'"></div>
+        <table class="table1">
+          <tr>
+            <th class="table_header">Descriptive Statistics</th>
+            <th class="table_header">Mean</th>
+            <th class="table_header">Standard Deviation</th>
+            <th class="table_header">SE Mean</th>
+            <th class="table_header">95% Confidence Interval</th>
+          </tr>
+          <tr>
+            <td class="table_row">Demand</td>
+            <td class="table_row" v-html="sim_response['demand']['average'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['demand']['stdev'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['demand']['sem'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['demand']['conf int'] + ' Mg'"></td>
+          </tr>
+           <tr>
+            <td class="table_row">Telehandler</td>
+            <td class="table_row" v-html="sim_response['telehandler rate']['average'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['telehandler rate']['stdev'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['telehandler rate']['sem'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['telehandler rate']['conf int'] + ' Mg/hr'"></td>
+          </tr>
+          <tr>
+            <td class="table_row">Forage Chopper</td>
+            <td class="table_row" v-html="sim_response['chopper rate']['average'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['chopper rate']['stdev'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['chopper rate']['sem'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['chopper rate']['conf int'] + ' Mg/hr'"></td>
+          </tr>
+          <tr>
+            <td class="table_row">Press</td>
+            <td class="table_row" v-html="sim_response['press rate']['average'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['press rate']['stdev'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['press rate']['sem'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['press rate']['conf int'] + ' Mg/hr'"></td>
+          </tr>
+          <tr>
+            <td class="table_row">Bagger</td>
+            <td class="table_row" v-html="sim_response['bagger rate']['average'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['bagger rate']['stdev'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['bagger rate']['sem'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['bagger rate']['conf int'] + ' Mg/hr'"></td>
+          </tr>
+          <tr>
+            <td class="table_row">Module Former</td>
+            <td class="table_row" v-html="sim_response['module former rate']['average'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['stdev'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['sem'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['conf int'] + ' Mg'"></td>
+          </tr>
+          <tr>
+            <td class="table_row">Module Hauler</td>
+            <td class="table_row" v-html="sim_response['module hauler rate']['average'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module hauler rate']['stdev'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module hauler rate']['sem'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module hauler rate']['conf int'] + ' Mg'"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
 </div>
 </template>
 
@@ -123,6 +189,8 @@ export default {
             ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
         ]
       },
+      op_response: {},
+      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
     };
   },
   methods: {
@@ -147,7 +215,7 @@ export default {
       var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}
       var routes = [];
       var i;
-    
+      this.$refs.map.removeRoutes();
       for (i=0; i < len; i++){
         var route = [];
         var f_id = response.summary.allocation_from_farm[i];
@@ -179,10 +247,10 @@ export default {
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
-              this.response = response.data;
-              console.log("Allocation Farm: ", response.data.summary.allocation_from_farm);
-              console.log("Allocation ssl: ", response.data.summary.allocation_to_ssl);
-              this.parseApplyRoutes(this.response);
+              var r = response.data
+              this.op_response = r.op_response;
+              this.sim_response = r.sim_response;
+              this.parseApplyRoutes(this.op_response);
           })
       }
     }
@@ -218,12 +286,41 @@ export default {
     margin: 0;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
-    grid-template-areas: "title" "map" "paramDescription" "params" "optimize";
+    grid-template-areas: "title" "map" "paramDescription" "params" "optimize" "results";
 }
 
 .optimize {
   grid-area: optimize;
   width: 110px;
   float: right;
+}
+
+.results {
+  grid-area: results;
+  text-align: left;
+}
+
+.table1{
+  grid-area: table1;
+  border-collapse: collapse;
+  border: 1px solid #0000FF;
+  width: 75%;
+}
+
+.table_header{
+  grid-area: table_header;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgb(76, 127, 175);
+  color: white;
+  text-align: center;
+  border: 1px solid #000000;
+}
+
+.table_row{
+  grid-area: table_row;
+  border: 1px solid #0000FF;
+  text-align: center;
 }
 </style>
