@@ -24,7 +24,10 @@
         Cancel
       </button>
     </div>
-    <div class="params">
+    <div 
+      v-if="!showSolution"
+      class="params"
+    >
       <OptimizationForm 
         v-if="customForm"
         ref = "opForm"
@@ -35,12 +38,15 @@
     <button 
       class="button optimize is-warning" 
       v-on:click="optimize"
-      v-if="showOptButton"
+      v-if="showOptButton == true && showSolution == false"
     >
       Optimize
     </button>
-    <br></br>
-    <div class="results">
+    <br>
+    <div 
+      class="results"
+      v-if="showSolution"
+    >
       <div class="title is-size-3">Simulation Results</div>
       <div class="sim_results">
         <div class="title is-size-5" v-html="'Percent of demand met: ' + sim_response['demand']['percent'] + '%'"></div>
@@ -128,6 +134,7 @@ export default {
       showOptButton: false,
       customModel: {},
       model: {},
+      showSolution: false,
       defaultModel: {
         "moisture": 0.7,
         "demand": 200000,
@@ -140,7 +147,8 @@ export default {
         "dry_yield": 21,
         "radius": 32,
         "proportion_devoted": 0.03,
-        "area_ratio": [1, 10]},
+        "area_ratio": [1, 10]
+        },
         "price": 65,
         "interest_rate": 0.05,
         "insurance_rate": 0.008,
@@ -250,6 +258,7 @@ export default {
               var r = response.data
               this.op_response = r.op_response;
               this.sim_response = r.sim_response;
+              this.showSolution = true;
               this.parseApplyRoutes(this.op_response);
           })
       }
