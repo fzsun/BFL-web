@@ -95,7 +95,7 @@ class s_bfl(object):
             m.addConstrs((inventory_level_farm[t, f] == inventory_level_farm[t - 1, f] + harvested[t, f] - shipped_farm_ssl.sum(t, f, '*')
                         for t in T for f in F),
                         name='c5')
-            m.addConstrs((shipped_ssl_refinery.sum(t, '*') + penalty[t] == self.demand[t] for t in T),
+            m.addConstrs((shipped_ssl_refinery.sum(t, '*') == self.demand[t] for t in T),
                         name='c6')
             m.addConstrs(
                 (shipped_farm_ssl.sum('*', f, s) <= M[f] * y[f, s] for f in F for s in S),
@@ -109,7 +109,7 @@ class s_bfl(object):
                         z_jit.sum(t, f, '*') for t in T for f in F),
                         name='c5')
             m.addConstrs(
-                (z_jit.sum(t, '*', '*') + shipped_ssl_refinery.sum(t, '*') + penalty[t] == self.demand[t]
+                (z_jit.sum(t, '*', '*') + shipped_ssl_refinery.sum(t, '*') == self.demand[t]
                 for t in T),
                 name='c6')
             m.addConstrs(
