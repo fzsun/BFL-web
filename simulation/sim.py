@@ -69,8 +69,16 @@ class Simulation(object):
                 self.former_rate = []
             elif equipment == 'module_hauler':
                 self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
-            
-        
+        self.breakdown ={'loadout':[], 'press':[], 'chopper':[], 'bagger':[], 'module former':[], 'module hauler': []}  
+        for trial in range(self.num_trials):
+            self.breakdown['loadout'].append([])
+            self.breakdown['press'].append([])
+            self.breakdown['chopper'].append([])
+            self.breakdown['bagger'].append([])
+            self.breakdown['module former'].append([])
+            self.breakdown['module hauler'].append([])
+        print(self.equipment_data)
+
         self.m = self.harvest_schedule.shape[0]
         self.n = self.harvest_schedule.shape[1]
         
@@ -98,19 +106,21 @@ class Simulation(object):
             #self.env.process(self.degradation_field()) # counts degredation of sitting sorghum at the fields
             #self.env.process(self.degradation_ensiled()) # counts degradation of ensiled sorghum
             self.env.process(self.record_data()) # Records all of the trial specific data and appends it to trial constant data
+            #self.env.process(self.machine_break(trial))
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
         self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
         self.simulation_results()
         self.round_conf_int()
+        print(self.all_demand)
         #degradation_cost = 0
         #for period in range(self.m):
          #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
         #print('The extra cost incured due to unforseen degradation is: ',degradation_cost,' dollars')
 
     def simulation_results(self):
-        for equipment in self.config_rate:
+        for equipment in self.configuration:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
                 self.sim_results['press rate'].update({'average':round(np.mean(self.press_rate),2)})
@@ -141,7 +151,7 @@ class Simulation(object):
                 self.sim_results['module hauler rate'].update({'stdev':round(np.std(self.loadout_rates_module),2)})
                 self.sim_results['module hauler rate'].update({'sem':round(stat.sem(self.loadout_rates_module),2)})
                 self.sim_results['module hauler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_module)-1, loc=np.mean(self.loadout_rates_module), scale=stat.sem(self.loadout_rates_module))})
-            if 'loadout' in self.configuration:
+            if equipment == 'loadout':
                 print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
                 self.sim_results['telehandler rate'].update({'average':round(np.mean(self.loadout_rates_standard),2)})
                 self.sim_results['telehandler rate'].update({'stdev':round(np.std(self.loadout_rates_standard),2)})
@@ -466,6 +476,17 @@ class Simulation(object):
                 x[0] = round(x[0], 2)
                 x[1] = round(x[1], 2)
                 self.sim_results[dic]['conf int'] = x
+
+    '''def machine_break(self, trial):
+        for period in range(self.m):
+            for day in range(self.work_week/7-2):
+                for ssl in len ssl:
+                    
+                    if 'loadout' in self.configuration:'''
+
+                        
+
+
                 
 
 #my_sim = Simulation()
