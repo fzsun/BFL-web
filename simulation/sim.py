@@ -28,7 +28,7 @@ class Simulation(object):
         self.algo_input_data = algo_input_data
         self.output_data = output_data
                    
-        self.num_trials = 5
+        self.num_trials = 100
         self.work_week = 40
          # assign variables from algo input
         self.demand = self.algo_input_data['demand']
@@ -77,7 +77,6 @@ class Simulation(object):
             self.breakdown['bagger'].append([])
             self.breakdown['module former'].append([])
             self.breakdown['module hauler'].append([])
-        print(self.equipment_data)
 
         self.m = self.harvest_schedule.shape[0]
         self.n = self.harvest_schedule.shape[1]
@@ -110,16 +109,15 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         #self.graphs() # calculates averages for discriptive info and creates visuals
-        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
+        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", "conf":{'90':0, '95':0, '99':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
         self.simulation_results()
         self.round_conf_int()
-        print(self.all_demand)
         #degradation_cost = 0
         #for period in range(self.m):
          #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
         #print('The extra cost incured due to unforseen degradation is: ',degradation_cost,' dollars')
 
-    def simulation_results(self):
+    def simulation_results(self):        
         for equipment in self.configuration:
             if equipment == 'press':
                 print('The average compression rate in MG/hour:',np.mean(self.press_rate))
@@ -168,11 +166,28 @@ class Simulation(object):
             self.sim_results['demand'].update({'average':round(np.mean(self.all_demand),2)})
             self.sim_results['demand'].update({'stdev':round(np.std(self.all_demand),2)})
             self.sim_results['demand'].update({'sem':round(stat.sem(self.all_demand),2)})
-            self.sim_results['demand'].update({'conf int':stat.t.interval(0.95,len(self.all_demand)-1, loc=np.mean(self.all_demand), scale=stat.sem(self.all_demand))})
             
             print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
             print(self.sim_results)
         
+        count_90 = 0
+        count_95 = 0
+        count_99 = 0
+        for demand in self.all_demand:
+            if demand >= .99*self.demand:
+                count_90 += 1
+                count_95 += 1
+                count_99 += 1
+            elif demand >= .95*self.demand:
+                count_90 += 1
+                count_95 += 1
+            elif demand >= .9*self.demand:
+                count_90 += 1
+            else:
+                pass
+        self.sim_results['demand']['conf'].update({'90':float(count_90/self.num_trials*100)})
+        self.sim_results['demand']['conf'].update({'95':float(count_95/self.num_trials*100)})
+        self.sim_results['demand']['conf'].update({'99':float(count_99/self.num_trials*100)})
 
     '''
     Simulation Environment 
@@ -218,7 +233,7 @@ class Simulation(object):
     def use_equipment(self, period, farm, x):
         i=1
         for equipment in self.config_rate:
-            equipment_rate = max(0,np.random.normal(self.config_rate[equipment],1/10*self.config_rate[equipment]))
+            equipment_rate = min(1.5*self.config_rate[equipment],max(.5*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/10*self.config_rate[equipment])))
             #equipment_rate = self.config_rate[equipment]
             if equipment == 'press':
                 self.press_rate.append(equipment_rate)
@@ -281,10 +296,10 @@ class Simulation(object):
 
     def create_loadout_rate(self):
         if 'module_hauler' in self.configuration:
-            self.loadout_rate_module = min(181,max(50,np.random.normal(self.loadout_rate_module, 1/10*self.loadout_rate_module)))
-            self.loadout_rates_module.append(self.loadout_rates_module)
-        self.loadout_rate_standard = min(43.5,max(15,np.random.normal(self.loadout_rate_standard, 1/10*self.loadout_rate_standard)))
-        self.loadout_rates_standard.append(self.loadout_rate_standard)
+            rate = min(1.5*self.loadout_rate_module,max(.5*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/10*self.loadout_rate_module)))
+            self.loadout_rates_module.append(rate)
+        rate2 = min(1.5*self.loadout_rate_standard,max(.5*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/10*self.loadout_rate_standard)))
+        self.loadout_rates_standard.append(rate2)
         
         
 
@@ -471,11 +486,15 @@ class Simulation(object):
 
     def round_conf_int(self):
         for dic in self.sim_results:
-            if self.sim_results[dic]['conf int'] != 0:
+            if dic == 'demand':
+                pass
+            elif self.sim_results[dic]['conf int'] != 0:
                 x = list(self.sim_results[dic]['conf int'])
                 x[0] = round(x[0], 2)
                 x[1] = round(x[1], 2)
                 self.sim_results[dic]['conf int'] = x
+            else:
+                pass
 
     '''def machine_break(self, trial):
         for period in range(self.m):

@@ -44,6 +44,9 @@
       <div class="title is-size-3">Simulation Results</div>
       <div class="sim_results">
         <div class="title is-size-5" v-html="'Percent of demand met: ' + sim_response['demand']['percent'] + '%'"></div>
+        <div class="results" v-html="'Confidence demand will be met to 90%: ' + sim_response['demand']['conf']['90'] + '%'"></div>
+        <div class="results" v-html="'Confidence demand will be met to 95%: ' + sim_response['demand']['conf']['95'] + '%'"></div>
+        <div class="results" v-html="'Confidence demand will be met to 99%: ' + sim_response['demand']['conf']['99'] + '%'"></div>
         <table class="table1">
           <tr>
             <th class="table_header">Descriptive Statistics</th>
@@ -57,7 +60,7 @@
             <td class="table_row" v-html="sim_response['demand']['average'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['demand']['stdev'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['demand']['sem'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['demand']['conf int'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['demand']['conf int']"></td>
           </tr>
            <tr>
             <td class="table_row">Telehandler</td>
@@ -190,7 +193,7 @@ export default {
         ]
       },
       op_response: {},
-      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":0}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
+      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'conf':{'90':0, '95':0, '99':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
     };
   },
   methods: {
