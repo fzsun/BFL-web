@@ -110,7 +110,7 @@
         </table>
       </div>
     </div>
-
+    <Csv_Formatter class="csv_download" ref="csv_download"></Csv_Formatter>
 </div>
 </template>
 
@@ -118,12 +118,14 @@
 import { validators, component as VueFormGenerator } from 'vue-form-generator'
 import axios from 'axios'
 import Map from './Map'
+import Csv_Formatter from './Csv_Formatter'
 import OptimizationForm from './OptimizationForm'
 
 export default {
   components: {
       VueFormGenerator,
       'Map' : Map,
+      'Csv_Formatter' : Csv_Formatter,
       'OptimizationForm' : OptimizationForm,
   },
   data() {
@@ -257,9 +259,11 @@ export default {
           .then(response => {
               var r = response.data
               this.op_response = r.op_response;
-              this.sim_response = r.sim_response;
+              this.$refs.csv_download.generate(this.op_response);
+			  this.sim_response = r.sim_response;
               this.showSolution = true;
               this.parseApplyRoutes(this.op_response);
+              this.$refs.map.show_results(this.op_response["summary"]["cost"]);
           })
       }
     }
