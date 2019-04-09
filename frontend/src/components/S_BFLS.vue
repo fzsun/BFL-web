@@ -349,7 +349,7 @@ export default {
           .then(response => {
               var r = response.data
               this.op_response = r.op_response;
-              this.$refs.csv_download.generateCsv(this.op_response);
+              this.$refs.csv_download.generateCsv(this.op_response.solution);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
               this.parseApplyRoutes(this.op_response);

@@ -48,6 +48,7 @@ export default {
     },
     methods: {
         generateCsv(data) {
+			console.log(data);
             var k = 0;
             var i;
             for (i = 0; i < data.length; i++) {
@@ -58,7 +59,7 @@ export default {
                                                  ssl: inner_parts[1].split("]")[0]};
                 } else if (parts[0] == "shipped_farm_ssl") {
                     var inner_parts = parts[1].split(",");
-                    this.op_esponse_csv[parseInt(inner_parts[1])]["week_" + inner_parts[0]] = data[i][1];
+                    this.op_response_csv[parseInt(inner_parts[1])]["week_" + inner_parts[0]] = data[i][1];
                 }
             }
             console.log(this.op_response_csv);
