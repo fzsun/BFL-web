@@ -26,7 +26,7 @@
               >
                 <option 
                   v-bind:key=index
-                  v-for="(config, index) in model.configurations"
+                  v-for="(config, index) in configurations"
                   v-bind:value="index"
                 >{{config}}</option>
               </select>
@@ -160,6 +160,24 @@ export default {
   data() {
     return {
       response: [],
+      configurations: [
+            "[whole_stalk, loadout, chopper]",
+            "[whole_stalk, loadout, chopper, bagger]",
+            "[whole_stalk, loadout, chopper, bunker]",
+            "[whole_stalk, loadout, chopper, module_former, module_hauler]",
+            "[whole_stalk, loadout, chopper, press]",
+            "[whole_stalk, loadout, chopper, press, bagger]",
+            "[whole_stalk, loadout, chopper, press, bunker]",
+            "[whole_stalk, loadout, chopper, press, module_former, module_hauler]",
+            "[forage_chop, loadout]",
+            "[forage_chop, loadout, bagger]",
+            "[forage_chop, loadout, bunker]",
+            "[forage_chop, loadout, module_former, module_hauler]",
+            "[forage_chop, loadout, press]",
+            "[forage_chop, loadout, press, bagger]",
+            "[forage_chop, loadout, press, bunker]",
+            "[forage_chop, loadout, press, module_former, module_hauler]"
+        ],
       mapInfo: {},
       showSolution: false,
       customForm: false,
@@ -211,23 +229,24 @@ export default {
             "in_bag": 100
         },
         "configurations": [
-            "[whole_stalk, loadout, chopper]",
-            "[whole_stalk, loadout, chopper, bagger]",
-            "[whole_stalk, loadout, chopper, bunker]",
-            "[whole_stalk, loadout, chopper, module_former, module_hauler]",
-            "[whole_stalk, loadout, chopper, press]",
-            "[whole_stalk, loadout, chopper, press, bagger]",
-            "[whole_stalk, loadout, chopper, press, bunker]",
-            "[whole_stalk, loadout, chopper, press, module_former, module_hauler]",
-            "[forage_chop, loadout]",
-            "[forage_chop, loadout, bagger]",
-            "[forage_chop, loadout, bunker]",
-            "[forage_chop, loadout, module_former, module_hauler]",
-            "[forage_chop, loadout, press]",
-            "[forage_chop, loadout, press, bagger]",
-            "[forage_chop, loadout, press, bunker]",
-            "[forage_chop, loadout, press, module_former, module_hauler]"
-        ]
+            ["whole_stalk", "loadout", "chopper"],
+            ["whole_stalk", "loadout", "chopper", "bagger"],
+            ["whole_stalk", "loadout", "chopper", "bunker"],
+            ["whole_stalk", "loadout", "chopper", "module_former", "module_hauler"],
+            ["whole_stalk", "loadout", "chopper", "press"],
+            ["whole_stalk", "loadout", "chopper", "press", "bagger"],
+            ["whole_stalk", "loadout", "chopper", "press", "bunker"],
+            ["whole_stalk", "loadout", "chopper", "press", "module_former", "module_hauler"],
+            ["forage_chop", "loadout"],
+            ["forage_chop", "loadout", "bagger"],
+            ["forage_chop", "loadout", "bunker"],
+            ["forage_chop", "loadout", "module_former", "module_hauler"],
+            ["forage_chop", "loadout", "press"],
+            ["forage_chop", "loadout", "press", "bagger"],
+            ["forage_chop", "loadout", "press", "bunker"],
+            ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
+          ]
+        
       },
       op_response: {},
       sim_response: {
@@ -330,8 +349,8 @@ export default {
           .then(response => {
               var r = response.data
               this.op_response = r.op_response;
-              this.$refs.csv_download.generate(this.op_response);
-			  this.sim_response = r.sim_response;
+              this.$refs.csv_download.generateCsv(this.op_response);
+			        this.sim_response = r.sim_response;
               this.showSolution = true;
               this.parseApplyRoutes(this.op_response);
               this.$refs.map.show_results(this.op_response["summary"]["cost"]);

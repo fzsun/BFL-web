@@ -79,6 +79,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif type(raw_data) is dict:
         int(raw_data['horizon'])
         raw = raw_data
+        sysnum = int(raw_data['sysnum'])
         raw['moisture'] = float(raw_data['moisture'])
         raw['demand'] = int(raw_data['demand'])
         raw['horizon'] = int(raw_data['horizon'])

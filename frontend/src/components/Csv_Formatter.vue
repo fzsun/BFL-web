@@ -50,15 +50,15 @@ export default {
         generateCsv(data) {
             var k = 0;
             var i;
-            for (i = 0; i < data.solution.length; i++) {
-                var parts = data.solution[i][0].split("[");
+            for (i = 0; i < data.length; i++) {
+                var parts = data[i][0].split("[");
                 if (parts[0] == "farm_to_ssl")  {
                     var inner_parts = parts[1].split(",");
                     this.op_response_csv[k++] = {farm: inner_parts[0],
                                                  ssl: inner_parts[1].split("]")[0]};
                 } else if (parts[0] == "shipped_farm_ssl") {
                     var inner_parts = parts[1].split(",");
-                    this.op_esponse_csv[parseInt(inner_parts[1])]["week_" + inner_parts[0]] = data.solution[i][1];
+                    this.op_esponse_csv[parseInt(inner_parts[1])]["week_" + inner_parts[0]] = data[i][1];
                 }
             }
             console.log(this.op_response_csv);
