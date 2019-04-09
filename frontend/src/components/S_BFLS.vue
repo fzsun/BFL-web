@@ -5,14 +5,14 @@
     <div class="paramDescription title is-size-4">Optimization Parameters</div>
     <div class="params">
       <div class="requiredParams">
-        <div class="field">
+        <div class="field defaultWidth">
             <label class="label">Projected Demand (Mg)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.demand">
             </div>
         </div>
-        <div class="field">
-            <label class="label">Length Planning Horizon (weeks)</label>
+        <div class="field defaultWidth">
+            <label class="label">Length Planning Horizon (wk)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.horizon">
             </div>
@@ -364,8 +364,20 @@ export default {
   flex-wrap: wrap;
 }
 
-.params .input {
-  width: 20rem;
+.requiredParams {
+  grid-area: params;
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.requiredParams .input {
+  margin-right: 1rem;
+}
+
+.defaultWidth {
+  width: 15rem;
 }
 
 .buttons {

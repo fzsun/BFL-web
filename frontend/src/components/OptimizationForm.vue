@@ -168,11 +168,12 @@ export default {
 <style>
 .params {
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
 .params .input {
-  width: 20rem;
+  width: 18rem;
+  margin-right: 1rem;
 }
 </style>
