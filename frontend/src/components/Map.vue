@@ -1,10 +1,10 @@
 <template>
   <body class="wrapper">
     <div v-if="showing_options" class="mapDescription">
-        <div class="is-size-4 floatLeft">Create Network</div>
-        <div class="floatLeft is-size-5">Click map to place <b>{{name}}</b></div>
+        <div class="is-size-4 floatLeft">1. Create Network</div><br><br>
+        <div class="is-size-5 floatLeft ">Click map to place <b>{{name}}</b></div>
         <div class="control is-size-5">
-            <label class="container">Refinery
+            <label class="container" style="color: red">Refinery
                 <input
                     v-model="name" 
                     type="radio" 
@@ -13,7 +13,7 @@
                 >
                 <span class="checkmark"></span>
             </label>
-            <label class="container">Farm
+            <label class="container" style="color: green">Farm
                 <input 
                     v-model="name" 
                     type="radio" 
@@ -22,7 +22,7 @@
                 >
                 <span class="checkmark"></span>
             </label>
-            <label class="container">SSL
+            <label class="container" style="color: blue">SSL
                 <input 
                     v-model="name" 
                     type="radio" 
@@ -32,8 +32,7 @@
                 <span class="checkmark"></span>
             </label>
         </div>
-        <form id="refineryFormAddress" class="is-size-5 paddingRight" @submit.prevent="submitAddress()">
-            <br>
+        <form id="refineryFormAddress" class="is-size-5 paddingRight addressInput" @submit.prevent="submitAddress()">
             <div class="floatLeft is-size-5">Or enter address</div>
             <input 
                 class="input"
@@ -48,8 +47,7 @@
                 placeholder="Address"
             >
             <span class="floatRight">
-                <button v-if="this.name != refinery" class="button is-info">Add</button>
-                <button class="button is-primary" v-on:click="submitAddress">Submit</button>
+                <button class="button is-primary" v-on:click="submitAddress">Add Pin</button>
             </span>
         </form>
     </div>
@@ -219,8 +217,6 @@ export default {
         },
 
         submitAddress() {
-            // var address = document.getElementById("address").value;
-            // var farmname = document.getElementById("farmnameAddress").value;
             var address = this.address;
             var addressName = this.addressName;
             console.log("address: ", this.address)
@@ -241,6 +237,8 @@ export default {
             result.then(data => {
                 var address_lat = data.results[0].location.lat;
                 var address_lng = data.results[0].location.lng;
+                this.address = '';
+                this.addressName = '';
                 ref.placeMarker(
                     new google.maps.LatLng(address_lat, address_lng),
                     addressName);
@@ -334,12 +332,28 @@ export default {
 
 <style>
 #map {
-    height: 400px;
+    height: 25rem;
     width: 100%;
+    max-width: 50rem;
+}
+
+.addressInput {
+    max-width: 25rem;
+    flex-grow: 1;
+}
+
+@media only screen and (max-width: 600) {
+    #map {
+        height: 300px;
+    }
+}
+
+.clickInstruction {
+    display: block;
 }
 
 .map {
-    grid-area: map;
+    flex-grow: 2;
 }
 
 .mapDescription {
@@ -347,10 +361,9 @@ export default {
 }
 
 .wrapper {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: auto;
-    grid-template-areas: "mapDescription map"
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
 }
 
 .floatLeft {
