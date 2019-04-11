@@ -4,58 +4,6 @@
         <label class="label">Moisture</label>
         <div class="control">
             <input class="input" type="number" v-model="model.moisture">
-    </div>
-    </div>
-    <div class="field">
-        <label class="label">Demand (Mg)</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.demand">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Horizon (weeks)</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.horizon">
-        </div>
-    </div>
-    <!-- <div class="field">
-    <label class="label">Number Farms</label>
-    <div class="control">
-        <input class="input" type="text" v-model="model.num_fields">
-    </div>
-    </div>
-    <div class="field">
-    <label class="label">Number SSL</label>
-    <div class="control">
-        <input class="input" type="text" v-model="model.demand">
-    </div>
-    </div> -->
-    <ListInput 
-        v-bind:list='model.ssl_sizes' 
-        v-on:listChange='model.ssl_sizes = $event'
-        v-bind:label="'SSL Sizes [small, medium, large]'"
-    ></ListInput>
-    <ListInput 
-        v-bind:list='model.harvest_progress' 
-        v-on:listChange='model.harvest_progress = $event'
-        v-bind:label="'Harvest Progress [Week1, ..., Week13]'"
-    ></ListInput>
-    <div class="field">
-        <label class="label">Field - Dry Yield</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.field.dry_yield">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Field - Radius</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.field.radius">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label">Field - Proportion Devoted</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.field.proportion_devoted">
         </div>
     </div>
     <ListInput 
@@ -220,11 +168,12 @@ export default {
 <style>
 .params {
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
 .params .input {
-  width: 20rem;
+  width: 18rem;
+  margin-right: 1rem;
 }
 </style>

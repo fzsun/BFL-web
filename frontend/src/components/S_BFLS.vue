@@ -2,46 +2,73 @@
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
     <Map class="map" v-model="mapInfo" ref="map"></Map>
-    <div class="paramDescription">
-      <div class="title is-size-4">Optimization Parameters</div>
+    <div class="paramDescription title is-size-4">Optimization Parameters</div>
+    <div class="params">
+      <div class="requiredParams">
+        <div class="field defaultWidth">
+            <label class="label">Projected Demand (Mg)</label>
+            <div class="control">
+                <input class="input" type="text" v-model="model.demand">
+            </div>
+        </div>
+        <div class="field defaultWidth">
+            <label class="label">Length Planning Horizon (wk)</label>
+            <div class="control">
+                <input class="input" type="text" v-model="model.horizon">
+            </div>
+        </div>
+        <div class="field">
+          <div class="control">
+            <label class="label">Equipment Configuration</label>  
+            <div class="select">
+              <select
+                v-model="model.sysnum"
+              >
+                <option 
+                  v-bind:key=index
+                  v-for="(config, index) in configurations"
+                  v-bind:value="index"
+                >{{config}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <ListInput 
+          v-bind:list='model.ssl_sizes' 
+          v-on:listChange='model.ssl_sizes = $event'
+          v-bind:label="'SSL Sizes [small, medium, large]'"
+        ></ListInput>
+        <ListInput 
+          v-bind:list='model.harvest_progress' 
+          v-on:listChange='model.harvest_progress = $event'
+          v-bind:label="'% Demand Harvested per 13 week cycle'"
+        ></ListInput>
+      </div>
+      <div class="advancedParams">
+        <div v-if="advancedOptions">
+          <div class="title is-size-5">Additional Parameters</div>
+          <OptimizationForm 
+            ref = "opForm"
+            v-on:formChange='customModel = $event'
+            v-bind:model='model'
+          ></OptimizationForm>
+        </div>
+      </div>
+    </div> 
+    <div class="buttons">
       <button 
-        class="button is-primary floatLeft"
-        v-on:click="useDefault()"
+        class="advancedOptions button is-link"
+        v-on:click="showAdvancedOptions()"
       >
-        Accept Default Configuration
+        Show Advanced Options
       </button>
       <button 
-        class="button is-link floatLeft"
-        v-on:click="customFormTrue()"
+        class="button optimize is-warning" 
+        v-on:click="optimize()"
       >
-        Customize Optimization Parameters
-      </button>
-      <button 
-        class="button is-danger floatLeft"
-        v-on:click="customFormFalse()"
-        v-if="customForm"
-      >
-        Cancel
+        Optimize
       </button>
     </div>
-    <div 
-      v-if="!showSolution"
-      class="params"
-    >
-      <OptimizationForm 
-        v-if="customForm"
-        ref = "opForm"
-        v-on:formChange='customModel = $event'
-        v-bind:model='defaultModel'
-      ></OptimizationForm>
-    </div> 
-    <button 
-      class="button optimize is-warning" 
-      v-on:click="optimize"
-      v-if="showOptButton == true && showSolution == false"
-    >
-      Optimize
-    </button>
     <br>
     <div 
       class="results"
@@ -125,7 +152,7 @@
         </table>
       </div>
     </div>
-
+    <Csv_Formatter class="csv_download" ref="csv_download"></Csv_Formatter>
 </div>
 </template>
 
@@ -133,26 +160,49 @@
 import { validators, component as VueFormGenerator } from 'vue-form-generator'
 import axios from 'axios'
 import Map from './Map'
+import Csv_Formatter from './Csv_Formatter'
 import OptimizationForm from './OptimizationForm'
+import ListInput from './ListInput'
 
 export default {
   components: {
       VueFormGenerator,
       'Map' : Map,
+      'Csv_Formatter' : Csv_Formatter,
+      'ListInput' : ListInput,
       'OptimizationForm' : OptimizationForm,
   },
   data() {
     return {
       response: [],
+      configurations: [
+            "[whole_stalk, loadout, chopper]",
+            "[whole_stalk, loadout, chopper, bagger]",
+            "[whole_stalk, loadout, chopper, bunker]",
+            "[whole_stalk, loadout, chopper, module_former, module_hauler]",
+            "[whole_stalk, loadout, chopper, press]",
+            "[whole_stalk, loadout, chopper, press, bagger]",
+            "[whole_stalk, loadout, chopper, press, bunker]",
+            "[whole_stalk, loadout, chopper, press, module_former, module_hauler]",
+            "[forage_chop, loadout]",
+            "[forage_chop, loadout, bagger]",
+            "[forage_chop, loadout, bunker]",
+            "[forage_chop, loadout, module_former, module_hauler]",
+            "[forage_chop, loadout, press]",
+            "[forage_chop, loadout, press, bagger]",
+            "[forage_chop, loadout, press, bunker]",
+            "[forage_chop, loadout, press, module_former, module_hauler]"
+        ],
       mapInfo: {},
+      showSolution: false,
       customForm: false,
       showOptButton: false,
       customModel: {},
-      model: {},
-      showSolution: false,
-      defaultModel: {
+      advancedOptions: false,
+      model: {
+        "sysnum": 0,
         "moisture": 0.7,
-        "demand": 200000,
+        "demand": 20000,
         "horizon": 26,
         "num_fields": 120,
         "num_ssls": 60,
@@ -210,7 +260,8 @@ export default {
             ["forage_chop", "loadout", "press", "bagger"],
             ["forage_chop", "loadout", "press", "bunker"],
             ["forage_chop", "loadout", "press", "module_former", "module_hauler"]
-        ]
+          ]
+        
       },
       op_response: {},
       sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
@@ -218,9 +269,12 @@ export default {
   },
   methods: {
     useDefault() {
-      this.model = this.defaultModel;
+      this.model = this.model;
       this.showOptimize();
       this.customForm = false;
+    },
+    showAdvancedOptions() {
+      this.advancedOptions = !this.advancedOptions;
     },
     showOptimize() {
       this.showOptButton = true;
@@ -249,17 +303,11 @@ export default {
         route.push(ssl);
         route.push(refinery);
         this.$refs.map.addRoutes(route);
-        // routes.append(route);
       }
     },
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
 
-      if (this.customForm) {
-        this.model = this.customModel
-      } else {
-        this.model = this.defaultModel
-      }
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
       } else {
@@ -272,9 +320,11 @@ export default {
           .then(response => {
               var r = response.data
               this.op_response = r.op_response;
-              this.sim_response = r.sim_response;
+              this.$refs.csv_download.generateCsv(this.op_response.solution);
+			        this.sim_response = r.sim_response;
               this.showSolution = true;
               this.parseApplyRoutes(this.op_response);
+              this.$refs.map.show_results(this.op_response["summary"]["cost"]);
           })
       }
     }
@@ -303,6 +353,35 @@ export default {
 
 .params {
   grid-area: params;
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.requiredParams {
+  grid-area: params;
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.requiredParams .input {
+  margin-right: 1rem;
+}
+
+.defaultWidth {
+  width: 15rem;
+}
+
+.buttons {
+  grid-area: buttons
+}
+
+.advancedOptions {
+  width: 15rem;
+  grid-area: optimize;
 }
 
 .wrap {
@@ -310,13 +389,11 @@ export default {
     margin: 0;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
-    grid-template-areas: "title" "map" "paramDescription" "params" "optimize" "results";
+    grid-template-areas: "title" "map" "paramDescription" "params" "buttons" "results";
 }
 
 .optimize {
-  grid-area: optimize;
   width: 110px;
-  float: right;
 }
 
 .results {
@@ -324,14 +401,14 @@ export default {
   text-align: left;
 }
 
-.table1{
+.table1 {
   grid-area: table1;
   border-collapse: collapse;
   border: 1px solid #0000FF;
   width: 75%;
 }
 
-.table_header{
+.table_header {
   grid-area: table_header;
   padding-top: 12px;
   padding-bottom: 12px;
@@ -342,7 +419,7 @@ export default {
   border: 1px solid #000000;
 }
 
-.table_row{
+.table_row {
   grid-area: table_row;
   border: 1px solid #0000FF;
   text-align: center;

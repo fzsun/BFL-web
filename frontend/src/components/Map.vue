@@ -1,10 +1,10 @@
 <template>
   <body class="wrapper">
-    <div class="mapDescription">
-        <div class="is-size-4 floatLeft">Create Network</div>
-        <div class="floatLeft is-size-5">Click map to place <b>{{name}}</b></div>
+    <div v-if="showing_options" class="mapDescription">
+        <div class="is-size-4 floatLeft">1. Create Network</div><br><br>
+        <div class="is-size-5 floatLeft ">Click map to place <b>{{name}}</b></div>
         <div class="control is-size-5">
-            <label class="container">Refinery
+            <label class="container" style="color: red">Refinery
                 <input
                     v-model="name" 
                     type="radio" 
@@ -13,7 +13,7 @@
                 >
                 <span class="checkmark"></span>
             </label>
-            <label class="container">Farm
+            <label class="container" style="color: green">Farm
                 <input 
                     v-model="name" 
                     type="radio" 
@@ -22,7 +22,7 @@
                 >
                 <span class="checkmark"></span>
             </label>
-            <label class="container">SSL
+            <label class="container" style="color: blue">SSL
                 <input 
                     v-model="name" 
                     type="radio" 
@@ -32,8 +32,7 @@
                 <span class="checkmark"></span>
             </label>
         </div>
-        <form id="refineryFormAddress" class="is-size-5 paddingRight" @submit.prevent="submitAddress()">
-            <br>
+        <form id="refineryFormAddress" class="is-size-5 paddingRight addressInput" @submit.prevent="submitAddress()">
             <div class="floatLeft is-size-5">Or enter address</div>
             <input 
                 class="input"
@@ -48,22 +47,33 @@
                 placeholder="Address"
             >
             <span class="floatRight">
-                <button v-if="this.name != refinery" class="button is-info">Add</button>
-                <button class="button is-primary" v-on:click="submitAddress">Submit</button>
+                <button class="button is-primary" v-on:click="submitAddress">Add Pin</button>
             </span>
         </form>
     </div>
+    <div v-else class="costChart">
+		<pie-chart prefix="$" :data="chart_data" width="48%" style="float: left; display:inline"></pie-chart>
+        <div class="list is-hoverable" width="40%" style="float: right; display:inline;">
+          <p class="list-item">Farm to SSL Cost: ${{chart_info['farm_ssl_trans_cost']}}</p>
+          <p class="list-item">SSL to Refinery Cost: ${{chart_info['ssl_ref_trans_cost']}}</p>
+          <p class="list-item">Farm Holding Cost: ${{chart_info['farm_holding_cost']}}</p>
+          <p class="list-item">SSL Holding Cost: ${{chart_info['ssl_holding_cost']}}</p>
+          <p class="list-item">Local Ownership Cost: ${{chart_info['local_ownership']}}</p>
+          <p class="list-item">Operation Cost: ${{chart_info['operation_cost']}}</p>
+          <p class="list-item is-active">Total Cost: ${{chart_info['total_cost']}}</p>
+        </div>
+    </div>
     <div id="map" class="map"></div>
-    <form id="getLocations">
-        <a href="#" v-on:click="locations">Print Locations</a>
-    </form>
-    <p id="locations"></p>
   </body>
 </template>
 
 <script>
+import Vue from 'vue'
 import axios from 'axios'
+import VueChartkick from 'vue-chartkick'
+import Chart from 'chart.js'
 
+Vue.use(VueChartkick, {adapter: Chart})
 export default {
     data() {
         return {
@@ -81,6 +91,9 @@ export default {
             addressName: '',
             flight_paths: [],
             num_flight_paths: 0,
+            showing_options: true,
+            chart_data: [],
+            chart_info: {},
     }},
     props: ['mapInfo'],
     methods: {
@@ -204,8 +217,6 @@ export default {
         },
 
         submitAddress() {
-            // var address = document.getElementById("address").value;
-            // var farmname = document.getElementById("farmnameAddress").value;
             var address = this.address;
             var addressName = this.addressName;
             console.log("address: ", this.address)
@@ -226,41 +237,12 @@ export default {
             result.then(data => {
                 var address_lat = data.results[0].location.lat;
                 var address_lng = data.results[0].location.lng;
+                this.address = '';
+                this.addressName = '';
                 ref.placeMarker(
                     new google.maps.LatLng(address_lat, address_lng),
                     addressName);
             });
-        },
-
-        //Print Locations to website
-        locations() {
-            var locations = "Farm Locations: </br>";
-            var k;
-            for(k = 0; k < this.farmsCounter; k++) {
-                if (this.farms[k] != null) {
-                    locations = locations +
-                                this.farms[k].name + ": " +
-                                this.farms[k].latitude + " -- " +
-                                this.farms[k].longitude + "</br>";
-                }
-            }
-            locations = locations + "SSL Locations: </br>";
-            for(k = 0; k < this.sslCounter; k++) {
-                if (this.ssls[k] != null) {
-                    locations = locations +
-                                this.ssls[k].name + ": " +
-                                this.ssls[k].latitude + " -- " +
-                                this.ssls[k].longitude + "</br>";
-                }
-            }
-			locations = locations + "Refinery Location: </br>";
-			if (this.refinery != null) {
-				locations = locations +
-              	            this.refinery.name + ": " +
-                            this.refinery.latitude + " -- " +
-                            this.refinery.longitude + "</br>";
-			}
-            document.getElementById("locations").innerHTML = locations;
         },
 
         //Submit locations to background for optimization
@@ -314,7 +296,32 @@ export default {
             }
             this.flight_paths = [];
             this.num_flight_paths = 0;
+        },
+
+        show_results(data) {
+            this.chart_info['farm_ssl_trans_cost'] = Math.round(data.tran_farms_ssl);
+            this.chart_info['ssl_ref_trans_cost'] = Math.round(data.tran_ssl_refinery);
+            this.chart_info['farm_holding_cost'] = Math.round(data.farm_inventory);
+            this.chart_info['ssl_holding_cost'] = Math.round(data.ssl_inventory);
+            this.chart_info['local_ownership'] = Math.round(data.loc_own);
+            this.chart_info['operation_cost'] = Math.round(data.operation);
+            this.chart_info['total_cost'] = Math.round(data.total_ub);
+
+            this.chart_data[0] = ['farm to ssl', Math.round(data.tran_farms_ssl)];
+            this.chart_data[1] = ['ssl to refinery', Math.round(data.tran_ssl_refinery)];
+            this.chart_data[2] = ['farm holding', Math.round(data.farm_inventory)];
+            this.chart_data[3] = ['ssl holding', Math.round(data.ssl_inventory)];
+            this.chart_data[4] = ['local ownership', Math.round(data.loc_own)];
+            this.chart_data[5] = ['operations', Math.round(data.operation)];
+            this.showing_options = false;
+        },
+        hide_results() {
+            this.chart_info = {};
+            this.chart_data = [];
+            this.showing_options = true;
         }
+
+
     },
     mounted: function() {
         this.getMap();
@@ -325,12 +332,28 @@ export default {
 
 <style>
 #map {
-    height: 400px;
+    height: 25rem;
     width: 100%;
+    max-width: 50rem;
+}
+
+.addressInput {
+    max-width: 25rem;
+    flex-grow: 1;
+}
+
+@media only screen and (max-width: 600) {
+    #map {
+        height: 300px;
+    }
+}
+
+.clickInstruction {
+    display: block;
 }
 
 .map {
-    grid-area: map;
+    flex-grow: 2;
 }
 
 .mapDescription {
@@ -338,10 +361,9 @@ export default {
 }
 
 .wrapper {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: auto;
-    grid-template-areas: "mapDescription map"
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
 }
 
 .floatLeft {
