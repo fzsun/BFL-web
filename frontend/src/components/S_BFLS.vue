@@ -56,7 +56,15 @@
       </div>
     </div> 
     <div class="buttons">
-      <button 
+      <button
+        v-if="advancedOptions"
+        class="advancedOptions button is-link"
+        v-on:click="showAdvancedOptions()"
+      >
+        Hide Advanced Options
+      </button>
+      <button
+        v-else 
         class="advancedOptions button is-link"
         v-on:click="showAdvancedOptions()"
       >
@@ -67,6 +75,13 @@
         v-on:click="optimize()"
       >
         Optimize
+      </button>
+      <button 
+        class="button show_input is-warning" 
+        v-on:click="show_input()"
+		v-if="showInput"
+      >
+        Show Input
       </button>
     </div>
     <br>
@@ -180,6 +195,7 @@ export default {
         ],
       mapInfo: {},
       showSolution: false,
+      showInput: false,
       customForm: false,
       showOptButton: false,
       customModel: {},
@@ -352,10 +368,16 @@ export default {
               this.$refs.csv_download.generateCsv(this.op_response.solution);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
+		      this.showInput = true;
               this.parseApplyRoutes(this.op_response);
               this.$refs.map.show_results(this.op_response["summary"]["cost"]);
           })
       }
+    },
+
+    show_input() {
+        this.showInput = false;
+		this.$refs.map.hide_results();
     }
   }
 }
