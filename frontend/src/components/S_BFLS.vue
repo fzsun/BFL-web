@@ -8,7 +8,7 @@
         <div class="field defaultWidth">
             <label class="label">Projected Demand (Mg)</label>
             <div class="control">
-                <input class="input" type="text" v-model="model.demand">
+                <input class="input" type="text" v-model="model.demand" @change="changeProportion">
             </div>
         </div>
         <div class="field defaultWidth">
@@ -56,7 +56,15 @@
       </div>
     </div> 
     <div class="buttons">
-      <button 
+      <button
+        v-if="advancedOptions"
+        class="advancedOptions button is-link"
+        v-on:click="showAdvancedOptions()"
+      >
+        Hide Advanced Options
+      </button>
+      <button
+        v-else 
         class="advancedOptions button is-link"
         v-on:click="showAdvancedOptions()"
       >
@@ -67,6 +75,13 @@
         v-on:click="optimize()"
       >
         Optimize
+      </button>
+      <button 
+        class="button show_input is-warning" 
+        v-on:click="show_input()"
+		v-if="showInput"
+      >
+        Show Input
       </button>
     </div>
     <br>
@@ -195,6 +210,7 @@ export default {
         ],
       mapInfo: {},
       showSolution: false,
+      showInput: false,
       customForm: false,
       showOptButton: false,
       customModel: {},
@@ -211,7 +227,7 @@ export default {
         "field": {
         "dry_yield": 21,
         "radius": 32,
-        "proportion_devoted": 0.003,
+        "proportion_devoted": .003,
         "area_ratio": [1, 10]
         },
         "price": 65,
@@ -323,10 +339,21 @@ export default {
               this.$refs.csv_download.generateCsv(this.op_response.solution);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
+		      this.showInput = true;
               this.parseApplyRoutes(this.op_response);
               this.$refs.map.show_results(this.op_response["summary"]["cost"]);
           })
       }
+    },
+
+    show_input() {
+        this.showInput = false;
+		this.$refs.map.hide_results();
+    },
+    changeProportion() {
+        this.model.proportion_devoted = (this.model.demand * 1.0) / 6666666;
+        console.log(this.model.demand);
+        console.log(this.model.proportion_devoted);
     }
   }
 }
