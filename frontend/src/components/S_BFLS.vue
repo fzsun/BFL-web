@@ -8,7 +8,7 @@
         <div class="field defaultWidth">
             <label class="label">Projected Demand (Mg)</label>
             <div class="control">
-                <input class="input" type="text" v-model="model.demand">
+                <input class="input" type="text" v-model="model.demand" @change="changeProportion">
             </div>
         </div>
         <div class="field defaultWidth">
@@ -212,7 +212,7 @@ export default {
         "field": {
         "dry_yield": 21,
         "radius": 32,
-        "proportion_devoted": 0.03,
+        "proportion_devoted": .003,
         "area_ratio": [1, 10]
         },
         "price": 65,
@@ -378,6 +378,11 @@ export default {
     show_input() {
         this.showInput = false;
 		this.$refs.map.hide_results();
+    },
+    changeProportion() {
+        this.model.proportion_devoted = (this.model.demand * 1.0) / 6666666;
+        console.log(this.model.demand);
+        console.log(this.model.proportion_devoted);
     }
   }
 }
