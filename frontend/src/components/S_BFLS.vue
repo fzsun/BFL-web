@@ -36,12 +36,14 @@
         <ListInput 
           v-bind:list='model.ssl_sizes' 
           v-on:listChange='model.ssl_sizes = $event'
-          v-bind:label="'SSL Sizes [small, medium, large]'"
+          v-bind:label="'SSL Sizes'"
+          v-bind:placeHolders="placeHolders.sslSizes"
         ></ListInput>
         <ListInput 
           v-bind:list='model.harvest_progress' 
           v-on:listChange='model.harvest_progress = $event'
-          v-bind:label="'% Demand Harvested per 13 week cycle'"
+          v-bind:label="'Harvest Progress'"
+          v-bind:placeHolders="placeHolders.harvestProgress"
         ></ListInput>
       </div>
       <div class="advancedParams">
@@ -148,6 +150,7 @@ import Map from './Map'
 import Csv_Formatter from './Csv_Formatter'
 import OptimizationForm from './OptimizationForm'
 import ListInput from './ListInput'
+import NProgress from 'nprogress'
 
 export default {
   components: {
@@ -160,6 +163,24 @@ export default {
   data() {
     return {
       response: [],
+      placeHolders: {
+        sslSizes: ["small (Mg)", "medium (Mg)", "large (Mg)"],
+        harvestProgress: [
+          "% demand harvested week 1",
+          "% demand harvested week 2",
+          "% demand harvested week 3",
+          "% demand harvested week 4",
+          "% demand harvested week 5",
+          "% demand harvested week 6",
+          "% demand harvested week 7",
+          "% demand harvested week 8",
+          "% demand harvested week 9",
+          "% demand harvested week 10",
+          "% demand harvested week 11",
+          "% demand harvested week 12",
+          "% demand harvested week 13",
+        ],
+      },
       configurations: [
             "[whole_stalk, loadout, chopper]",
             "[whole_stalk, loadout, chopper, bagger]",
@@ -336,6 +357,7 @@ export default {
     },
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
+      NProgress.start()
 
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
@@ -347,6 +369,7 @@ export default {
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
+              NProgress.done()
               var r = response.data
               this.op_response = r.op_response;
               this.$refs.csv_download.generateCsv(this.op_response);
