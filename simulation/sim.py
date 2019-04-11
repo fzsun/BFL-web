@@ -122,12 +122,6 @@ class Simulation(object):
         self.simulation_results()
         self.round_conf_int()
         #self.graphs()
-        print(self.refinery_graph)
-        print(self.refinery_hypothetical)
-        print(self.ssl_graph)
-        print(self.hypothetical_ssl)
-        print(self.farm_graph)
-        print(self.hypothetical_farm)
         #degradation_cost = 0
         #for period in range(self.m):
          #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
@@ -215,7 +209,7 @@ class Simulation(object):
         for period in range(self.m):
             for farm in range(self.n):
                 if self.harvest_schedule[period][farm] != 0:
-                    self.harvest_actual[period][farm]=max(0,np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
+                    self.harvest_actual[period][farm]=max(1/10*self.harvest_schedule[period][farm],np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
                     #self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
                     self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
@@ -253,7 +247,7 @@ class Simulation(object):
     def use_equipment(self, period, farm, x):
         i=1
         for equipment in self.config_rate:
-            equipment_rate = max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment]))
+            equipment_rate = max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/2*self.config_rate[equipment]))
             if equipment == 'press':
                 self.press_rate.append(equipment_rate)
             if equipment == 'chopper':
@@ -284,9 +278,9 @@ class Simulation(object):
     def refinery_transport(self, ssl, period):
         whats_left = self.ssl_transport_schedule[period][ssl]
         while whats_left != 0:
-            if self.ssl_container[ssl].level == 0 and self.before_ssl[ssl] == 0:
-                break
-            elif self.ssl_container[ssl].level > 0:
+            #if self.ssl_container[ssl].level == 0 and self.before_ssl[ssl] == 0:
+                #break
+            if self.ssl_container[ssl].level > 0:
                 y=min(whats_left,self.ssl_container[ssl].level)
                 self.ssl_container[ssl].get(y)
                 if 'module_hauler' in self.configuration:
@@ -338,11 +332,10 @@ class Simulation(object):
     def create_loadout_rate(self):
         for period in range(self.m):
             if 'module_hauler' in self.configuration:
-                self.loadout_rate_module_new = max(1/10*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module))
+                self.loadout_rate_module_new = max(1/10*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/2*self.loadout_rate_module))
                 self.loadout_rates_module.append(self.loadout_rate_module_new)
-            self.loadout_rate_standard_new = max(1/10*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/5*self.loadout_rate_standard))
+            self.loadout_rate_standard_new = max(1/10*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/2*self.loadout_rate_standard))
             self.loadout_rates_standard.append(self.loadout_rate_standard_new)
-            print(self.env.now, ' ',self.loadout_rate_standard_new, ' ', self.loadout_rate_module_new)
             yield self.env.timeout(self.work_week)
 
 
@@ -443,7 +436,8 @@ class Simulation(object):
         self.refinery_graph = np.mean(self.all_refinery_actual, axis=0)
         self.ssl_graph = np.mean(self.all_ssl_actual, axis=0)
         self.farm_graph = np.mean(self.all_farm_level, axis=0)
-        
+        self.harvest_actual = np.mean(self.harvest_actual, axis=0)
+        print(self.harvest_actual)
 
     def record_data(self):
         total = 0
@@ -466,7 +460,7 @@ class Simulation(object):
             self.refinery_actual.append(self.refinery.level)
             #print('harvested amount @ ',self.env.now,'acutal: ', total, '   hypothetical: ', total2)
             #print('total ssl inventory @  ',self.env.now, '   acutal: ', total5, '   hypothetical: ', total4)
-            #print('refinery level @ ',self.env.now, '   actual: ', self.refinery.level, '   hypothetical: ', self.refinery_total)
+            print('refinery level @ ',self.env.now, '  ', self.refinery.level)
             total5 = 0
             total7 = 0
         self.all_farm_level.append(self.actual_farm)

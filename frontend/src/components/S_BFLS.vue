@@ -211,7 +211,7 @@ export default {
         "field": {
         "dry_yield": 21,
         "radius": 32,
-        "proportion_devoted": 0.03,
+        "proportion_devoted": 0.003,
         "area_ratio": [1, 10]
         },
         "price": 65,
@@ -220,12 +220,12 @@ export default {
         "tax_rate": 0.01,
         "cost": {
             "equipment": {
-            "loadout": [94000, 5, 28200, 0.37, 84700],
-            "press": [300000, 5, 120000, 0.1374, 90800],
-            "chopper": [22000, 5, 8800, 0, 924000],
-            "bagger": [50000, 5, 20000, 0.7, 200000],
-            "module_former": [450000, 5, 217234, 1.0319, 80000],
-            "module_hauler": [375000, 8, 73530, 0.2766, 362000]
+            "loadout": [94000, 5, 28200, 0.37, 847],
+            "press": [300000, 5, 120000, 0.1374, 908],
+            "chopper": [22000, 5, 8800, 0, 9240],
+            "bagger": [50000, 5, 20000, 0.7, 2000],
+            "module_former": [450000, 5, 217234, 1.0319, 800],
+            "module_hauler": [375000, 8, 73530, 0.2766, 3620]
             },
             "bunker_annual_own": 5600,
             "ssl_annual_own": 0.36,
