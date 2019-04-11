@@ -52,7 +52,6 @@
         <div class="title is-size-5" v-html="'Percent of demand met: ' + sim_response['demand']['percent'] + '%'"></div>
         <div class="results" v-html="'Confidence demand will be met to 90%: ' + sim_response['demand']['conf']['90'] + '%'"></div>
         <div class="results" v-html="'Confidence demand will be met to 95%: ' + sim_response['demand']['conf']['95'] + '%'"></div>
-        <div class="results" v-html="'Confidence demand will be met to 99%: ' + sim_response['demand']['conf']['99'] + '%'"></div>
         <table class="table1">
           <tr>
             <th class="table_header">Descriptive Statistics</th>
@@ -60,6 +59,7 @@
             <th class="table_header">Standard Deviation</th>
             <th class="table_header">SE Mean</th>
             <th class="table_header">95% Confidence Interval</th>
+            <th class="table_header">Range (min,max)</th>
           </tr>
           <tr>
             <td class="table_row">Demand</td>
@@ -67,6 +67,7 @@
             <td class="table_row" v-html="sim_response['demand']['stdev'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['demand']['sem'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['demand']['conf int']"></td>
+            <td class="table_row" v-html="'(' + sim_response['demand']['range'][0] + ', ' + sim_response['demand']['range'][1] + ')' + ' Mg'"></td>
           </tr>
            <tr>
             <td class="table_row">Telehandler</td>
@@ -74,6 +75,7 @@
             <td class="table_row" v-html="sim_response['telehandler rate']['stdev'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['telehandler rate']['sem'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['telehandler rate']['conf int'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="'(' + sim_response['telehandler rate']['range'][0] + ', ' + sim_response['telehandler rate']['range'][1] + ')' + ' Mg/hr'"></td>
           </tr>
           <tr>
             <td class="table_row">Forage Chopper</td>
@@ -81,6 +83,8 @@
             <td class="table_row" v-html="sim_response['chopper rate']['stdev'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['chopper rate']['sem'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['chopper rate']['conf int'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="'(' + sim_response['chopper rate']['range'][0] + ', ' + sim_response['chopper rate']['range'][1] + ')' + ' Mg/hr'"></td>
+
           </tr>
           <tr>
             <td class="table_row">Press</td>
@@ -88,6 +92,8 @@
             <td class="table_row" v-html="sim_response['press rate']['stdev'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['press rate']['sem'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['press rate']['conf int'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="'(' + sim_response['press rate']['range'][0] + ', ' + sim_response['press rate']['range'][1] + ')' + ' Mg/hr'"></td>
+
           </tr>
           <tr>
             <td class="table_row">Bagger</td>
@@ -95,13 +101,17 @@
             <td class="table_row" v-html="sim_response['bagger rate']['stdev'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['bagger rate']['sem'] + ' Mg/hr'"></td>
             <td class="table_row" v-html="sim_response['bagger rate']['conf int'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="'(' + sim_response['bagger rate']['range'][0] + ', ' + sim_response['bagger rate']['range'][1] + ')' + ' Mg/hr'"></td>
+
           </tr>
           <tr>
             <td class="table_row">Module Former</td>
-            <td class="table_row" v-html="sim_response['module former rate']['average'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['stdev'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['sem'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['conf int'] + ' Mg'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['average'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['stdev'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['sem'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="sim_response['module former rate']['conf int'] + ' Mg/hr'"></td>
+            <td class="table_row" v-html="'(' + sim_response['module former rate']['range'][0] + ', ' + sim_response['module former rate']['range'][1] + ')' + ' Mg/hr'"></td>
+
           </tr>
           <tr>
             <td class="table_row">Module Hauler</td>
@@ -109,6 +119,8 @@
             <td class="table_row" v-html="sim_response['module hauler rate']['stdev'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['module hauler rate']['sem'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['module hauler rate']['conf int'] + ' Mg'"></td>
+            <td class="table_row" v-html="'(' + sim_response['module hauler rate']['range'][0] + ', ' + sim_response['module hauler rate']['range'][1] + ')' + ' Mg/hr'"></td>
+
           </tr>
         </table>
       </div>
@@ -201,7 +213,7 @@ export default {
         ]
       },
       op_response: {},
-      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'conf':{'90':0, '95':0, '99':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0}}
+      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
     };
   },
   methods: {
