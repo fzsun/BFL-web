@@ -25,7 +25,10 @@ class Simulation(object):
     -this is a combination of data from the algorithms input and output
     '''
     
-    def __init__(self, algo_input_data, output_data):
+    def __init__(self):
+        print(" * Created new simulation")
+        
+    def new_input(self, algo_input_data, output_data):
         self.algo_input_data = algo_input_data
         self.output_data = output_data
                    
@@ -43,8 +46,6 @@ class Simulation(object):
         self.coord_s = self.output_data['params']['Coord_ssls'] # coordinates x,y for ssl (all possible)
         self.ssl_configurations = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
         self.harvest_schedule = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
-        #self.harvest_schedule = self.harvest_schedule[1:] + [self.harvest_schedule[0]]
-        #print(self.harvest_schedule)
         self.ue = self.output_data['params']['upperbound_equip_proc_rate'] # processing rate of non-chopping methods
         self.sysnum = self.output_data['params']['Sysnum']
         self.solutions = self.output_data['solution'] # holds the algorithms solution dictionary
@@ -57,25 +58,28 @@ class Simulation(object):
         self.loadout_rates_module_jit = []
         self.loadout_rate_module_new = 0
         self.loadout_rate_standard_new = 0
-        for equipment in self.configuration:
-            if equipment == 'loadout':
-                self.loadout_rate_standard = self.equipment_data[equipment][4]/self.work_week
-                self.loadout_rate_standard_new = self.loadout_rate_standard
-            elif equipment == 'press':
-                self.config_rate.update({'press':self.equipment_data[equipment][4]/self.work_week})
-                self.press_rate = []
-            elif equipment == 'chopper':
-                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/self.work_week})
-                self.chopper_rate = []
-            elif equipment == 'bagger':
-                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/self.work_week})
-                self.bagger_rate = []
-            elif equipment == 'module_former':
-                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/self.work_week})
-                self.former_rate = []
-            elif equipment == 'module_hauler':
-                self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
-                self.loadout_rate_module_new = self.loadout_rate_module
+        print(algo_input_data["new_input"])
+        if algo_input_data["new_input"]:
+            print("new!!!!!")
+            for equipment in self.configuration:
+                if equipment == 'loadout':
+                    self.loadout_rate_standard = self.equipment_data[equipment][4]/self.work_week
+                    self.loadout_rate_standard_new = self.loadout_rate_standard
+                elif equipment == 'press':
+                    self.config_rate.update({'press':self.equipment_data[equipment][4]/self.work_week})
+                    self.press_rate = []
+                elif equipment == 'chopper':
+                    self.config_rate.update({'chopper':self.equipment_data[equipment][4]/self.work_week})
+                    self.chopper_rate = []
+                elif equipment == 'bagger':
+                    self.config_rate.update({'bagger':self.equipment_data[equipment][4]/self.work_week})
+                    self.bagger_rate = []
+                elif equipment == 'module_former':
+                    self.config_rate.update({'module_former':self.equipment_data[equipment][4]/self.work_week})
+                    self.former_rate = []
+                elif equipment == 'module_hauler':
+                    self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
+                    self.loadout_rate_module_new = self.loadout_rate_module
                 
         self.breakdown ={'loadout':[], 'press':[], 'chopper':[], 'bagger':[], 'module former':[], 'module hauler': []}  
         for trial in range(self.num_trials):
@@ -247,7 +251,7 @@ class Simulation(object):
     def use_equipment(self, period, farm, x):
         i=1
         for equipment in self.config_rate:
-            equipment_rate = max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/2*self.config_rate[equipment]))
+            equipment_rate = min(1.25*self.config_rate[equipment],max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])))
             if equipment == 'press':
                 self.press_rate.append(equipment_rate)
             if equipment == 'chopper':
@@ -299,9 +303,7 @@ class Simulation(object):
                 pass
             yield self.env.timeout(1)
 
-
-
-        if self.ssl_container[ssl].level > 0:
+        '''if self.ssl_container[ssl].level > 0:
             z = self.ssl_container[ssl].level
             self.ssl_container[ssl].get(z)
             if 'module_hauler' in self.configuration:
@@ -312,7 +314,7 @@ class Simulation(object):
                 with self.ssl[ssl][0].request() as req:
                     yield req
                     yield self.env.timeout(z/(self.equip_in_ssl[ssl][0]*self.loadout_rate_standard_new))
-            self.refinery.put(z)
+            self.refinery.put(z)'''
     
 
 
@@ -332,9 +334,9 @@ class Simulation(object):
     def create_loadout_rate(self):
         for period in range(self.m):
             if 'module_hauler' in self.configuration:
-                self.loadout_rate_module_new = max(1/10*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/2*self.loadout_rate_module))
+                self.loadout_rate_module_new = min(1.25*self.loadout_rate_module,max(1/10*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)))
                 self.loadout_rates_module.append(self.loadout_rate_module_new)
-            self.loadout_rate_standard_new = max(1/10*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/2*self.loadout_rate_standard))
+            self.loadout_rate_standard_new = min(1.25*self.loadout_rate_standard,max(1/10*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/5*self.loadout_rate_standard)))
             self.loadout_rates_standard.append(self.loadout_rate_standard_new)
             yield self.env.timeout(self.work_week)
 
@@ -437,7 +439,7 @@ class Simulation(object):
         self.ssl_graph = np.mean(self.all_ssl_actual, axis=0)
         self.farm_graph = np.mean(self.all_farm_level, axis=0)
         self.harvest_actual = np.mean(self.harvest_actual, axis=0)
-        print(self.harvest_actual)
+        #print(self.harvest_actual)
 
     def record_data(self):
         total = 0
@@ -460,7 +462,7 @@ class Simulation(object):
             self.refinery_actual.append(self.refinery.level)
             #print('harvested amount @ ',self.env.now,'acutal: ', total, '   hypothetical: ', total2)
             #print('total ssl inventory @  ',self.env.now, '   acutal: ', total5, '   hypothetical: ', total4)
-            print('refinery level @ ',self.env.now, '  ', self.refinery.level)
+            #print('refinery level @ ',self.env.now, '  ', self.refinery.level)
             total5 = 0
             total7 = 0
         self.all_farm_level.append(self.actual_farm)

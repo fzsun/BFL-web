@@ -36,7 +36,7 @@
         <ListInput 
           v-bind:list='model.ssl_sizes' 
           v-on:listChange='model.ssl_sizes = $event'
-          v-bind:label="'SSL Sizes [small, medium, large]'"
+          v-bind:label="'SSL Sizes [small, medium, large] (Mg)'"
         ></ListInput>
         <ListInput 
           v-bind:list='model.harvest_progress' 
@@ -279,8 +279,61 @@ export default {
           ]
         
       },
+      new_input: true,
       op_response: {},
-      sim_response: {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
+      sim_response: {
+            "demand": {
+              "percent": 0, 
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":"N/a", 
+              'range':[0,0], 
+              "conf":{'90':0, '95':0}
+              }, 
+          "telehandler rate":{
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":0, 
+              "range":[0,0]
+              }, 
+          "press rate":{
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":0, 
+              "range":[0,0]
+              }, 
+          "chopper rate":{
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":0, 
+              "range":[0,0]
+              }, 
+          "bagger rate":{
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":0, 
+              "range":[0,0]
+              }, 
+          "module former rate":{
+              "average": 0, 
+              "stdev":0, 
+              "sem":0, 
+              "conf int":0, 
+              "range":[0,0]
+              }, 
+          "module hauler rate":{
+            "average": 0, 
+            "stdev":0, 
+            "sem":0, 
+            "conf int":0, 
+            "range":[0,0]
+            }
+          }
     };
   },
   methods: {
@@ -322,6 +375,7 @@ export default {
       }
     },
     optimize(event) {
+      NProgress.start();
       var mapInfo = this.$refs.map.submitLocations();
 
       if (mapInfo == "Refinery Missing") {
@@ -331,9 +385,12 @@ export default {
         this.model.Coord_s = mapInfo.Coord_s;
         this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
+        this.model.new_input = this.new_input;
+        console.log(this.model);
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
+              NProgress.done();
               var r = response.data
               this.op_response = r.op_response;
               this.$refs.csv_download.generateCsv(this.op_response.solution);
@@ -343,6 +400,8 @@ export default {
               this.parseApplyRoutes(this.op_response);
               this.$refs.map.show_results(this.op_response["summary"]["cost"]);
           })
+        this.new_input = false;
+
       }
     },
 
@@ -351,7 +410,7 @@ export default {
 		this.$refs.map.hide_results();
     },
     changeProportion() {
-        this.model.proportion_devoted = (this.model.demand * 1.0) / 6666666;
+        this.model.field.proportion_devoted = (this.model.demand * 1.0) / 6666666;
         console.log(this.model.demand);
         console.log(this.model.proportion_devoted);
     }

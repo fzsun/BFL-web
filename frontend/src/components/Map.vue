@@ -109,7 +109,8 @@ export default {
         addPushpin() {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
-            	var typeName = prompt(ref.name + " Name", this.name);
+                var typeName = prompt(ref.name + " Name", this.name);
+                // console.log(event.latLng.lat(), event.latLng.lng(), typeName);
                 if (typeName !== null) ref.placeMarker(event.latLng, typeName);
             });
         },
