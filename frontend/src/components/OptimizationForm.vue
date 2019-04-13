@@ -47,27 +47,31 @@
             </div>
         </div>
     </div>
-    <div class="field">
-        <label class="label">Moisture</label>
-        <div class="control">
-            <input class="input" type="number" v-model="model.moisture">
+    <div>
+        <div class="label centerAlign makeFull">Farm and Crop Info</div> 
+        <div class="flexWrap">
+            <div class="field">
+                <label class="label">Moisture</label>
+                <div class="control">
+                    <input class="input" type="number" v-model="model.moisture">
+                </div>
+            </div>
+            <ListInput 
+                v-bind:list='model.field.area_ratio' 
+                v-on:listChange='model.field.area_ratio = $event'
+                v-bind:label="'Farm Size Ratio'"
+                v-bind:placeHolders='placeHolders.areaRatio'
+            ></ListInput>
         </div>
-    </div>
-    <ListInput 
-        v-bind:list='model.field.area_ratio' 
-        v-on:listChange='model.field.area_ratio = $event'
-        v-bind:label="'Farm Size Ratio'"
-        v-bind:placeHolders='placeHolders.areaRatio'
-    ></ListInput>
     <!-- <div class="field">
         <label class="label">Price per Mg</label>
         <div class="control">
             <input class="input" type="text" v-model="model.price">
         </div>
     </div> -->
-    
+    </div>
     <div>
-        <div class="label centerAlign">Equipment Configuration Info</div>
+        <div class="label centerAlign makeFull">Equipment Configuration Info</div>
         <div class="flexWrap">
             <EquipmentField
                 v-bind:list='model.cost.equipment.loadout'
@@ -107,38 +111,46 @@
             </EquipmentField>
         </div>
     </div>
-    <div class="transCoefficients">
-        <label class="label">Transportation Factors</label>
-        <div class="flexCols">
-            <input 
-                class="input" 
-                type="text" 
-                v-model="model.cost.transport_coef.compressed"
-                placeholder="Compressed"
-            >
-        </div>
-        <div class="flexCols">
-            <input 
-                class="input" 
-                type="text" 
-                v-model="model.cost.transport_coef.whole_stalk"
-                placeholder="Whole Stalk"
-            >
-        </div>
-        <div class="flexCols">
-            <input 
-                class="input" 
-                type="text" 
-                v-model="model.cost.transport_coef.in_module"
-                placeholder="In Module"
-            >
+
+    <div>
+        <div class="label centerAlign makeFull">Transportation Factors</div>
+        <div class="flexWrap">
+            <div class="control">
+                <div class="field">
+                    <label class="label">Compressed</label>
+                    <input 
+                        class="input" 
+                        type="text" 
+                        v-model="model.cost.transport_coef.compressed"
+                    >
+                </div>
+            </div>
+            <div class="control">
+                <div class="field">
+                    <label class="label">Whole Stalk</label>
+                    <input 
+                        class="input" 
+                        type="number" 
+                        v-model="model.cost.transport_coef.whole_stalk"
+                    >
+                </div>
+            </div>
+            <div class="control">
+                <div class="field">
+                    <label class="label">In Module</label>
+                    <input 
+                        class="input" 
+                        type="number" 
+                        v-model="model.cost.transport_coef.in_module"
+                    >
+                </div>
+            </div>
         </div>
     </div>
     
     <div>
         <div class="label centerAlign">Degradation Factors</div>
         <div class="flexWrap">
-            <!-- Add <br>, Finish labeling, swap trans factors, remedy placeholder vs default  -->
             <div class="field">
                 <label class="label">Whole Stalk</label>
                 <div class="control">
@@ -150,6 +162,7 @@
                 </div>
             </div>
             <div class="control">
+                <label class="label">Chopped</label>
                 <input 
                     class="input" 
                     type="number" 
@@ -157,6 +170,7 @@
                 >
             </div>
             <div class="control">
+                <label class="label">In Bunker</label>
                 <input 
                     class="input" 
                     type="number" 
@@ -164,6 +178,7 @@
                 >
             </div>
             <div class="control">
+                <label class="label">In Bag</label>
                 <input 
                     class="input" 
                     type="number" 
@@ -206,19 +221,13 @@ export default {
 </script>
 
 <style>
-.params {
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
+
+.makeFull {
+    width: calc(100vw - 4rem);
 }
 
 .degradeParams .flexCols {
     width: 18rem;
-}
-
-.params .input {
-  width: 18rem;
-  margin-right: 1rem;
 }
 
 .flexCols {
@@ -237,5 +246,10 @@ export default {
 
 .centerAlign {
     text-align: center;
+    margin: 1rem 0;
+}
+
+.section {
+    margin-bottom: 1rem;
 }
 </style>

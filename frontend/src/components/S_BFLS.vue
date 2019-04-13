@@ -4,14 +4,13 @@
     <Map class="map" v-model="mapInfo" ref="map"></Map>
     <div class="paramDescription title is-size-4">Optimization Parameters</div>
     <div class="params">
-      <div class="requiredParams">
-        <div class="field defaultWidth">
+        <div class="field">
             <label class="label">Projected Demand (Mg)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.demand" @change="changeProportion">
             </div>
         </div>
-        <div class="field defaultWidth">
+        <div class="field">
             <label class="label">Length Planning Horizon (wk)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.horizon">
@@ -45,7 +44,6 @@
           v-bind:label="'Harvest Progress'"
           v-bind:placeHolders="placeHolders.harvestProgress"
         ></ListInput>
-      </div>
       <div class="advancedParams">
         <div v-if="advancedOptions">
           <div class="title is-size-5">Additional Parameters</div>
@@ -164,7 +162,6 @@
             <td class="table_row" v-html="sim_response['module hauler rate']['sem'] + ' Mg'"></td>
             <td class="table_row" v-html="sim_response['module hauler rate']['conf int'] + ' Mg'"></td>
             <td class="table_row" v-html="'(' + sim_response['module hauler rate']['range'][0] + ', ' + sim_response['module hauler rate']['range'][1] + ')' + ' Mg/hr'"></td>
-
           </tr>
         </table>
       </div>
@@ -462,29 +459,28 @@ export default {
 .params {
   grid-area: params;
   display: flex;
-  flex-grow: 1;
   justify-content: flex-start;
   flex-wrap: wrap;
 }
 
-.requiredParams {
-  grid-area: params;
-  display: flex;
-  flex-grow: 1;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.requiredParams .input {
+.params .input {
+  width: 18rem;
   margin-right: 1rem;
 }
+/* .requiredParams {
+  grid-area: params;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+} */
 
 .defaultWidth {
   width: 15rem;
 }
 
 .buttons {
-  grid-area: buttons
+  grid-area: buttons;
+  margin-top: 1rem;
 }
 
 .advancedOptions {

@@ -3,7 +3,7 @@
     <div class="control"> 
         <form v-on:change="emit()">
             <label class="label">{{label}}</label>
-            <div v-if="showLess" class="flex">
+            <div v-if="showLess">
                 <input 
                     class="input"
                     type="number"
@@ -50,8 +50,7 @@ export default {
 
 <style>
 
-.flexCols {
-    display: flex;
-    /* flex-direction: column; */
+.width {
+    width: 18rem;
 }
 </style>
