@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "chart.js": "^2.8.0",
     "geocodio": "^2.0.0",
     "node-sass": "^4.11.0",
     "vue": "^2.5.2",
+    "vue-chartkick": "^0.5.0",
     "vue-form-generator": "^2.3.2",
+    "vue-json-to-csv": "^1.1.7",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
