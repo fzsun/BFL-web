@@ -29,7 +29,7 @@
     week_23: { title: 'week 23' }
   }">
 <button id="optimization_csv_button" hidden="true">
-    <b>Get Data</b>
+    <b>Download Full Results</b>
   </button>
 </vue-json-to-csv>
 </template>
