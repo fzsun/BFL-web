@@ -447,7 +447,7 @@ export default {
               NProgress.done();
               var r = response.data
               this.op_response = r.op_response;
-              this.$refs.csv_download.generateCsv(this.op_response.solution);
+              this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
 		          this.showInput = true;
@@ -460,6 +460,9 @@ export default {
       }
     },
     show_results(data) {
+			this.chart_info = {}; this.showing_options = [];
+
+            this.showing_options = false;
             this.chart_info['farm_ssl_trans_cost'] = Math.round(data.tran_farms_ssl);
             this.chart_info['ssl_ref_trans_cost'] = Math.round(data.tran_ssl_refinery);
             this.chart_info['farm_holding_cost'] = Math.round(data.farm_inventory);
@@ -474,7 +477,6 @@ export default {
             this.chart_data[3] = ['ssl holding', Math.round(data.ssl_inventory)];
             this.chart_data[4] = ['local ownership', Math.round(data.loc_own)];
             this.chart_data[5] = ['operations', Math.round(data.operation)];
-            this.showing_options = false;
     },
     show_input() {
         this.showInput = false;
@@ -482,8 +484,6 @@ export default {
     },
     changeProportion() {
         this.model.field.proportion_devoted = (this.model.demand * 1.0) / 6666666;
-        console.log(this.model.demand);
-        console.log(this.model.proportion_devoted);
     }
   }
 }

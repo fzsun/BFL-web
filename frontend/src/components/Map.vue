@@ -59,18 +59,6 @@
             </span>
         </form>
     </div>
-    <div v-else class="costChart">
-		<pie-chart prefix="$" :data="chart_data" width="48%" style="float: left; display:inline"></pie-chart>
-        <div class="list is-hoverable" width="40%" style="float: right; display:inline;">
-          <p class="list-item">Farm to SSL Cost: ${{chart_info['farm_ssl_trans_cost']}}</p>
-          <p class="list-item">SSL to Refinery Cost: ${{chart_info['ssl_ref_trans_cost']}}</p>
-          <p class="list-item">Farm Holding Cost: ${{chart_info['farm_holding_cost']}}</p>
-          <p class="list-item">SSL Holding Cost: ${{chart_info['ssl_holding_cost']}}</p>
-          <p class="list-item">Local Ownership Cost: ${{chart_info['local_ownership']}}</p>
-          <p class="list-item">Operation Cost: ${{chart_info['operation_cost']}}</p>
-          <p class="list-item is-active">Total Cost: ${{chart_info['total_cost']}}</p>
-        </div>
-    </div>
     <div id="map" class="map"></div>
   </body>
 </template>
@@ -100,8 +88,6 @@ export default {
             flight_paths: [],
             num_flight_paths: 0,
             showing_options: true,
-            chart_data: [],
-            chart_info: {},
     }},
     props: ['mapInfo'],
     methods: {
@@ -304,29 +290,6 @@ export default {
             }
             this.flight_paths = [];
             this.num_flight_paths = 0;
-        },
-
-        show_results(data) {
-            this.chart_info['farm_ssl_trans_cost'] = Math.round(data.tran_farms_ssl);
-            this.chart_info['ssl_ref_trans_cost'] = Math.round(data.tran_ssl_refinery);
-            this.chart_info['farm_holding_cost'] = Math.round(data.farm_inventory);
-            this.chart_info['ssl_holding_cost'] = Math.round(data.ssl_inventory);
-            this.chart_info['local_ownership'] = Math.round(data.loc_own);
-            this.chart_info['operation_cost'] = Math.round(data.operation);
-            this.chart_info['total_cost'] = Math.round(data.total_ub);
-
-            this.chart_data[0] = ['farm to ssl', Math.round(data.tran_farms_ssl)];
-            this.chart_data[1] = ['ssl to refinery', Math.round(data.tran_ssl_refinery)];
-            this.chart_data[2] = ['farm holding', Math.round(data.farm_inventory)];
-            this.chart_data[3] = ['ssl holding', Math.round(data.ssl_inventory)];
-            this.chart_data[4] = ['local ownership', Math.round(data.loc_own)];
-            this.chart_data[5] = ['operations', Math.round(data.operation)];
-            this.showing_options = false;
-        },
-        hide_results() {
-            this.chart_info = {};
-            this.chart_data = [];
-            this.showing_options = true;
         }
 
 
