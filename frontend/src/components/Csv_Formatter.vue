@@ -1,38 +1,38 @@
 <template>
 <vue-json-to-csv :json-data="op_response_csv"
 :labels="{
-    col_a: { title: '--' },
-    col_b: { title: '--' },
-    col_c: { title: '--' },
-    col_d: { title: '--' },
-    col_e: { title: '--' },
-    col_f: { title: '--' },
-    col_1: { title: '--' },
-    col_2: { title: '--' },
-    col_3: { title: '--' },
-    col_4: { title: '--' },
-    col_5: { title: '--' },
-    col_6: { title: '--' },
-    col_7: { title: '--' },
-    col_8: { title: '--' },
-    col_9: { title: '--' },
-    col_10: { title: '--' },
-    col_11: { title: '--' },
-    col_12: { title: '--' },
-    col_13: { title: '--' },
-    col_14: { title: '--' },
-    col_15: { title: '--' },
-    col_16: { title: '--' },
-    col_17: { title: '--' },
-    col_18: { title: '--' },
-    col_19: { title: '--' },
-    col_20: { title: '--' },
-    col_21: { title: '--' },
-    col_22: { title: '--' },
-    col_23: { title: '--' },
-    col_24: { title: '--' },
-    col_25: { title: '--' },
-    col_26: { title: '--' }
+   0: { title: '--' },
+   1: { title: '--' },
+   2: { title: '--' },
+   3: { title: '--' },
+   4: { title: '--' },
+   5: { title: '--' },
+   6: { title: '--' },
+   7: { title: '--' },
+   8: { title: '--' },
+   9: { title: '--' },
+   10: { title: '--' },
+   11: { title: '--' },
+   12: { title: '--' },
+   13: { title: '--' },
+   14: { title: '--' },
+   15: { title: '--' },
+   16: { title: '--' },
+   17: { title: '--' },
+   18: { title: '--' },
+   19: { title: '--' },
+   20: { title: '--' },
+   21: { title: '--' },
+   22: { title: '--' },
+   23: { title: '--' },
+   24: { title: '--' },
+   25: { title: '--' },
+   26: { title: '--' },
+   27: { title: '--' },
+   28: { title: '--' },
+   29: { title: '--' },
+   30: { title: '--' },
+   31: { title: '--' }
     }">
 <button id="optimization_csv_button" hidden="true">
     <b>Download Full Results</b>
@@ -83,83 +83,85 @@ export default {
             var upperbound_inventory = params.upperbound_inventory;
 
             //sysnum, configuration, seed, refinery coords chart
-            this.op_response_csv[csv_index++] = {col_a: "sysnum",
-                                                 col_b: "configuration",
-                                                 col_c: "seed",
-                                                 col_d: "refinery lat",
-                                                 col_e: "refinery lng"};
-            this.op_response_csv[csv_index++] = {col_a: sysnum,
-                                                 col_b: configuration,
-                                                 col_c: (seed == null) ? "undefined" : seed,
-                                                 col_d: refinery_location[0],
-                                                 col_e: refinery_location[1]};
+            this.op_response_csv[csv_index++] = ["sysnum",
+                                                 "configuration",
+                                                 "seed",
+                                                 "refinery lat",
+                                                 "refinery lng"];
+            this.op_response_csv[csv_index++] = [sysnum,
+                                                 configuration,
+                                                 (seed == null) ? "undefined" : seed,
+                                                 refinery_location[0],
+                                                 refinery_location[1]];
 
 
-            this.op_response_csv[csv_index++] = {};
-            this.op_response_csv[csv_index++] = {};
+            this.op_response_csv[csv_index++] = [];
+            this.op_response_csv[csv_index++] = [];
 
 
 
             //penalty, operating cost (+ jit), farm_holding_cost, ssl_holding_cost chart
-            this.op_response_csv[csv_index++] = {col_a: "penalty",
-                                                 col_b: "operating cost",
-                                                 col_c: "operating cost jit",
-                                                 col_d: "farm holding cost",
-                                                 col_e: "ssl holding cost"};
-            this.op_response_csv[csv_index++] = {col_a: penalty_per_Mg,
-                                                 col_b: operating_cost,
-                                                 col_c: operating_cost_jit,
-                                                 col_d: farm_holding_cost,
-                                                 col_e: ssl_holding_cost};
+            this.op_response_csv[csv_index++] = ["penalty",
+                                                 "operating cost",
+                                                 "operating cost jit",
+                                                 "farm holding cost",
+                                                 "ssl holding cost"];
+            this.op_response_csv[csv_index++] = [penalty_per_Mg,
+                                                 operating_cost,
+                                                 operating_cost_jit,
+                                                 farm_holding_cost,
+                                                 ssl_holding_cost];
 
 
-            this.op_response_csv[csv_index++] = {};
-            this.op_response_csv[csv_index++] = {};
+            this.op_response_csv[csv_index++] = [];
+            this.op_response_csv[csv_index++] = [];
 
 
 
             //harvested + demand
-            this.op_response_csv[csv_index++] = {col_1: "week 1",
-                                                 col_2: "week 2",
-                                                 col_3: "week 3",
-                                                 col_4: "week 4",
-                                                 col_5: "week 5",
-                                                 col_6: "week 6",
-                                                 col_7: "week 7",
-                                                 col_8: "week 8",
-                                                 col_9: "week 9",
-                                                 col_10: "week 10",
-                                                 col_11: "week 11",
-                                                 col_12: "week 12",
-                                                 col_13: "week 13",
-                                                 col_14: "week 14",
-                                                 col_15: "week 15",
-                                                 col_16: "week 16",
-                                                 col_17: "week 17",
-                                                 col_18: "week 18",
-                                                 col_19: "week 19",
-                                                 col_20: "week 20",
-                                                 col_21: "week 21",
-                                                 col_22: "week 22",
-                                                 col_23: "week 23",
-                                                 col_24: "week 24",
-                                                 col_25: "week 25",
-                                                 col_26: "week 26"};
+            this.op_response_csv[csv_index++] = ["",
+                                                 "week 1",
+                                                 "week 2",
+                                                 "week 3",
+                                                 "week 4",
+                                                 "week 5",
+                                                 "week 6",
+                                                 "week 7",
+                                                 "week 8",
+                                                 "week 9",
+                                                 "week 10",
+                                                 "week 11",
+                                                 "week 12",
+                                                 "week 13",
+                                                 "week 14",
+                                                 "week 15",
+                                                 "week 16",
+                                                 "week 17",
+                                                 "week 18",
+                                                 "week 19",
+                                                 "week 20",
+                                                 "week 21",
+                                                 "week 22",
+                                                 "week 23",
+                                                 "week 24",
+                                                 "week 25",
+                                                 "week 26",
+                                                 "week 27"];
 
             var n;
-            this.op_response_csv[csv_index] = {};
+            this.op_response_csv[csv_index] = ["demand"];
             for (n = 0; n < demand.length; n++) {
-               this.op_response_csv[csv_index]["col_" + (n + 1)] = demand[n]; 
+               this.op_response_csv[csv_index][n + 1] = demand[n]; 
             }
-            this.op_response_csv[csv_index++]["col_f"] = "demand";
+            csv_index++;
 
             for (n = 0; n < harvested[0].length; n++) {
-                this.op_response_csv[csv_index] = {};
+                this.op_response_csv[csv_index] = ["farm" + n];
                 var q;
                 for (q = 0; q < harvested.length; q++) {
-                    this.op_response_csv[csv_index]["col_" + (q + 1)] = harvested[q][n];
+                    this.op_response_csv[csv_index][q + 1] = harvested[q][n];
                 }
-                this.op_response_csv[csv_index++]["col_f"] = "farm " + n;
+                csv_index++;
             }
 
 
@@ -183,40 +185,40 @@ export default {
                     ssl_configs[ssl_configs.length] = [ssl, config];
                 } else if (solution_parts[0] == "farm_to_ssl") {
                     if (farm_ssl) {
-                        this.op_response_csv[csv_index++] = {};
-                        this.op_response_csv[csv_index++] = {};
+                        this.op_response_csv[csv_index++] = [];
+                        this.op_response_csv[csv_index++] = [];
 
-                        this.op_response_csv[csv_index++] = {col_a: "farm num",
-                                                             col_b: "farm lat",
-                                                             col_c: "farm lng",
-                                                             col_d: "ssl num",
-                                                             col_e: "farm to ssl cost",
-                                                             col_1: "week 1",
-                                                             col_2: "week 2",
-                                                             col_3: "week 3",
-                                                             col_4: "week 4",
-                                                             col_5: "week 5",
-                                                             col_6: "week 6",
-                                                             col_7: "week 7",
-                                                             col_8: "week 8",
-                                                             col_9: "week 9",
-                                                             col_10: "week 10",
-                                                             col_11: "week 11",
-                                                             col_12: "week 12",
-                                                             col_13: "week 13",
-                                                             col_14: "week 14",
-                                                             col_15: "week 15",
-                                                             col_16: "week 16",
-                                                             col_17: "week 17",
-                                                             col_18: "week 18",
-                                                             col_19: "week 19",
-                                                             col_20: "week 20",
-                                                             col_21: "week 21",
-                                                             col_22: "week 22",
-                                                             col_23: "week 23",
-                                                             col_24: "week 24",
-                                                             col_25: "week 25",
-                                                             col_26: "week 26"};
+                        this.op_response_csv[csv_index++] = ["farm num",
+                                                             "farm lat",
+                                                             "farm lng",
+                                                             "ssl num",
+                                                             "farm to ssl cost",
+                                                             "week 1",
+                                                             "week 2",
+                                                             "week 3",
+                                                             "week 4",
+                                                             "week 5",
+                                                             "week 6",
+                                                             "week 7",
+                                                             "week 8",
+                                                             "week 9",
+                                                             "week 10",
+                                                             "week 11",
+                                                             "week 12",
+                                                             "week 13",
+                                                             "week 14",
+                                                             "week 15",
+                                                             "week 16",
+                                                             "week 17",
+                                                             "week 18",
+                                                             "week 19",
+                                                             "week 20",
+                                                             "week 21",
+                                                             "week 22",
+                                                             "week 23",
+                                                             "week 24",
+                                                             "week 25",
+                                                             "week 26"];
                         farm_ssl = false;
                         farm_index = csv_index;
                     }
@@ -224,11 +226,11 @@ export default {
                     var inner_parts = solution_parts[1].split(",");
                     var farm = parseInt(inner_parts[0]);
                     var ssl = parseInt(inner_parts[1].split("]")[0]);
-                    this.op_response_csv[csv_index++] = {col_a: farm,
-                                                         col_b: coord_farms[farm][0],
-                                                         col_c: coord_farms[farm][1],
-                                                         col_d: ssl,
-                                                         col_e: farm_ssl_trans_cost[farm][ssl]};
+                    this.op_response_csv[csv_index++] = [farm,
+                                                         coord_farms[farm][0],
+                                                         coord_farms[farm][1],
+                                                         ssl,
+                                                         farm_ssl_trans_cost[farm][ssl]];
 
 
                 } else if (solution_parts[0] == "shipped_farm_ssl") {
@@ -236,64 +238,64 @@ export default {
                     var inner_parts = solution_parts[1].split(",");
                     var week = parseInt(inner_parts[0]);
                     var farm = parseInt(inner_parts[1]);
-                    this.op_response_csv[farm_index + farm]["col_" + week] =
+                    this.op_response_csv[farm_index + farm][week + 4] =
                         solution[solution_index][1];
 
                 } else if (solution_parts[0] == "shipped_ssl_refinery") {
                     if (ssl_ref) {
-                        this.op_response_csv[csv_index++] = {};
-                        this.op_response_csv[csv_index++] = {};
+                        this.op_response_csv[csv_index++] = [];
+                        this.op_response_csv[csv_index++] = [];
 
-                        this.op_response_csv[csv_index++] = {col_a: "ssl num",
-                                                             col_b: "ssl lat",
-                                                             col_c: "ssl lng",
-                                                             col_d: "ssl to ref cost (jit)",
-                                                             col_e: "cost to build ssl",
-                                                             col_f: "ssl configuration number",
-                                                             col_1: "week 1",
-                                                             col_2: "week 2",
-                                                             col_3: "week 3",
-                                                             col_4: "week 4",
-                                                             col_5: "week 5",
-                                                             col_6: "week 6",
-                                                             col_7: "week 7",
-                                                             col_8: "week 8",
-                                                             col_9: "week 9",
-                                                             col_10: "week 10",
-                                                             col_11: "week 11",
-                                                             col_12: "week 12",
-                                                             col_13: "week 13",
-                                                             col_14: "week 14",
-                                                             col_15: "week 15",
-                                                             col_16: "week 16",
-                                                             col_17: "week 17",
-                                                             col_18: "week 18",
-                                                             col_19: "week 19",
-                                                             col_20: "week 20",
-                                                             col_21: "week 21",
-                                                             col_22: "week 22",
-                                                             col_23: "week 23",
-                                                             col_24: "week 24",
-                                                             col_25: "week 25",
-                                                             col_26: "week 26"};
+                        this.op_response_csv[csv_index++] = ["ssl num",
+                                                             "ssl lat",
+                                                             "ssl lng",
+                                                             "ssl to ref cost (jit)",
+                                                             "cost to build ssl",
+                                                             "ssl configuration number",
+                                                             "week 1",
+                                                             "week 2",
+                                                             "week 3",
+                                                             "week 4",
+                                                             "week 5",
+                                                             "week 6",
+                                                             "week 7",
+                                                             "week 8",
+                                                             "week 9",
+                                                             "week 10",
+                                                             "week 11",
+                                                             "week 12",
+                                                             "week 13",
+                                                             "week 14",
+                                                             "week 15",
+                                                             "week 16",
+                                                             "week 17",
+                                                             "week 18",
+                                                             "week 19",
+                                                             "week 20",
+                                                             "week 21",
+                                                             "week 22",
+                                                             "week 23",
+                                                             "week 24",
+                                                             "week 25",
+                                                             "week 26"];
                         ssl_ref = false;
                         ssl_index = csv_index;
 
                         var n;
                         for (n = 0; n < ssl_configs.length; n++) {
-                            this.op_response_csv[csv_index++] = {col_a: ssl_configs[n][0],
-                                 col_b: coord_ssls[n][0],
-                                 col_c: coord_ssls[n][1],
-                                 col_d: ssl_refinery_trans_cost[n] + " (" + ssl_refinery_trans_cost_jit[n] + ")",
-                                 col_e: fixed_cost_ssl[ssl_configs[n][0]][ssl_configs[n][1]], 
-                                 col_f: ssl_configs[n][1]};
+                            this.op_response_csv[csv_index++] = [ssl_configs[n][0],
+                                 coord_ssls[n][0],
+                                 coord_ssls[n][1],
+                                 ssl_refinery_trans_cost[n] + " (" + ssl_refinery_trans_cost_jit[n] + ")",
+                                 fixed_cost_ssl[ssl_configs[n][0]][ssl_configs[n][1]], 
+                                 ssl_configs[n][1]];
                         }
                     }
 
                     var inner_parts = solution_parts[1].split(",");
                     var week = parseInt(inner_parts[0]);
                     var ssl = parseInt(inner_parts[1].split("]")[0]);
-                    this.op_response_csv[ssl_index + ssl]["col_" + week] =
+                    this.op_response_csv[ssl_index + ssl][week + 5] =
                         solution[solution_index][1];
 
 
@@ -301,29 +303,29 @@ export default {
             }
             
 
-            this.op_response_csv[csv_index++] = {};
-            this.op_response_csv[csv_index++] = {};
+            this.op_response_csv[csv_index++] = [];
+            this.op_response_csv[csv_index++] = [];
 
 
             //upperbounds
  
-            this.op_response_csv[csv_index++] = {col_a: "ssl config num",
-                                                 col_b: "max storage",
-                                                 col_c: "max equip proc rate (jit)"};
+            this.op_response_csv[csv_index++] = ["ssl config num",
+                                                 "max storage",
+                                                 "max equip proc rate (jit)"];
             var saved_configs = [];
             for (n = 0; n < ssl_configs.length; n++) {
                 var ind_ssl = ssl_configs[n];
                 if (!saved_configs.includes(ind_ssl[1])) {
                     saved_configs[saved_configs.length] = ind_ssl[1];
-                    this.op_response_csv[csv_index++] = {col_a: ind_ssl[1],
-                        col_b: upperbound_inventory[ind_ssl[1]],
-                        col_c: upperbound_equip_proc_rate[ind_ssl[1]] +
-                        " (" + upperbound_equip_proc_rate_jit[ind_ssl[1]] + ")"};
+                    this.op_response_csv[csv_index++] = [ind_ssl[1],
+                        upperbound_inventory[ind_ssl[1]],
+                        upperbound_equip_proc_rate[ind_ssl[1]] +
+                        " (" + upperbound_equip_proc_rate_jit[ind_ssl[1]] + ")"];
                 }
             }
 
-            this.op_response_csv[csv_index++] = {};
-            this.op_response_csv[csv_index++] = {};
+            this.op_response_csv[csv_index++] = [];
+            this.op_response_csv[csv_index++] = [];
 
 
 
@@ -335,35 +337,35 @@ export default {
 
             //cost (total and per Mg)
 
-            this.op_response_csv[csv_index++] = {col_a: "part",
-                                                 col_b: "cost",
-                                                 col_c: "cost per dry mg"};
-            this.op_response_csv[csv_index++] = {col_a: "farm holding cost",
-                                                 col_b: cost.farm_inventory,
-                                                 col_c: per_dry_Mg.farm_inventory};
-            this.op_response_csv[csv_index++] = {col_a: "ssl holding",
-                                                 col_b: cost.ssl_inventory,
-                                                 col_c: per_dry_Mg.ssl_inventory};
-            this.op_response_csv[csv_index++] = {col_a: "location ownership",
-                                                 col_b: cost.loc_own,
-                                                 col_c: per_dry_Mg.loc_own};
-            this.op_response_csv[csv_index++] = {col_a: "operation",
-                                                 col_b: cost.operation,
-                                                 col_c: per_dry_Mg.operation};
-            this.op_response_csv[csv_index++] = {col_a: "farm to ssl trans",
-                                                 col_b: cost.tran_farms_ssl,
-                                                 col_c: per_dry_Mg.tran_farms_ssl};
-            this.op_response_csv[csv_index++] = {col_a: "ssl to ref trans",
-                                                 col_b: cost.tran_ssl_refinery,
-                                                 col_c: per_dry_Mg.tran_ssl_refinery};
-            this.op_response_csv[csv_index++] = {col_a: "total (upper bound)",
-                                                 col_b: cost.total_ub,
-                                                 col_c: per_dry_Mg.total_ub};
+            this.op_response_csv[csv_index++] = ["part",
+                                                 "cost",
+                                                 "cost per dry mg"];
+            this.op_response_csv[csv_index++] = ["farm holding cost",
+                                                 cost.farm_inventory,
+                                                 per_dry_Mg.farm_inventory];
+            this.op_response_csv[csv_index++] = ["ssl holding",
+                                                 cost.ssl_inventory,
+                                                 per_dry_Mg.ssl_inventory];
+            this.op_response_csv[csv_index++] = ["location ownership",
+                                                 cost.loc_own,
+                                                 per_dry_Mg.loc_own];
+            this.op_response_csv[csv_index++] = ["operation",
+                                                 cost.operation,
+                                                 per_dry_Mg.operation];
+            this.op_response_csv[csv_index++] = ["farm to ssl trans",
+                                                 cost.tran_farms_ssl,
+                                                 per_dry_Mg.tran_farms_ssl];
+            this.op_response_csv[csv_index++] = ["ssl to ref trans",
+                                                 cost.tran_ssl_refinery,
+                                                 per_dry_Mg.tran_ssl_refinery];
+            this.op_response_csv[csv_index++] = ["total (upper bound)",
+                                                 cost.total_ub,
+                                                 per_dry_Mg.total_ub];
             
 
 
-            this.op_response_csv[csv_index++] = {};
-            this.op_response_csv[csv_index++] = {};
+            this.op_response_csv[csv_index++] = [];
+            this.op_response_csv[csv_index++] = [];
 
             this.fill_undefined();
             console.log(this.op_response_csv);
@@ -372,23 +374,17 @@ export default {
         fill_undefined() {
             var k;
             for (k = 0; k < this.op_response_csv.length; k++) {
-                if (this.op_response_csv[k]["col_a"] == null)
-                    this.op_response_csv[k]["col_a"] = "";
-                if (this.op_response_csv[k]["col_b"] == null)
-                    this.op_response_csv[k]["col_b"] = "";
-                if (this.op_response_csv[k]["col_c"] == null)
-                    this.op_response_csv[k]["col_c"] = "";
-                if (this.op_response_csv[k]["col_d"] == null)
-                    this.op_response_csv[k]["col_d"] = "";
-                if (this.op_response_csv[k]["col_e"] == null)
-                    this.op_response_csv[k]["col_e"] = "";
-                if (this.op_response_csv[k]["col_f"] == null)
-                    this.op_response_csv[k]["col_f"] = "";
                 var m;
-                for ( m = 1; m <= 26; m++) {
-                    if (this.op_response_csv[k]["col_" + m] == null)
-                        this.op_response_csv[k]["col_" + m] = "";
+                for (m = 0; m < 32; m++) {
+                    if (this.op_response_csv[k][m] == null)
+                        this.op_response_csv[k][m] = "";
                 }
+                var obj = {};
+                for (m = 0; m < 32; m++) {
+                    obj[m] = this.op_response_csv[k][m];
+                }
+                this.op_response_csv[k] = obj;
+
             }
         }
     }
