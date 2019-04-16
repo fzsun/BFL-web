@@ -1,20 +1,20 @@
 <template>
 <div class="field">
-    <div class="control"> 
-        <form v-on:change="emit()">
-            <label class="label">{{label}}</label>
-            <div v-if="showLess">
-                <input 
-                    class="input"
-                    type="number"
-                    v-bind:key="index" 
-                    v-for="(item, index) in list"
-                    v-model="data[index]"
-                    v-bind:placeholder="placeHolders[index]"
-                >
-            </div>
-        </form>
-    </div>
+    <label class="label">{{label}}</label>
+    <form class="flexWrap" v-on:change="emit()">
+        <div
+            class="control tooltip is-tooltip-bottom"
+            v-bind:data-tooltip="tooltips[index]"
+            v-bind:key="index" 
+            v-for="(item, index) in list"
+        >
+            <input 
+                class="input"
+                type="number"
+                v-model="data[index]"
+            >
+        </div>
+    </form>
 </div>
 </template>
 
@@ -27,13 +27,13 @@ export default {
         label: {
             type: String
         },
-        placeHolders: {
+        tooltips: {
             type: Array
         }
     },
     data() {
         return {
-            data: new Array(this.list.length),
+            data: this.list,
             showLess: true,
         }
     }, 
@@ -52,5 +52,10 @@ export default {
 
 .width {
     width: 18rem;
+}
+
+.flexWrap {
+    display: flex;
+    flex-wrap: wrap;
 }
 </style>

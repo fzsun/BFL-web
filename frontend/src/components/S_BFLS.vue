@@ -4,24 +4,29 @@
     <Map class="map" v-model="mapInfo" ref="map"></Map>
     <div class="paramDescription">
       <div class="title is-4">Optimization Parameters</div>
-      <div class="subtitle is-6">Note: if parameter unspecified default value is accepted</div>
+      <div class="subtitle is-6">Note: if parameter unchanged default value accepted</div>
     </div>
     
     <div class="params">
         <div class="field">
             <label class="label">Projected Demand (Mg)</label>
-            <div class="control">
-                <input class="input" type="text" v-model="model.demand" @change="changeProportion">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Approximate biomass needed to meet demand.">
+                <input 
+                  class="input tooltip" 
+                  type="text" 
+                  v-model="model.demand" 
+                  @change="changeProportion"
+                >
             </div>
         </div>
         <div class="field">
             <label class="label">Length Planning Horizon (wk)</label>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Overall time period for optimization">
                 <input class="input" type="text" v-model="model.horizon">
             </div>
         </div>
         <div class="field">
-          <div class="control">
+          <div class="control tooltip is-tooltip-bottom" data-tooltip="Select array of equipment arrangments">
             <label class="label">Equipment Configuration</label>  
             <div class="select">
               <select
@@ -40,13 +45,13 @@
           v-bind:list='model.ssl_sizes' 
           v-on:listChange='model.ssl_sizes = $event'
           v-bind:label="'SSL Sizes'"
-          v-bind:placeHolders="placeHolders.sslSizes"
+          v-bind:tooltips="tooltips.sslSizes"
         ></ListInput>
         <ListInput 
           v-bind:list='model.harvest_progress' 
           v-on:listChange='model.harvest_progress = $event'
-          v-bind:label="'Harvest Progress'"
-          v-bind:placeHolders="placeHolders.harvestProgress"
+          v-bind:label="'Harvest Progress (must sum to 1)'"
+          v-bind:tooltips="tooltips.harvestProgress"
         ></ListInput>
       <div class="advancedParams">
         <div v-if="advancedOptions">
@@ -218,7 +223,7 @@ export default {
   data() {
     return {
       response: [],
-      placeHolders: {
+      tooltips: {
         sslSizes: ["small (Mg)", "medium (Mg)", "large (Mg)"],
         harvestProgress: [
           "% demand harvested week 1",

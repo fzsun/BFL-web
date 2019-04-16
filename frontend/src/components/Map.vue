@@ -34,7 +34,7 @@
             </label>
         </div>
         <p class="max-width paddingLeft">
-            Place refinery (red pin) as center of hub 
+            Place refinery (red pin) as center of 2-layer hub 
             and spoke optimization model. Next place farm locations 
             (green pins). Finally, place potential satellite storage 
             locations (blue pins).
