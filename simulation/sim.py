@@ -290,8 +290,8 @@ class Simulation(object):
     def refinery_transport(self, ssl, period):
         whats_left = self.ssl_transport_schedule[period][ssl]
         while whats_left != 0:
-            #if self.ssl_container[ssl].level == 0 and self.before_ssl[ssl] == 0:
-                #break
+            if self.ssl_container[ssl].level == 0 and self.before_ssl[ssl] == 0:
+                break
             if self.ssl_container[ssl].level > 0:
                 y=min(whats_left,self.ssl_container[ssl].level)
                 self.ssl_container[ssl].get(y)

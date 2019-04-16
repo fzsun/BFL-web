@@ -2,16 +2,19 @@
 <div class="section wrap">
     <h1 class="title">Sorghum - Logistics Support</h1>
     <Map class="map" v-model="mapInfo" ref="map"></Map>
-    <div class="paramDescription title is-size-4">Optimization Parameters</div>
+    <div class="paramDescription">
+      <div class="title is-4">Optimization Parameters</div>
+      <div class="subtitle is-6">Note: if parameter unspecified default value is accepted</div>
+    </div>
+    
     <div class="params">
-      <div class="requiredParams">
-        <div class="field defaultWidth">
+        <div class="field">
             <label class="label">Projected Demand (Mg)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.demand" @change="changeProportion">
             </div>
         </div>
-        <div class="field defaultWidth">
+        <div class="field">
             <label class="label">Length Planning Horizon (wk)</label>
             <div class="control">
                 <input class="input" type="text" v-model="model.horizon">
@@ -36,14 +39,15 @@
         <ListInput 
           v-bind:list='model.ssl_sizes' 
           v-on:listChange='model.ssl_sizes = $event'
-          v-bind:label="'SSL Sizes [small, medium, large] (Mg)'"
+          v-bind:label="'SSL Sizes'"
+          v-bind:placeHolders="placeHolders.sslSizes"
         ></ListInput>
         <ListInput 
           v-bind:list='model.harvest_progress' 
           v-on:listChange='model.harvest_progress = $event'
-          v-bind:label="'% Demand Harvested per 13 week cycle'"
+          v-bind:label="'Harvest Progress'"
+          v-bind:placeHolders="placeHolders.harvestProgress"
         ></ListInput>
-      </div>
       <div class="advancedParams">
         <div v-if="advancedOptions">
           <div class="title is-size-5">Additional Parameters</div>
@@ -89,80 +93,103 @@
       class="results"
       v-if="showSolution"
     >
-      <div class="title is-size-3">Simulation Results</div>
-      <div class="sim_results">
-        <div class="title is-size-5" v-html="'Percent of demand met: ' + sim_response['demand']['percent'] + '%'"></div>
-        <div class="results" v-html="'Confidence demand will be met to 90%: ' + sim_response['demand']['conf']['90'] + '%'"></div>
-        <div class="results" v-html="'Confidence demand will be met to 95%: ' + sim_response['demand']['conf']['95'] + '%'"></div>
-        <table class="table1">
+      <div class="title is-size-3">Results</div>
+      <div class="title is-5">Cost Breakdown</div>
+      <div class="costChart">
+          <pie-chart 
+            prefix="$" 
+            :data="chart_data"
+            class="pieChart" 
+            width="48%"
+          ></pie-chart>
+          <div class="list is-hoverable" width="40%">
+            <div class="list-item">Farm to SSL Cost: ${{chart_info['farm_ssl_trans_cost']}}</div>
+            <div class="list-item">SSL to Refinery Cost: ${{chart_info['ssl_ref_trans_cost']}}</div>
+            <div class="list-item">Farm Holding Cost: ${{chart_info['farm_holding_cost']}}</div>
+            <div class="list-item">SSL Holding Cost: ${{chart_info['ssl_holding_cost']}}</div>
+            <div class="list-item">Local Ownership Cost: ${{chart_info['local_ownership']}}</div>
+            <div class="list-item">Operation Cost: ${{chart_info['operation_cost']}}</div>
+            <div class="list-item is-active">Total Cost: ${{chart_info['total_cost']}}</div>
+          </div>
+      </div>
+      
+      <div class="title is-5">Simulation Statistics</div>
+      <div class="subtitle is-6">Based on 100 Replications</div> 
+      <div class="simResults">
+        <div>
+          <div>Configuration: {{configurations[model.sysnum]}}</div>
+          <div>90% of demand met {{sim_response['demand']['conf']['90']}}% of the time</div>
+          <div>95% of demand met {{sim_response['demand']['conf']['95']}}% of the time</div>
+          <div>Average amount of demand met {{sim_response['demand']['percent']}}%</div>
+        </div>
+        <table class="table is-striped">
           <tr>
-            <th class="table_header">Descriptive Statistics</th>
-            <th class="table_header">Mean</th>
-            <th class="table_header">Standard Deviation</th>
-            <th class="table_header">SE Mean</th>
-            <th class="table_header">95% Confidence Interval</th>
-            <th class="table_header">Range (min,max)</th>
+            <th class="table is-hoverable">Descriptive Statistics</th>
+            <th class="table is-hoverable">Mean</th>
+            <th class="table is-hoverable">Std. Dev</th>
+            <th class="table is-hoverable">SE Mean</th>
+            <th class="table is-hoverable">95% CI</th>
+            <th class="table is-hoverable">Range (min,max)</th>
           </tr>
           <tr>
-            <td class="table_row">Demand</td>
-            <td class="table_row" v-html="sim_response['demand']['average'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['demand']['stdev'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['demand']['sem'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['demand']['conf int']"></td>
-            <td class="table_row" v-html="'(' + sim_response['demand']['range'][0] + ', ' + sim_response['demand']['range'][1] + ')' + ' Mg'"></td>
+            <td class="table is-hoverable">Demand</td>
+            <td class="table is-hoverable" v-html="sim_response['demand']['average'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['demand']['stdev'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['demand']['sem'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['demand']['conf int']"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['demand']['range'][0] + ', ' + sim_response['demand']['range'][1] + ')' + ' Mg'"></td>
           </tr>
            <tr>
-            <td class="table_row">Telehandler</td>
-            <td class="table_row" v-html="sim_response['telehandler rate']['average'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['telehandler rate']['stdev'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['telehandler rate']['sem'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['telehandler rate']['conf int'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="'(' + sim_response['telehandler rate']['range'][0] + ', ' + sim_response['telehandler rate']['range'][1] + ')' + ' Mg/hr'"></td>
+            <td class="table is-hoverable">Telehandler</td>
+            <td class="table is-hoverable" v-html="sim_response['telehandler rate']['average'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['telehandler rate']['stdev'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['telehandler rate']['sem'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['telehandler rate']['conf int'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['telehandler rate']['range'][0] + ', ' + sim_response['telehandler rate']['range'][1] + ')' + ' Mg/week'"></td>
           </tr>
           <tr>
-            <td class="table_row">Forage Chopper</td>
-            <td class="table_row" v-html="sim_response['chopper rate']['average'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['chopper rate']['stdev'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['chopper rate']['sem'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['chopper rate']['conf int'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="'(' + sim_response['chopper rate']['range'][0] + ', ' + sim_response['chopper rate']['range'][1] + ')' + ' Mg/hr'"></td>
+            <td class="table is-hoverable">Forage Chopper</td>
+            <td class="table is-hoverable" v-html="sim_response['chopper rate']['average'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['chopper rate']['stdev'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['chopper rate']['sem'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['chopper rate']['conf int'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['chopper rate']['range'][0] + ', ' + sim_response['chopper rate']['range'][1] + ')' + ' Mg/week'"></td>
 
           </tr>
           <tr>
-            <td class="table_row">Press</td>
-            <td class="table_row" v-html="sim_response['press rate']['average'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['press rate']['stdev'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['press rate']['sem'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['press rate']['conf int'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="'(' + sim_response['press rate']['range'][0] + ', ' + sim_response['press rate']['range'][1] + ')' + ' Mg/hr'"></td>
+            <td class="table is-hoverable">Press</td>
+            <td class="table is-hoverable" v-html="sim_response['press rate']['average'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['press rate']['stdev'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['press rate']['sem'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['press rate']['conf int'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['press rate']['range'][0] + ', ' + sim_response['press rate']['range'][1] + ')' + ' Mg/week'"></td>
 
           </tr>
           <tr>
-            <td class="table_row">Bagger</td>
-            <td class="table_row" v-html="sim_response['bagger rate']['average'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['bagger rate']['stdev'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['bagger rate']['sem'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['bagger rate']['conf int'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="'(' + sim_response['bagger rate']['range'][0] + ', ' + sim_response['bagger rate']['range'][1] + ')' + ' Mg/hr'"></td>
+            <td class="table is-hoverable">Bagger</td>
+            <td class="table is-hoverable" v-html="sim_response['bagger rate']['average'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['bagger rate']['stdev'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['bagger rate']['sem'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['bagger rate']['conf int'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['bagger rate']['range'][0] + ', ' + sim_response['bagger rate']['range'][1] + ')' + ' Mg/week'"></td>
 
           </tr>
           <tr>
-            <td class="table_row">Module Former</td>
-            <td class="table_row" v-html="sim_response['module former rate']['average'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['stdev'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['sem'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="sim_response['module former rate']['conf int'] + ' Mg/hr'"></td>
-            <td class="table_row" v-html="'(' + sim_response['module former rate']['range'][0] + ', ' + sim_response['module former rate']['range'][1] + ')' + ' Mg/hr'"></td>
+            <td class="table is-hoverable">Module Former</td>
+            <td class="table is-hoverable" v-html="sim_response['module former rate']['average'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module former rate']['stdev'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module former rate']['sem'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module former rate']['conf int'] + ' Mg/week'"></td>
+            <td class="table is-hoverable" v-html="'(' + sim_response['module former rate']['range'][0] + ', ' + sim_response['module former rate']['range'][1] + ')' + ' Mg/week'"></td>
 
           </tr>
           <tr>
-            <td class="table_row">Module Hauler</td>
-            <td class="table_row" v-html="sim_response['module hauler rate']['average'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module hauler rate']['stdev'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module hauler rate']['sem'] + ' Mg'"></td>
-            <td class="table_row" v-html="sim_response['module hauler rate']['conf int'] + ' Mg'"></td>
-            <td class="table_row" v-html="'(' + sim_response['module hauler rate']['range'][0] + ', ' + sim_response['module hauler rate']['range'][1] + ')' + ' Mg/hr'"></td>
-
+            <td class="table is-hoverable">Module Hauler</td>
+            <td class="table is-hoverable" v-html="sim_response['module hauler rate']['average'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module hauler rate']['stdev'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module hauler rate']['sem'] + ' Mg'"></td>
+            <td class="table is-hoverable" v-html="sim_response['module hauler rate']['conf int'] + ' Mg'"></td>
+            <td class="table is-hoverable">({{sim_response['module hauler rate']['range'][0]}} , {{sim_response['module hauler rate']['range'][1]}}) Mg/week</td>
           </tr>
         </table>
       </div>
@@ -178,6 +205,7 @@ import Map from './Map'
 import Csv_Formatter from './Csv_Formatter'
 import OptimizationForm from './OptimizationForm'
 import ListInput from './ListInput'
+import NProgress from 'nprogress'
 
 export default {
   components: {
@@ -190,6 +218,24 @@ export default {
   data() {
     return {
       response: [],
+      placeHolders: {
+        sslSizes: ["small (Mg)", "medium (Mg)", "large (Mg)"],
+        harvestProgress: [
+          "% demand harvested week 1",
+          "% demand harvested week 2",
+          "% demand harvested week 3",
+          "% demand harvested week 4",
+          "% demand harvested week 5",
+          "% demand harvested week 6",
+          "% demand harvested week 7",
+          "% demand harvested week 8",
+          "% demand harvested week 9",
+          "% demand harvested week 10",
+          "% demand harvested week 11",
+          "% demand harvested week 12",
+          "% demand harvested week 13",
+        ],
+      },
       configurations: [
             "[whole_stalk, loadout, chopper]",
             "[whole_stalk, loadout, chopper, bagger]",
@@ -214,6 +260,8 @@ export default {
       customForm: false,
       showOptButton: false,
       customModel: {},
+      chart_data: [],
+      chart_info: {},
       advancedOptions: false,
       model: {
         "sysnum": 0,
@@ -377,6 +425,7 @@ export default {
     optimize(event) {
       NProgress.start();
       var mapInfo = this.$refs.map.submitLocations();
+      NProgress.start()
 
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
@@ -396,15 +445,32 @@ export default {
               this.$refs.csv_download.generateCsv(this.op_response.solution);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
-		      this.showInput = true;
+		          this.showInput = true;
               this.parseApplyRoutes(this.op_response);
-              this.$refs.map.show_results(this.op_response["summary"]["cost"]);
+              this.show_results(this.op_response["summary"]["cost"]);
+              console.log("summary ",this.op_response["summary"]["cost"])
           })
         this.new_input = false;
 
       }
     },
+    show_results(data) {
+            this.chart_info['farm_ssl_trans_cost'] = Math.round(data.tran_farms_ssl);
+            this.chart_info['ssl_ref_trans_cost'] = Math.round(data.tran_ssl_refinery);
+            this.chart_info['farm_holding_cost'] = Math.round(data.farm_inventory);
+            this.chart_info['ssl_holding_cost'] = Math.round(data.ssl_inventory);
+            this.chart_info['local_ownership'] = Math.round(data.loc_own);
+            this.chart_info['operation_cost'] = Math.round(data.operation);
+            this.chart_info['total_cost'] = Math.round(data.total_ub);
 
+            this.chart_data[0] = ['farm to ssl', Math.round(data.tran_farms_ssl)];
+            this.chart_data[1] = ['ssl to refinery', Math.round(data.tran_ssl_refinery)];
+            this.chart_data[2] = ['farm holding', Math.round(data.farm_inventory)];
+            this.chart_data[3] = ['ssl holding', Math.round(data.ssl_inventory)];
+            this.chart_data[4] = ['local ownership', Math.round(data.loc_own)];
+            this.chart_data[5] = ['operations', Math.round(data.operation)];
+            this.showing_options = false;
+    },
     show_input() {
         this.showInput = false;
 		this.$refs.map.hide_results();
@@ -419,10 +485,16 @@ export default {
 </script>
 
 <style>
+div {
+  text-align: left
+}
 
 .title {
-  grid-area: title;
   text-align: left;
+}
+
+.subtitle {
+  margin-bottom: 1rem;
 }
 
 .map {
@@ -440,29 +512,18 @@ export default {
 .params {
   grid-area: params;
   display: flex;
-  flex-grow: 1;
   justify-content: flex-start;
   flex-wrap: wrap;
 }
 
-.requiredParams {
-  grid-area: params;
-  display: flex;
-  flex-grow: 1;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.requiredParams .input {
+.params .input {
+  width: 18rem;
   margin-right: 1rem;
 }
 
-.defaultWidth {
-  width: 15rem;
-}
-
 .buttons {
-  grid-area: buttons
+  grid-area: buttons;
+  margin-top: 1rem;
 }
 
 .advancedOptions {
@@ -482,32 +543,19 @@ export default {
   width: 110px;
 }
 
+.costChart {
+  display: flex;
+}
+
+.pieChart {
+  position: relative;
+  width: 48%;
+  float: right;
+  display: inline;
+}
+
 .results {
-  grid-area: results;
-  text-align: left;
-}
-
-.table1 {
-  grid-area: table1;
-  border-collapse: collapse;
-  border: 1px solid #0000FF;
-  width: 75%;
-}
-
-.table_header {
-  grid-area: table_header;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: rgb(76, 127, 175);
-  color: white;
-  text-align: center;
-  border: 1px solid #000000;
-}
-
-.table_row {
-  grid-area: table_row;
-  border: 1px solid #0000FF;
-  text-align: center;
+  display: flex;
+  flex-direction: column
 }
 </style>

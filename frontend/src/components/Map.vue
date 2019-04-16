@@ -1,8 +1,9 @@
 <template>
   <body class="wrapper">
     <div v-if="showing_options" class="mapDescription">
-        <div class="is-size-4 floatLeft">1. Create Network</div><br><br>
-        <div class="is-size-5 floatLeft ">Click map to place <b>{{name}}</b></div>
+        <div class="is-size-4 floatLeft">1. Create Network</div>
+        <br>
+        <div class="is-size-5 floatLeft">Click map to place <b>{{name}}</b></div>
         <div class="control is-size-5">
             <label class="container" style="color: red">Refinery
                 <input
@@ -32,6 +33,13 @@
                 <span class="checkmark"></span>
             </label>
         </div>
+        <p class="max-width paddingLeft">
+            Place refinery (red pin) as center of hub 
+            and spoke optimization model. Next place farm locations 
+            (green pins). Finally, place potential satellite storage 
+            locations (blue pins).
+        </p>
+        <br>
         <form id="refineryFormAddress" class="is-size-5 paddingRight addressInput" @submit.prevent="submitAddress()">
             <div class="floatLeft is-size-5">Or enter address</div>
             <input 
@@ -101,7 +109,7 @@ export default {
         getMap() {
             this.map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.22904237824045, lng: -80.41982042804534},
-            zoom: 4
+            zoom: 8
             })
         },
 
@@ -110,7 +118,6 @@ export default {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
                 var typeName = prompt(ref.name + " Name", this.name);
-                // console.log(event.latLng.lat(), event.latLng.lng(), typeName);
                 if (typeName !== null) ref.placeMarker(event.latLng, typeName);
             });
         },
@@ -345,8 +352,12 @@ export default {
 
 @media only screen and (max-width: 600) {
     #map {
-        height: 300px;
+        height: 250px;
     }
+}
+
+p {
+    max-width: 24rem;
 }
 
 .clickInstruction {
@@ -377,5 +388,9 @@ export default {
 
 .paddingRight {
     padding-right: 1rem;
+}
+
+.paddingLeft {
+    padding-left: 1rem;
 }
 </style>
