@@ -442,7 +442,7 @@ export default {
               NProgress.done();
               var r = response.data
               this.op_response = r.op_response;
-              this.$refs.csv_download.generateCsv(this.op_response.solution);
+              this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
 			        this.sim_response = r.sim_response;
               this.showSolution = true;
 		          this.showInput = true;
