@@ -100,15 +100,13 @@ export default {
 
 
 
-            //penalty, operating cost (+ jit), farm_holding_cost, ssl_holding_cost chart
-            this.op_response_csv[csv_index++] = ["penalty",
-                                                 "operating cost",
-                                                 "operating cost jit",
-                                                 "farm holding cost",
-                                                 "ssl holding cost"];
+            //penalty, operating cost, farm_holding_cost, ssl_holding_cost chart
+            this.op_response_csv[csv_index++] = ["penalty ($/Mg)",
+                                                 "operating cost ($/Mg)",
+                                                 "farm holding cost ($/Mg/week)",
+                                                 "ssl holding cost ($/Mg/week)"];
             this.op_response_csv[csv_index++] = [penalty_per_Mg,
                                                  operating_cost,
-                                                 operating_cost_jit,
                                                  farm_holding_cost,
                                                  ssl_holding_cost];
 
@@ -120,6 +118,7 @@ export default {
 
             //harvested + demand
             this.op_response_csv[csv_index++] = ["",
+                                                 "week 0",
                                                  "week 1",
                                                  "week 2",
                                                  "week 3",
@@ -145,24 +144,32 @@ export default {
                                                  "week 23",
                                                  "week 24",
                                                  "week 25",
-                                                 "week 26",
-                                                 "week 27"];
+                                                 "week 26"];
 
+            var total_index = csv_index;
             var n;
-            this.op_response_csv[csv_index] = ["demand"];
-            for (n = 0; n < demand.length; n++) {
-               this.op_response_csv[csv_index][n + 1] = demand[n]; 
-            }
-            csv_index++;
 
             for (n = 0; n < harvested[0].length; n++) {
-                this.op_response_csv[csv_index] = ["farm" + n];
+                this.op_response_csv[csv_index] = ["farm " + n];
                 var q;
                 for (q = 0; q < harvested.length; q++) {
                     this.op_response_csv[csv_index][q + 1] = harvested[q][n];
                 }
                 csv_index++;
             }
+
+            this.op_response_csv[csv_index] = ["week total: "];
+            var m;
+            for (m = 1; m <= 27; m++) {
+                var p;
+                var total = 0;
+                for (p = total_index; p < csv_index; p++) {
+                    var biomass = this.op_response_csv[p][m];
+                    total += (biomass == null) ? 0 : parseInt(biomass);
+                }
+                this.op_response_csv[csv_index][m] = total;
+            }
+            csv_index++;
 
 
             //SOLUTION
@@ -182,7 +189,7 @@ export default {
                     var ssl = inner_parts[0];
                     var config = inner_parts[1].split("]")[0];
 
-                    ssl_configs[ssl_configs.length] = [ssl, config];
+                    ssl_configs[ssl_configs.length] = [ssl, config, ssl_configs.length];
                 } else if (solution_parts[0] == "farm_to_ssl") {
                     if (farm_ssl) {
                         this.op_response_csv[csv_index++] = [];
@@ -192,8 +199,8 @@ export default {
                                                              "farm lat",
                                                              "farm lng",
                                                              "ssl num",
-                                                             "farm to ssl cost",
-                                                             "week 1",
+                                                             "farm to ssl cost ($/Mg)",
+                                                             "week 1 (Mg)",
                                                              "week 2",
                                                              "week 3",
                                                              "week 4",
@@ -249,10 +256,10 @@ export default {
                         this.op_response_csv[csv_index++] = ["ssl num",
                                                              "ssl lat",
                                                              "ssl lng",
-                                                             "ssl to ref cost (jit)",
-                                                             "cost to build ssl",
-                                                             "ssl configuration number",
-                                                             "week 1",
+                                                             "ssl to ref cost ($/Mg)",
+                                                             "cost to build ssl ($)",
+                                                             "ssl type",
+                                                             "week 1 (Mg)",
                                                              "week 2",
                                                              "week 3",
                                                              "week 4",
@@ -286,15 +293,22 @@ export default {
                             this.op_response_csv[csv_index++] = [ssl_configs[n][0],
                                  coord_ssls[n][0],
                                  coord_ssls[n][1],
-                                 ssl_refinery_trans_cost[n] + " (" + ssl_refinery_trans_cost_jit[n] + ")",
+                                 ssl_refinery_trans_cost[n],
                                  fixed_cost_ssl[ssl_configs[n][0]][ssl_configs[n][1]], 
                                  ssl_configs[n][1]];
                         }
                     }
-
                     var inner_parts = solution_parts[1].split(",");
                     var week = parseInt(inner_parts[0]);
                     var ssl = parseInt(inner_parts[1].split("]")[0]);
+                    var m;
+                    for (m = 0; m < ssl_configs.length; m++) {
+                        if (ssl_configs[m][0] == ssl) { ssl = ssl_configs[m][2]; break; }
+                    }
+
+console.log([week, ssl, ssl_index]);
+console.log(this.op_response_csv[ssl_index + ssl]);
+console.log([csv_index]);
                     this.op_response_csv[ssl_index + ssl][week + 5] =
                         solution[solution_index][1];
 
@@ -302,6 +316,11 @@ export default {
                 }
             }
             
+            this.op_response_csv[csv_index] = ["","","","","","demand: "];
+            for (n = 1; n < demand.length; n++) {
+               this.op_response_csv[csv_index][n + 5] = demand[n]; 
+            }
+            csv_index++;
 
             this.op_response_csv[csv_index++] = [];
             this.op_response_csv[csv_index++] = [];
@@ -309,9 +328,9 @@ export default {
 
             //upperbounds
  
-            this.op_response_csv[csv_index++] = ["ssl config num",
-                                                 "max storage",
-                                                 "max equip proc rate (jit)"];
+            this.op_response_csv[csv_index++] = ["ssl type",
+                                                 "max storage (Mg)",
+                                                 "max equip proc rate ($/Mg)"];
             var saved_configs = [];
             for (n = 0; n < ssl_configs.length; n++) {
                 var ind_ssl = ssl_configs[n];
@@ -319,8 +338,7 @@ export default {
                     saved_configs[saved_configs.length] = ind_ssl[1];
                     this.op_response_csv[csv_index++] = [ind_ssl[1],
                         upperbound_inventory[ind_ssl[1]],
-                        upperbound_equip_proc_rate[ind_ssl[1]] +
-                        " (" + upperbound_equip_proc_rate_jit[ind_ssl[1]] + ")"];
+                        upperbound_equip_proc_rate[ind_ssl[1]]];
                 }
             }
 
@@ -337,9 +355,9 @@ export default {
 
             //cost (total and per Mg)
 
-            this.op_response_csv[csv_index++] = ["part",
-                                                 "cost",
-                                                 "cost per dry mg"];
+            this.op_response_csv[csv_index++] = ["cost component",
+                                                 "cost ($)",
+                                                 "cost ($/Mg)"];
             this.op_response_csv[csv_index++] = ["farm holding cost",
                                                  cost.farm_inventory,
                                                  per_dry_Mg.farm_inventory];
