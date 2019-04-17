@@ -4,24 +4,29 @@
     <Map class="map" v-model="mapInfo" ref="map"></Map>
     <div class="paramDescription">
       <div class="title is-4">Optimization Parameters</div>
-      <div class="subtitle is-6">Note: if parameter unspecified default value is accepted</div>
+      <div class="subtitle is-6">Note: if parameter unchanged default value accepted</div>
     </div>
     
     <div class="params">
         <div class="field">
             <label class="label">Projected Demand (Mg)</label>
-            <div class="control">
-                <input class="input" type="text" v-model="model.demand" @change="changeProportion">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Approximate biomass needed to meet demand.">
+                <input 
+                  class="input tooltip" 
+                  type="text" 
+                  v-model="model.demand" 
+                  @change="changeProportion"
+                >
             </div>
         </div>
         <div class="field">
             <label class="label">Length Planning Horizon (wk)</label>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Overall time period for optimization">
                 <input class="input" type="text" v-model="model.horizon">
             </div>
         </div>
         <div class="field">
-          <div class="control">
+          <div class="control tooltip is-tooltip-bottom" data-tooltip="Select array of equipment arrangments">
             <label class="label">Equipment Configuration</label>  
             <div class="select">
               <select
@@ -40,13 +45,13 @@
           v-bind:list='model.ssl_sizes' 
           v-on:listChange='model.ssl_sizes = $event'
           v-bind:label="'SSL Sizes'"
-          v-bind:placeHolders="placeHolders.sslSizes"
+          v-bind:tooltips="tooltips.sslSizes"
         ></ListInput>
         <ListInput 
           v-bind:list='model.harvest_progress' 
           v-on:listChange='model.harvest_progress = $event'
-          v-bind:label="'Harvest Progress'"
-          v-bind:placeHolders="placeHolders.harvestProgress"
+          v-bind:label="'Harvest Progress (must sum to 1)'"
+          v-bind:tooltips="tooltips.harvestProgress"
         ></ListInput>
       <div class="advancedParams">
         <div v-if="advancedOptions">
@@ -80,15 +85,9 @@
       >
         Optimize
       </button>
-      <button 
-        class="button show_input is-warning" 
-        v-on:click="show_input()"
-		v-if="showInput"
-      >
-        Show Input
-      </button>
     </div>
     <br>
+    <Csv_Formatter class="csv_download" ref="csv_download"></Csv_Formatter>
     <div 
       class="results"
       v-if="showSolution"
@@ -107,7 +106,7 @@
             <div class="list-item">SSL to Refinery Cost: ${{chart_info['ssl_ref_trans_cost']}}</div>
             <div class="list-item">Farm Holding Cost: ${{chart_info['farm_holding_cost']}}</div>
             <div class="list-item">SSL Holding Cost: ${{chart_info['ssl_holding_cost']}}</div>
-            <div class="list-item">Local Ownership Cost: ${{chart_info['local_ownership']}}</div>
+            <div class="list-item">Location Ownership Cost: ${{chart_info['location_ownership']}}</div>
             <div class="list-item">Operation Cost: ${{chart_info['operation_cost']}}</div>
             <div class="list-item is-active">Total Cost: ${{chart_info['total_cost']}}</div>
           </div>
@@ -194,7 +193,6 @@
         </table>
       </div>
     </div>
-    <Csv_Formatter class="csv_download" ref="csv_download"></Csv_Formatter>
 </div>
 </template>
 
@@ -218,7 +216,7 @@ export default {
   data() {
     return {
       response: [],
-      placeHolders: {
+      tooltips: {
         sslSizes: ["small (Mg)", "medium (Mg)", "large (Mg)"],
         harvestProgress: [
           "% demand harvested week 1",
@@ -440,11 +438,11 @@ export default {
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
               NProgress.done();
+              this.showSolution = true;
               var r = response.data
               this.op_response = r.op_response;
               this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
 			        this.sim_response = r.sim_response;
-              this.showSolution = true;
 		          this.showInput = true;
               this.parseApplyRoutes(this.op_response);
               this.show_results(this.op_response["summary"]["cost"]);
@@ -455,14 +453,13 @@ export default {
       }
     },
     show_results(data) {
-			this.chart_info = {}; this.showing_options = [];
+			this.chart_info = {}; this.chart_data = [];
 
-            this.showing_options = false;
             this.chart_info['farm_ssl_trans_cost'] = Math.round(data.tran_farms_ssl);
             this.chart_info['ssl_ref_trans_cost'] = Math.round(data.tran_ssl_refinery);
             this.chart_info['farm_holding_cost'] = Math.round(data.farm_inventory);
             this.chart_info['ssl_holding_cost'] = Math.round(data.ssl_inventory);
-            this.chart_info['local_ownership'] = Math.round(data.loc_own);
+            this.chart_info['location_ownership'] = Math.round(data.loc_own);
             this.chart_info['operation_cost'] = Math.round(data.operation);
             this.chart_info['total_cost'] = Math.round(data.total_ub);
 
@@ -470,13 +467,10 @@ export default {
             this.chart_data[1] = ['ssl to refinery', Math.round(data.tran_ssl_refinery)];
             this.chart_data[2] = ['farm holding', Math.round(data.farm_inventory)];
             this.chart_data[3] = ['ssl holding', Math.round(data.ssl_inventory)];
-            this.chart_data[4] = ['local ownership', Math.round(data.loc_own)];
+            this.chart_data[4] = ['location ownership', Math.round(data.loc_own)];
             this.chart_data[5] = ['operations', Math.round(data.operation)];
     },
-    show_input() {
-        this.showInput = false;
-		this.$refs.map.hide_results();
-    },
+
     changeProportion() {
         this.model.field.proportion_devoted = (this.model.demand * 1.0) / 6666666;
     }

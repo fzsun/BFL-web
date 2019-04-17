@@ -1,22 +1,20 @@
 <template>
 <div class="field">
-    <div class="control"> 
-        <form v-on:change="emit()">
-            <label class="label">{{label}}</label>
-            <div 
-                class="flexCols"
+    <label class="label">{{label}}</label>
+    <form v-on:change="emit()">
+        <div 
+            class="control tooltip is-tooltip-bottom"
+            v-bind:key="index" 
+            v-bind:data-tooltip="tooltips[index]"
+            v-for="(item, index) in list"
+        >
+            <input 
+                class="input"
+                type="number"
+                v-model="data[index]"
             >
-                <input 
-                    class="input"
-                    type="number"
-                    v-bind:key="index" 
-                    v-for="(item, index) in list"
-                    v-model="data[index]"
-                    v-bind:placeholder="headers[index]"
-                >
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 </template>
 
@@ -28,19 +26,15 @@ export default {
         },
         label: {
             type: String
+        },
+        tooltips: {
+            type: Array
         }
     },
     data() {
         return {
-            data: new Array(5),
+            data: this.list,
             showLess: true,
-            headers: [
-                "Purchase Cost ($)",
-                "Liftime (yrs) ",
-                "Salvage Value ($)",
-                "Operation Cost ($)",
-                "Capacity (Mg/Week)"
-            ]
         }
     }, 
     methods: {

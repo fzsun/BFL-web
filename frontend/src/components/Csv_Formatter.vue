@@ -34,7 +34,15 @@
    30: { title: '--' },
    31: { title: '--' }
     }">
-<button id="optimization_csv_button" hidden="true">
+<button id="optimization_csv_button" hidden="true" style="
+  background-color: #555555;
+  border: none;
+  float: right;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;">
     <b>Download Full Results</b>
   </button>
 </vue-json-to-csv>
@@ -54,8 +62,6 @@ export default {
     },
     methods: {
         generateCsv(data, refinery_location) {
-            console.log(data);
-            
             var csv_index = 0;
 
             //PARAMS
@@ -306,9 +312,6 @@ export default {
                         if (ssl_configs[m][0] == ssl) { ssl = ssl_configs[m][2]; break; }
                     }
 
-console.log([week, ssl, ssl_index]);
-console.log(this.op_response_csv[ssl_index + ssl]);
-console.log([csv_index]);
                     this.op_response_csv[ssl_index + ssl][week + 5] =
                         solution[solution_index][1];
 
@@ -386,7 +389,6 @@ console.log([csv_index]);
             this.op_response_csv[csv_index++] = [];
 
             this.fill_undefined();
-            console.log(this.op_response_csv);
             document.getElementById('optimization_csv_button').hidden = false;
         },
         fill_undefined() {
@@ -408,10 +410,3 @@ console.log([csv_index]);
     }
 };
 </script>
-
-
-
-
-
-
-

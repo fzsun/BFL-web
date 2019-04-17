@@ -5,19 +5,19 @@
         <div class="flexWrap">
             <div class="field">
                 <label class="label">Interest Rate</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Used to approximate time value of money for equipment">
                     <input class="input" type="text" v-model="model.interest_rate">
                 </div>
             </div>
             <div class="field">
                 <label class="label">Insurance Rate</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Used to acount for additional costs">
                     <input class="input" type="text" v-model="model.insurance_rate">
                 </div>
             </div>
             <div class="field">
                 <label class="label">Tax Rate</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Used to acount for additional costs">
                     <input class="input" type="text" v-model="model.tax_rate">
                 </div>
             </div>
@@ -34,14 +34,14 @@
                 </div>
             </div>
             <div class="field">
-                <label class="label">Base Infield Cost</label>
-                <div class="control">
+                <label class="label">Base Infield Cost ($/Mg/km)</label>
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Base hauling cost of in-field transfer per Mg per km.">
                     <input class="input" type="text" v-model="model.cost.base_infield">
                 </div>
             </div>
             <div class="field">
                 <label class="label">Base Highway Cost</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Base hauling cost of highway transfer per Mg per km.">
                     <input class="input" type="text" v-model="model.cost.base_highway">
                 </div>
             </div>
@@ -52,7 +52,7 @@
         <div class="flexWrap">
             <div class="field">
                 <label class="label">Moisture</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Proportion of water content wet biomass.">
                     <input class="input" type="number" v-model="model.moisture">
                 </div>
             </div>
@@ -60,7 +60,7 @@
                 v-bind:list='model.field.area_ratio' 
                 v-on:listChange='model.field.area_ratio = $event'
                 v-bind:label="'Farm Size Ratio'"
-                v-bind:placeHolders='placeHolders.areaRatio'
+                v-bind:tooltips='tooltips.areaRatio'
             ></ListInput>
         </div>
     <!-- <div class="field">
@@ -77,36 +77,42 @@
                 v-bind:list='model.cost.equipment.loadout'
                 v-on:listChange='model.cost.equipment.loadout = $event'
                 v-bind:label="'Loadout'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
             <EquipmentField
                 v-bind:list='model.cost.equipment.press'
                 v-on:listChange='model.cost.equipment.press = $event'
                 v-bind:label="'Press'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
             <EquipmentField
                 v-bind:list='model.cost.equipment.chopper'
                 v-on:listChange='model.cost.equipment.chopper = $event'
                 v-bind:label="'Chopper'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
             <EquipmentField
                 v-bind:list='model.cost.equipment.bagger'
                 v-on:listChange='model.cost.equipment.bagger = $event'
                 v-bind:label="'Bagger'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
             <EquipmentField
                 v-bind:list='model.cost.equipment.module_former'
                 v-on:listChange='model.cost.equipment.module_former = $event'
                 v-bind:label="'Module Former'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
             <EquipmentField
                 v-bind:list='model.cost.equipment.module_hauler'
                 v-on:listChange='model.cost.equipment.module_hauler = $event'
                 v-bind:label="'Module Hauler'"
+                v-bind:tooltips="tooltips.equipmentFields"
             >
             </EquipmentField>
         </div>
@@ -115,7 +121,7 @@
     <div>
         <div class="label centerAlign makeFull">Transportation Factors</div>
         <div class="flexWrap">
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Factor of compression configuration on base hauling cost.">
                 <div class="field">
                     <label class="label">Compressed</label>
                     <input 
@@ -125,7 +131,7 @@
                     >
                 </div>
             </div>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Factor of whole stalk configuration on base hauling cost.">
                 <div class="field">
                     <label class="label">Whole Stalk</label>
                     <input 
@@ -135,7 +141,7 @@
                     >
                 </div>
             </div>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Factor of in module configuration on base hauling cost.">
                 <div class="field">
                     <label class="label">In Module</label>
                     <input 
@@ -153,7 +159,7 @@
         <div class="flexWrap">
             <div class="field">
                 <label class="label">Whole Stalk</label>
-                <div class="control">
+                <div class="control tooltip is-tooltip-bottom" data-tooltip="Number of weeks until fully degraded for configuration">
                     <input 
                         class="input" 
                         type="number" 
@@ -161,7 +167,7 @@
                     >
                 </div>
             </div>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Number of weeks until fully degraded for configuration">
                 <label class="label">Chopped</label>
                 <input 
                     class="input" 
@@ -169,7 +175,7 @@
                     v-model="model.degrade.chopped"
                 >
             </div>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Number of weeks until fully degraded for configuration">
                 <label class="label">In Bunker</label>
                 <input 
                     class="input" 
@@ -177,7 +183,7 @@
                     v-model="model.degrade.in_bunker"
                 >
             </div>
-            <div class="control">
+            <div class="control tooltip is-tooltip-bottom" data-tooltip="Number of weeks until fully degraded for configuration">
                 <label class="label">In Bag</label>
                 <input 
                     class="input" 
@@ -212,8 +218,15 @@ export default {
     },
     data() {
         return {
-            placeHolders: {
-                areaRatio: ["Smallest", "Largest"],
+            tooltips: {
+                areaRatio: ["Smallest size factor", "Largest size factor"],
+                equipmentFields: [
+                    "Purchase Cost ($)",
+                    "Liftime (yrs) ",
+                    "Salvage Value ($)",
+                    "Operation Cost ($)",
+                    "Capacity (Mg/Week)"
+                ]
             }
         }
     }
