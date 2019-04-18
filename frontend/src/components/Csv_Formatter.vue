@@ -1,50 +1,42 @@
 <template>
 <vue-json-to-csv :json-data="op_response_csv"
-csv-title="s_bfl_optimization.csv"
+csv-title="s_bfl_optimization"
 :labels="{
-   0: { title: '--' },
-   1: { title: '--' },
-   2: { title: '--' },
-   3: { title: '--' },
-   4: { title: '--' },
-   5: { title: '--' },
-   6: { title: '--' },
-   7: { title: '--' },
-   8: { title: '--' },
-   9: { title: '--' },
-   10: { title: '--' },
-   11: { title: '--' },
-   12: { title: '--' },
-   13: { title: '--' },
-   14: { title: '--' },
-   15: { title: '--' },
-   16: { title: '--' },
-   17: { title: '--' },
-   18: { title: '--' },
-   19: { title: '--' },
-   20: { title: '--' },
-   21: { title: '--' },
-   22: { title: '--' },
-   23: { title: '--' },
-   24: { title: '--' },
-   25: { title: '--' },
-   26: { title: '--' },
-   27: { title: '--' },
-   28: { title: '--' },
-   29: { title: '--' },
-   30: { title: '--' },
-   31: { title: '--' }
+   0: { title: '' },
+   1: { title: '' },
+   2: { title: '' },
+   3: { title: '' },
+   4: { title: '' },
+   5: { title: '' },
+   6: { title: '' },
+   7: { title: '' },
+   8: { title: '' },
+   9: { title: '' },
+   10: { title: '' },
+   11: { title: '' },
+   12: { title: '' },
+   13: { title: '' },
+   14: { title: '' },
+   15: { title: '' },
+   16: { title: '' },
+   17: { title: '' },
+   18: { title: '' },
+   19: { title: '' },
+   20: { title: '' },
+   21: { title: '' },
+   22: { title: '' },
+   23: { title: '' },
+   24: { title: '' },
+   25: { title: '' },
+   26: { title: '' },
+   27: { title: '' },
+   28: { title: '' },
+   29: { title: '' },
+   30: { title: '' },
+   31: { title: '' }
     }">
-<button id="optimization_csv_button" hidden="true" style="
-  background-color: #555555;
-  border: none;
-  float: right;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;">
-    <b>Download Full Results</b>
+<button id="optimization_csv_button" class="button is-success" hidden="true">
+    Download Full Results
   </button>
 </vue-json-to-csv>
 </template>
@@ -383,7 +375,9 @@ export default {
             this.op_response_csv[csv_index++] = ["total (upper bound)",
                                                  cost.total_ub,
                                                  per_dry_Mg.total_ub];
-            
+            this.op_response_csv[csv_index++] = [];
+            var other = summary.others;
+            this.op_response_csv[csv_index++] = ["gap", other.gap];            
 
 
             this.op_response_csv[csv_index++] = [];
