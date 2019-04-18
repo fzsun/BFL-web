@@ -239,11 +239,11 @@ class Simulation(object):
     
     def preprocessing(self, period, farm, trial):
         x = min(self.farm_transport_schedule[period][farm],self.farms[farm].level)
-        y = random.randint(0,1000)
+        #y = random.randint(0,1000)
         if x > 0:
-            if y == 1:
+            '''if y == 1:
                 yield self.env.timeout(8)
-                self.breakdown['loadout'][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})
+                self.breakdown['loadout'][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})'''
             self.farms[farm].get(x)
             with self.ssl[self.farm_ssl[farm]][0].request() as req:
                 yield req
@@ -262,11 +262,11 @@ class Simulation(object):
             if equipment == 'loadout' or equipment == 'module_former':
                 pass
             else:
-                z = random.randint(0,1000)
-                print(z)
+                '''z = random.randint(0,1000)
+                #print(z)
                 if z == 1:
                     yield self.env.timeout(8)
-                    self.breakdown[equipment][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})
+                    self.breakdown[equipment][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})'''
                 equipment_rate = min(1.25*self.config_rate[equipment],max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])))
                 if equipment == 'press':
                     self.press_rate.append(equipment_rate)
@@ -455,7 +455,7 @@ class Simulation(object):
         self.ssl_graph = np.mean(self.all_ssl_actual, axis=0)
         self.farm_graph = np.mean(self.all_farm_level, axis=0)
         self.harvest_actual = np.mean(self.harvest_actual, axis=0)
-        print(self.breakdown)
+        #print(self.breakdown)
 
 
     def record_data(self):
