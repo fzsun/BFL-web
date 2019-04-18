@@ -2,36 +2,41 @@
   <body class="wrapper">
     <div v-if="showing_options" class="mapDescription">
         <div class="is-size-4 floatLeft">1. Create Network</div>
-        <br>
         <div class="is-size-5 floatLeft">Click map to place <b>{{name}}</b></div>
-        <div class="control is-size-5">
-            <label class="container" style="color: red">Refinery
-                <input
-                    v-model="name" 
-                    type="radio" 
-                    name="radio" 
-                    value="Refinery"
-                >
-                <span class="checkmark"></span>
-            </label>
-            <label class="container" style="color: green">Farm
-                <input 
-                    v-model="name" 
-                    type="radio" 
-                    name="radio" 
-                    value="Farm"
-                >
-                <span class="checkmark"></span>
-            </label>
-            <label class="container" style="color: blue">SSL
-                <input 
-                    v-model="name" 
-                    type="radio" 
-                    name="radio" 
-                    value="SSL"
-                >
-                <span class="checkmark"></span>
-            </label>
+        <div class="field is-grouped nameButtons">
+            <div class="control">
+                <label class="button red">
+                    Refinery
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="Refinery"
+                    >
+                </label>
+            </div>
+            <div class="control">
+                <label class="button blue">
+                    Farm
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="Farm"
+                    >
+                </label>
+            </div>
+            <div class="control">
+                <label class="button green">
+                    SSL
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="SSL"
+                    >
+                </label>
+            </div>
         </div>
         <p class="max-width paddingLeft">
             Place refinery (red pin) as center of 2-layer hub 
@@ -333,6 +338,8 @@ p {
 
 .mapDescription {
     grid-area: mapDescription;
+    display: flex;
+    flex-direction: column;
 }
 
 .wrapper {
@@ -355,5 +362,25 @@ p {
 
 .paddingLeft {
     padding-left: 1rem;
+}
+
+.nameButtons input[type="radio"] {
+    opacity: 0.0011;
+    z-index: 100;
+}
+.nameButtons .button {
+    padding-left: 1.5rem;
+}
+
+.red {
+    color: red;
+}
+
+.blue {
+    color: blue;
+}
+
+.green {
+    color: green;
 }
 </style>

@@ -442,7 +442,7 @@ export default {
               this.showSolution = true;
               var r = response.data
               this.op_response = r.op_response;
-              // this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
+              this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
 			        this.sim_response = r.sim_response;
 		          this.showInput = true;
               this.parseApplyRoutes(this.op_response);

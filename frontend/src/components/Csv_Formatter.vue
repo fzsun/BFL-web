@@ -1,6 +1,6 @@
 <template>
 <vue-json-to-csv :json-data="op_response_csv"
-csv-title="s_bfl_optimization.csv"
+csv-title="s_bfl_optimization"
 :labels="{
    0: { title: '--' },
    1: { title: '--' },
