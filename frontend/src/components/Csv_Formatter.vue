@@ -375,7 +375,9 @@ export default {
             this.op_response_csv[csv_index++] = ["total (upper bound)",
                                                  cost.total_ub,
                                                  per_dry_Mg.total_ub];
-            
+            this.op_response_csv[csv_index++] = [];
+            var other = summary.others;
+            this.op_response_csv[csv_index++] = ["gap", other.gap];            
 
 
             this.op_response_csv[csv_index++] = [];
