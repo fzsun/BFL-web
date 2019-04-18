@@ -85,9 +85,11 @@
       >
         Optimize
       </button>
+      <Csv_Formatter v-show="showSolution"
+                     class="csv_download" 
+                     ref="csv_download"></Csv_Formatter>
     </div>
     <br>
-    <Csv_Formatter class="csv_download" ref="csv_download"></Csv_Formatter>
     <div 
       class="results"
       v-if="showSolution"
