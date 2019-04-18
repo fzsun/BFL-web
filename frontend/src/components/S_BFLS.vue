@@ -120,6 +120,7 @@
           <div>Configuration: {{configurations[model.sysnum]}}</div>
           <div>90% of demand met {{sim_response['demand']['conf']['90']}}% of the time</div>
           <div>95% of demand met {{sim_response['demand']['conf']['95']}}% of the time</div>
+          <div>99% of demand met {{sim_response['demand']['conf']['99']}}% of the time</div>
           <div>Average amount of demand met {{sim_response['demand']['percent']}}%</div>
         </div>
         <table class="table is-striped">
@@ -337,7 +338,7 @@ export default {
               "sem":0, 
               "conf int":"N/a", 
               'range':[0,0], 
-              "conf":{'90':0, '95':0}
+              "conf":{'90':0, '95':0, '99':0}
               }, 
           "telehandler rate":{
               "average": 0, 

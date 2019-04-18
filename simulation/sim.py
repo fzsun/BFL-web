@@ -33,7 +33,7 @@ class Simulation(object):
         self.algo_input_data = algo_input_data
         self.output_data = output_data
                    
-        self.num_trials = 10
+        self.num_trials = 100
         self.work_week = 40
          # assign variables from algo input
         self.demand = self.algo_input_data['demand']
@@ -107,8 +107,9 @@ class Simulation(object):
         self.degradation_farm_average = []
         self.degradation_ssl_average = []
         self.refinery_graph = []
-        self.breakdowns = []
-                   
+
+
+
     def main(self):
         for trial in range(self.num_trials):
             env = simpy.Environment() # sets up a new simpy env for every trial
@@ -116,7 +117,7 @@ class Simulation(object):
             self.trial_reset() # resets the simpy constructs and data structures for recording the information
             self.env.process(self.create_loadout_rate())
             self.env.process(self.harvest()) #triggers the harvest schedule, JIT_schedule and preprocessing every period
-            self.env.process(self.farm_transport())
+            self.env.process(self.farm_transport(trial))
             self.env.process(self.moniter_ssl())# checks the ssl transport schedule for refinery deliveries
             #self.env.process(self.degradation_field()) # counts degredation of sitting sorghum at the fields
             #self.env.process(self.degradation_ensiled()) # counts degradation of ensiled sorghum
@@ -124,15 +125,12 @@ class Simulation(object):
             self.env.run(until=self.SIM_TIME) # planning horizon in hours
             self.all_demand.append(self.refinery.level)
         self.schedules()
-        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
+        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0, '99':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
         self.simulation_results()
         self.round_conf_int()
-        #self.graphs()
-        #degradation_cost = 0
-        #for period in range(self.m):
-         #   degradation_cost = degradation_cost + ((self.degradation_ssl_average[period]-self.degradation_ensiled_expected[period])*65+(self.degradation_farm_average[period]-self.degradation_farm_expected[period])*65)
-        #print('The extra cost incured due to unforseen degradation is: ',degradation_cost,' dollars')
         
+
+
     def simulation_results(self):        
         for equipment in self.configuration:
             if equipment == 'press':
@@ -193,11 +191,15 @@ class Simulation(object):
         self.sim_results['demand']['range'][1] = round(max(self.all_demand),2)
         
         print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
-        
         count_90 = 0
         count_95 = 0
+        count_99 = 0
         for demand in self.all_demand:
-            if demand >= .95*self.demand:
+            if demand >= .99*self.demand:
+                count_99 += 1
+                count_95 += 1
+                count_90 += 1
+            elif demand >= .95*self.demand:
                 count_90 += 1
                 count_95 += 1
             elif demand >= .9*self.demand:
@@ -206,6 +208,7 @@ class Simulation(object):
                 pass
         self.sim_results['demand']['conf'].update({'90':float(count_90/self.num_trials*100)})
         self.sim_results['demand']['conf'].update({'95':float(count_95/self.num_trials*100)})
+        self.sim_results['demand']['conf'].update({'99':float(count_99/self.num_trials*100)})
 
     '''
     Simulation Environment 
@@ -216,7 +219,6 @@ class Simulation(object):
             for farm in range(self.n):
                 if self.harvest_schedule[period][farm] != 0:
                     self.harvest_actual[period][farm]=max(1/10*self.harvest_schedule[period][farm],np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
-                    #self.harvest_actual[period][farm] = max(0,self.harvest_schedule[period][farm])
                     self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
                     pass
@@ -224,55 +226,61 @@ class Simulation(object):
     
 
 
-    def farm_transport(self):
+    def farm_transport(self, trial):
         for period in range(self.m):
             for farm in range(self.n):
                 if self.jit_farm_transport[period][farm] != 0:
                     self.env.process(self.JIT_delivery(period, farm))
                 if self.farm_transport_schedule[period][farm] != 0:
-                    self.env.process(self.preprocessing(period, farm))
+                    self.env.process(self.preprocessing(period, farm, trial))
             yield self.env.timeout(self.work_week)
 
             
     
-    def preprocessing(self, period, farm):
+    def preprocessing(self, period, farm, trial):
         x = min(self.farm_transport_schedule[period][farm],self.farms[farm].level)
+        y = random.randint(0,1000)
         if x > 0:
+            if y == 1:
+                yield self.env.timeout(8)
+                self.breakdown['loadout'][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})
             self.farms[farm].get(x)
             with self.ssl[self.farm_ssl[farm]][0].request() as req:
                 yield req
                 yield self.env.timeout(x/(self.equip_in_ssl[self.farm_ssl[farm]][0]*self.loadout_rate_standard_new))
             self.before_ssl[self.farm_ssl[farm]].put(x)
-            self.env.process(self.use_equipment(period, farm, x))
+            self.env.process(self.use_equipment(period, farm, x, trial))
             self.before_ssl[self.farm_ssl[farm]].get(x)
             self.ssl_container[self.farm_ssl[farm]].put(x)
             self.ssl_level_actual[period][self.farm_ssl[farm]] = self.ssl_container[self.farm_ssl[farm]].level
 
 
 
-    def use_equipment(self, period, farm, x):
+    def use_equipment(self, period, farm, x, trial):
         i=1
         for equipment in self.config_rate:
-            x = random.randint(0,1)
-            if x == 1:
-                yield self.env.timeout(8)
-                self.breakdown_count =+ 1
-                self.breakdown_log.update({self.breakdown_count:{}})
-                self.breakdown_log[self.breakdown_count].update({'ssl num':self.farm_ssl[farm], 'type equipment':equipment, 'time':self.env.now,})
-            equipment_rate = min(1.25*self.config_rate[equipment],max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])))
-            if equipment == 'press':
-                self.press_rate.append(equipment_rate)
-            if equipment == 'chopper':
-                self.chopper_rate.append(equipment_rate)
-            if equipment == 'bagger':
-                self.bagger_rate.append(equipment_rate)
-            if equipment == 'module_former':
-                self.former_rate.append(equipment_rate)
-            with self.ssl[self.farm_ssl[farm]][i].request() as req:
-                yield req
-                yield self.env.timeout(x/(equipment_rate*self.equip_in_ssl[self.farm_ssl[farm]][i]))
-            i=i+1
-            yield self.env.timeout(.25)
+            if equipment == 'loadout' or equipment == 'module_former':
+                pass
+            else:
+                z = random.randint(0,1000)
+                print(z)
+                if z == 1:
+                    yield self.env.timeout(8)
+                    self.breakdown[equipment][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})
+                equipment_rate = min(1.25*self.config_rate[equipment],max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])))
+                if equipment == 'press':
+                    self.press_rate.append(equipment_rate)
+                if equipment == 'chopper':
+                    self.chopper_rate.append(equipment_rate)
+                if equipment == 'bagger':
+                    self.bagger_rate.append(equipment_rate)
+                if equipment == 'module_former':
+                    self.former_rate.append(equipment_rate)
+                with self.ssl[self.farm_ssl[farm]][i].request() as req:
+                    yield req
+                    yield self.env.timeout(x/(equipment_rate*self.equip_in_ssl[self.farm_ssl[farm]][i]))
+                i=i+1
+                yield self.env.timeout(.25)
     
 
 
@@ -447,9 +455,7 @@ class Simulation(object):
         self.ssl_graph = np.mean(self.all_ssl_actual, axis=0)
         self.farm_graph = np.mean(self.all_farm_level, axis=0)
         self.harvest_actual = np.mean(self.harvest_actual, axis=0)
-        #print(self.harvest_actual)
-        self.breakdowns.append(self.breakdown_log)
-        print(self.breakdowns)
+        print(self.breakdown)
 
 
     def record_data(self):
@@ -484,7 +490,7 @@ class Simulation(object):
         
 
 
-    def graphs(self):
+    '''def graphs(self):
         X = np.linspace(0,1080,27)
         
         print('\nRefinery Inventory level v.s. Time')
@@ -495,7 +501,7 @@ class Simulation(object):
         plt.xticks(np.linspace(0,1080,10,endpoint=True))
         plt.yticks(np.linspace(0,230000,12,endpoint=True))
         plt.legend(loc='upper left', frameon=False)
-        plt.show()
+        plt.show()'''
         
 
     def trial_reset(self):           
@@ -571,7 +577,6 @@ class Simulation(object):
         self.degradation_ensiled_actual = []
         self.degradation_farm_actual = []
         self.actual_farm = []
-        self.breakdown_log = {}
         self.breakdown_count = 0
 
 
