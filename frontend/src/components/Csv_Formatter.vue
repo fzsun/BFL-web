@@ -315,8 +315,6 @@ export default {
 
                     this.op_response_csv[ssl_index + ssl][week + 5] =
                         solution[solution_index][1];
-
-
                 }
             }
             

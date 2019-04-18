@@ -23,7 +23,7 @@ export default {
     data() {
         return {
             team_members: [
-                {name: "Dr. Sarin", img: 'https://picsum.photos/200/300/?random'},
+                {name: "Dr. Sarin", img: "'../assets/images/subhash-sarin-w.jpg'"},
                 {name: "Fangshou", img: "https://picsum.photos/200/300/?random"},
                 {name: "Nate", img: "https://picsum.photos/200/300/?random"},
                 {name: "Hannah", img: "https://picsum.photos/200/300/?random"},

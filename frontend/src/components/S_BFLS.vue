@@ -442,7 +442,7 @@ export default {
               this.showSolution = true;
               var r = response.data
               this.op_response = r.op_response;
-              this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
+              // this.$refs.csv_download.generateCsv(this.op_response, this.model.refinery_location);
 			        this.sim_response = r.sim_response;
 		          this.showInput = true;
               this.parseApplyRoutes(this.op_response);
@@ -471,7 +471,6 @@ export default {
             this.chart_data[4] = ['location ownership', Math.round(data.loc_own)];
             this.chart_data[5] = ['operations', Math.round(data.operation)];
     },
-
     changeProportion() {
         this.model.field.proportion_devoted = (this.model.demand * 1.0) / 6666666;
     }
