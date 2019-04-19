@@ -10,7 +10,8 @@
                 Virginia Tech
             </h2>
             <router-link class="button is-link" to="/s-bfls">Decision Support Tool</router-link>
-            <router-link class="button is-link" to="/methodology">Background</router-link>
+            <router-link class="button is-link" to="/methodology">Methodolgy</router-link>
+            <a class="button is-link" href="https://github.com/fzsun/BFL-web/tree/master">GitHub</a>
             </div>
         </div>
     </section>
@@ -40,5 +41,11 @@ export default {
 
 .textLeft {
     text-align: left;
+}
+
+.hero-body .button {
+    width: 11rem;
+    height: 3rem;
+    margin: .25rem .5rem;
 }
 </style>

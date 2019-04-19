@@ -1,7 +1,7 @@
 <template>
 <div class="columns is-centered">
 
-  <div class="column is-2" v-for="team_member in team_members" :key="team_member.name">
+  <div class="column is-4" v-for="team_member in team_members" :key="team_member.name">
     <div class="card">
       <div class="card-image">
         <figure class="image is-1by1">
