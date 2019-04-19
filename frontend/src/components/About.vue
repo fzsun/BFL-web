@@ -1,7 +1,7 @@
 <template>
 <div class="columns is-centered">
 
-  <div class="column is-2" v-for="team_member in team_members" :key="team_member.name">
+  <div class="column is-4" v-for="team_member in team_members" :key="team_member.name">
     <div class="card">
       <div class="card-image">
         <figure class="image is-1by1">
@@ -47,7 +47,7 @@ export default {
                   name: "Ben Hadinger", 
                   img: "../static/ben_hadinger_bio_pic.png",
                   contact: "bmh@vt.edu",
-                  bio: "Ben is a Computer Science student at Virginia Tech, graduating class of 2020. He has worked for Parsons Federal and although Ben is color-blind, he finds his alternative perspective is a huge advantage in pursuing his dream as a full time CSS developer."
+                  bio: "Ben is a Computer Science student at Virginia Tech, graduating class of 2020. He has worked for Parsons Federal in the cyber-security, volunteered for 100 Girls of Code, and has enjoyed his time expanding his horizons in the logistics space."
                 },
                 {
                   name: "Robert Shelton", 
@@ -74,6 +74,10 @@ export default {
 .content {
   position: relative;
   z-index: 4
+}
+
+.card {
+  padding: 1rem;
 }
 </style>
 
