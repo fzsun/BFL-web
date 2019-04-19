@@ -10,7 +10,7 @@
                 Virginia Tech
             </h2>
             <router-link class="button is-link" to="/s-bfls">Decision Support Tool</router-link>
-            <router-link class="button is-link" to="/methodology">Methodolgy</router-link>
+            <router-link class="button is-link" to="/methodology">Background</router-link>
             </div>
         </div>
     </section>
