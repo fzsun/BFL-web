@@ -14,13 +14,14 @@
       <div id="navMenu" class="navbar-menu">
         <div class="navbar-end">
           <a href="/" class="navbar-item">Home</a>
-          <a href="/about/" class="navbar-item">Team</a>
-          <div class="navbar-item has-dropdown is-hoverable">
+          <a href="/s-bfls" class="navbar-item">Decision Support Tool</a>
+          <a href="/methodology" class="navbar-item">Methodology</a>
+          <!-- <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">Projects</a>
             <div class="navbar-dropdown is-boxed">
               <a class="navbar-item" href="/s-bfls/">Sorghum BFLS</a>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -54,10 +55,6 @@ html {
   text-align: center;
   color: #2c3e50; 
   margin-top: 50px;
-}
-
-.columns {
-  flex-wrap: wrap;
 }
 
 .card {

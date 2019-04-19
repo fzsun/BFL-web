@@ -1,5 +1,5 @@
 <template>
-<div class="content">
+<section class="content">
     <div class="title is-4"> Background</div>
     <div class="subtitle is-4"> Demand For Bio-Fuels</div>
     <div>
@@ -17,7 +17,7 @@
         has the potential to be killed off by a frost. Sorghum typically needs between 400-600mm of rainfall
         and should be spaced with an optimal planting density of approximately 120,000 plants per hectare. <br></br>
     </div>
-    <div> Simulation-Optimization Methodology </div>
+    <div class="subtitle is-4"> Simulation-Optimization Methodology </div>
     <div> 
         The value of the sim-Op methodology is it can create an optimal solution while still being verified in
         a stochastic environment to emmulate a real world logistics problem. In our tool we utilize a hub and spoke
@@ -28,7 +28,7 @@
         solutions is variable. The sim-op methodology will highlight this result and let you revise your parameters
         so that you can create a solution feasible for a real world operation.  
     </div>
-</div>
+</section>
 </template>
 
 <script>
@@ -40,5 +40,6 @@ export default {
 <style>
 .content {
     text-align: left;
+    padding: 2rem;
 }
 </style>
