@@ -16,7 +16,7 @@
                 </label>
             </div>
             <div class="control">
-                <label class="button blue">
+                <label class="button green">
                     Farm
                     <input 
                         type="radio"
@@ -27,7 +27,7 @@
                 </label>
             </div>
             <div class="control">
-                <label class="button green">
+                <label class="button blue">
                     SSL
                     <input 
                         type="radio"
