@@ -4,7 +4,7 @@
   <nav class="navbar is-fixed-top is-primary">
     <div class="container">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/"><img src="./assets/logo.png"></a>
+        <a class="navbar-item" href="/"><img src="../static/favicon.png"></a>
         <span class="navbar-burger burger" data-target="navMenu">
           <span></span>
           <span></span>
@@ -14,13 +14,11 @@
       <div id="navMenu" class="navbar-menu">
         <div class="navbar-end">
           <a href="/" class="navbar-item">Home</a>
-          <a href="/team/" class="navbar-item">Team</a>
-          <a href="/contact/" class="navbar-item">Contact</a>
+          <a href="/about/" class="navbar-item">Team</a>
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">Projects</a>
             <div class="navbar-dropdown is-boxed">
               <a class="navbar-item" href="/s-bfls/">Sorghum BFLS</a>
-              <a class="navbar-item" href="/tsp/">TSP Example</a>
             </div>
           </div>
         </div>
@@ -34,7 +32,7 @@
 
   <footer class="footer has-background-primary">
     <div class="content has-text-centered has-text-white">
-      <p>Copyright &copy; VT BFL Team 2018</p>
+      <p>Copyright &copy; VT BFL Team 2019</p>
     </div>
   </footer>
 </div>

@@ -5,7 +5,8 @@ const routerOptions = [
   { path: '/', component: 'Home' },
   { path: '/s-bfls', name: 'S_BFLS', component: 'S_BFLS' },
   { path: '/about', name: 'About', component: 'About' },
-  { path: '/map', name: 'Map', component: 'Map' }
+  { path: '/map', name: 'Map', component: 'Map' },
+  { path: '/methodology', name: 'Methodology', component: 'Methodology'}
 ]
 
 const routes = routerOptions.map(route => {

@@ -63,12 +63,6 @@
                 v-bind:tooltips='tooltips.areaRatio'
             ></ListInput>
         </div>
-    <!-- <div class="field">
-        <label class="label">Price per Mg</label>
-        <div class="control">
-            <input class="input" type="text" v-model="model.price">
-        </div>
-    </div> -->
     </div>
     <div>
         <div class="label centerAlign makeFull">Equipment Configuration Info</div>
