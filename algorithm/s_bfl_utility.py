@@ -114,7 +114,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         raw['degrade']['in_bag'] = int(raw_data['degrade']['in_bag'])
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
-
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
