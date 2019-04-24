@@ -47,7 +47,7 @@ export default {
                   name: "Ben Hadinger", 
                   img: "../static/ben_hadinger_bio_pic.png",
                   contact: "bmh@vt.edu",
-                  bio: "Ben is a Computer Science student at Virginia Tech, graduating class of 2020. He has worked for Parsons Federal in the cyber-security, volunteered for 100 Girls of Code, and has enjoyed his time expanding his horizons in the logistics space."
+                  bio: "Ben is a Computer Science student at Virginia Tech, graduating class of 2020. He has worked for Parsons Federal in cyber-security, volunteered for 100 Girls of Code, and has enjoyed his time expanding his horizons in the logistics space."
                 },
                 {
                   name: "Robert Shelton", 
