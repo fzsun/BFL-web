@@ -20,9 +20,7 @@ Install Flask and Waitress
 conda install flask waitress
 ```
 # frontend Vue.js Installation 
-'''
-npm install vue
-'''
+`npm install vue`
 
 ## Build Setup
 
