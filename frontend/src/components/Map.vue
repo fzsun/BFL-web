@@ -1,51 +1,84 @@
 <template>
-  <body>
-    <div id="map"></div>
-    <p id="choice">Current choice: Farm</p>
-    <!-- <select v-model = "type">
-        <option class="button" value="Refinery">Refinery</option>
-        <option class="button" value="Farm">Farm</option>
-        <option class="button" value="SSL">SSL</option>
-    </select> -->
-    <form id="changeType">
-        <a href="#" v-on:click="farm_or_ssl">CHANGE</a>
-    </form>
-    <br>
-    <br>
-    <form id="refineryFormLatLong">
-        <label>Location</label>
-        <input id="farmnameLatLon" type="text" placeholder="Farm">
-        <input id="latInput" type="number" placeholder="Lat">
-        <input id="lonInput" type="number" placeholder="Lng">
-        <a href="#" v-on:click="latlon">SUBMIT</a>
-    </form>
-    <br>
-    <br>
-    <form id="refineryFormAddress">
-        <label>Location</label>
-        <input id="farmnameAddress" type="text" placeholder="Farm">
-        <input id="address" type="text" placeholder="Address">
-        <a href="#" v-on:click="address">SUBMIT</a>
-    </form>
-    <br>
-    <br>
-    <form id="getLocations">
-        <a href="#" v-on:click="locations">Print Locations</a>
-    </form>
-    <p id="locations"></p>
+  <body class="wrapper">
+    <div v-if="showing_options" class="mapDescription">
+        <div class="is-size-4 floatLeft">1. Create Network</div>
+        <div class="is-size-5 floatLeft">Click map to place <b>{{name}}</b></div>
+        <div class="field is-grouped nameButtons">
+            <div class="control">
+                <label class="button red">
+                    Refinery
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="Refinery"
+                    >
+                </label>
+            </div>
+            <div class="control">
+                <label class="button green">
+                    Farm
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="Farm"
+                    >
+                </label>
+            </div>
+            <div class="control">
+                <label class="button blue">
+                    SSL
+                    <input 
+                        type="radio"
+                        name="radio" 
+                        v-model="name"
+                        value="SSL"
+                    >
+                </label>
+            </div>
+        </div>
+        <p class="max-width paddingLeft">
+            Place refinery (red pin) as center of 2-layer hub 
+            and spoke optimization model. Next place farm locations 
+            (green pins). Finally, place potential satellite storage 
+            locations (blue pins).
+        </p>
+        <br>
+        <form id="refineryFormAddress" class="is-size-5 paddingRight addressInput" @submit.prevent="submitAddress()">
+            <div class="floatLeft is-size-5">Or enter address</div>
+            <input 
+                class="input"
+                v-model="addressName" 
+                type="text" 
+                placeholder="Location Name"
+            >
+            <input 
+                class="input"
+                v-model="address" 
+                type="text" 
+                placeholder="Address"
+            >
+            <span class="floatRight">
+                <button class="button is-primary" v-on:click="submitAddress">Add Pin</button>
+            </span>
+        </form>
+    </div>
+    <div id="map" class="map"></div>
   </body>
 </template>
 
 <script>
+import Vue from 'vue'
 import axios from 'axios'
+import VueChartkick from 'vue-chartkick'
+import Chart from 'chart.js'
 
+Vue.use(VueChartkick, {adapter: Chart})
 export default {
-    name: 'Map',
     data() {
         return {
-            //0 = farm, 1 = ssl, 2 = refinery
-            type: 0,
-		    name: 'Farm',
+		    name: 'Refinery',
             msg: 'BFL Map',
             refinery: null,
             refineryMarker: null,
@@ -55,25 +88,19 @@ export default {
             ssls: [],
             farmMarkers: [],
             sslMarkers: [],
+            address: '',
+            addressName: '',
+            flight_paths: [],
+            num_flight_paths: 0,
+            showing_options: true,
     }},
+    props: ['mapInfo'],
     methods: {
-        farm_or_ssl : function() {
-            this.type = (this.type + 1) % 3;
-
-			if (this.type == 2) this.name = "Refinery"
-            else if (this.type == 1) this.name = "SSL";
-            else this.name = "Farm";
-
-			document.getElementById("choice").innerHTML = "Current choice: " + this.name;
-            document.getElementById("farmnameLatLon").placeholder = this.name;
-            document.getElementById("farmnameAddress").placeholder = this.name;
-        },
-
         //Initial retrieval of map
-        getMap(){
+        getMap() {
             this.map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.22904237824045, lng: -80.41982042804534},
-            zoom: 16
+            zoom: 8
             })
         },
 
@@ -81,23 +108,29 @@ export default {
         addPushpin() {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
-            	var typeName = prompt(ref.name + " Name", this.name);
-                ref.placeMarker(event.latLng, typeName);
+                var typeName = prompt(ref.name + " Name", this.name);
+                if (typeName !== null) ref.placeMarker(event.latLng, typeName);
             });
         },
+
         placeMarker(location, locationname) {
             var ref = this;
-			if (this.type == 2) {
+			if (this.name == 'Refinery') {
 				if (this.refinery != null) {
 					this.refineryMarker.setMap(null);
 				}
 				var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
                     }
+                });
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
                 });
 				google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(0, "refinery") });
@@ -105,16 +138,20 @@ export default {
                                  latitude: location.lat(),
                                  longitude: location.lng()};
 				this.refineryMarker = marker;
-            } else if (this.type == 1) {
+            } else if (this.name == "SSL") {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
                     }
                 });
-
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
+                });
                 var id = this.sslCounter;
                 google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(id, "ssl") });
@@ -128,12 +165,16 @@ export default {
                 var marker = new google.maps.Marker({
                     position: location,
                     map: this.map,
-                    label: name,
                     icon: {
                         url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                     }
                 });
-
+                var info_window = new google.maps.InfoWindow({
+                    content: locationname
+                });
+                google.maps.event.addListener(marker, "click", function(e) {
+                    info_window.open(map, marker);
+                });
                 var id = this.farmsCounter;
                 google.maps.event.addListener(marker, "rightclick",
                     function (point) { ref.delMarker(id, "farm") });
@@ -145,6 +186,7 @@ export default {
                 this.farmsCounter = this.farmsCounter + 1;
             }
         },
+        
         delMarker(id, type) {
 			if (type == "refinery") {
 				var marker = this.refineryMarker;
@@ -164,18 +206,19 @@ export default {
             }
         },
 
-
         //Submit Forms for farm locations (by lat,lng and by address)
-        latlon : function(){
+        latlon(){
             var lat = document.getElementById("latInput").value;
             var lon = document.getElementById("lonInput").value;
             var farmname = document.getElementById("farmnameLatLon").value;
             var myLatlng = new google.maps.LatLng(lat, lon);
             this.placeMarker(myLatlng, farmname);
         },
-        address : function() {
-            var address = document.getElementById("address").value;
-            var farmname = document.getElementById("farmnameAddress").value;
+
+        submitAddress() {
+            var address = this.address;
+            var addressName = this.addressName;
+            console.log("address: ", this.address)
             var url = 'https://api.geocod.io/v1.3/geocode?' +
                       'q=' + address +
                       '&api_key=' + '57cf5c27cf057777f7fd555f33f3b56d77f5da5';
@@ -191,58 +234,27 @@ export default {
                 });
             var ref = this;
             result.then(data => {
-
                 var address_lat = data.results[0].location.lat;
                 var address_lng = data.results[0].location.lng;
+                this.address = '';
+                this.addressName = '';
                 ref.placeMarker(
                     new google.maps.LatLng(address_lat, address_lng),
-                    farmname);
+                    addressName);
             });
         },
 
-        //Print Locations to website
-        locations : function() {
-            var locations = "Locations: </br>";
-            var k;
-            for(k = 0; k < this.farmsCounter; k++) {
-                if (this.farms[k] != null) {
-                    locations = locations +
-                                this.farms[k].name + ": " +
-                                this.farms[k].latitude + " -- " +
-                                this.farms[k].longitude + "</br>";
-                }
-            }
-            locations = locations + "SSL Locations: </br>";
-            for(k = 0; k < this.sslCounter; k++) {
-                if (this.ssls[k] != null) {
-                    locations = locations +
-                                this.ssls[k].name + ": " +
-                                this.ssls[k].latitude + " -- " +
-                                this.ssls[k].longitude + "</br>";
-                }
-            }
-			locations = locations + "Refinery: </br>";
-			if (this.refinery != null) {
-				locations = locations +
-              	            this.refinery.name + ": " +
-                            this.refinery.latitude + " -- " +
-                            this.refinery.longitude + "</br>";
-			}
-            document.getElementById("locations").innerHTML = locations;
-        },
-
         //Submit locations to background for optimization
-        submitLocations : function() {
+        submitLocations() {
             var filteredFarm = this.farms.filter(function (el) {
                 return el != null;
             });
             var filteredSSL = this.ssls.filter(function (el) {
                 return el != null;
             });
-
+            var mapInfo = {}
             if (this.refinery == null) return "Refinery Missing";
 
-            var mapInfo = {};
             mapInfo.refinery_location =
               [this.refinery.latitude, this.refinery.longitude];
             mapInfo.mode = "coordinates";
@@ -250,15 +262,42 @@ export default {
             mapInfo.Coord_s = {};
             var k;
             for (k = 0; k < filteredFarm.length; k++) {
-              mapInfo.Coord_f[k] =
-                [filteredFarm[k].latitude, filteredFarm[k].longitude];
+              mapInfo.Coord_f[k] = {
+                  "lat": filteredFarm[k].latitude,
+                  "lng": filteredFarm[k].longitude
+              }
             }
             for (k = 0; k < filteredSSL.length; k++) {
-              mapInfo.Coord_s[k] =
-                [filteredSSL[k].latitude, filteredSSL[k].longitude];
+              mapInfo.Coord_s[k] = {
+                  "lat": filteredSSL[k].latitude,
+                  "lng": filteredSSL[k].longitude
+              }
             }
+            this.$emit('Emit stuff', mapInfo)
             return mapInfo;
+        },
+        addRoutes(routeCoordinates){
+        var flightPath = new google.maps.Polyline({
+          path: routeCoordinates,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        
+        flightPath.setMap(this.map);
+        this.flight_paths[this.num_flight_paths++] = flightPath;
+        },
+        removeRoutes() {
+            var i;
+            for (i = 0; i < this.num_flight_paths; i++) {
+                this.flight_paths[i].setMap(null);
+            }
+            this.flight_paths = [];
+            this.num_flight_paths = 0;
         }
+
+
     },
     mounted: function() {
         this.getMap();
@@ -269,7 +308,79 @@ export default {
 
 <style>
 #map {
-    height: 600px;
-    width: 75%;
+    height: 25rem;
+    width: 100%;
+    max-width: 50rem;
+}
+
+.addressInput {
+    max-width: 25rem;
+    flex-grow: 1;
+}
+
+@media only screen and (max-width: 600) {
+    #map {
+        height: 250px;
+    }
+}
+
+p {
+    max-width: 24rem;
+}
+
+.clickInstruction {
+    display: block;
+}
+
+.map {
+    flex-grow: 2;
+}
+
+.mapDescription {
+    grid-area: mapDescription;
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.floatLeft {
+    float: left;
+}
+
+.floatRight {
+    float: right;
+}
+
+.paddingRight {
+    padding-right: 1rem;
+}
+
+.paddingLeft {
+    padding-left: 1rem;
+}
+
+.nameButtons input[type="radio"] {
+    opacity: 0.0011;
+    z-index: 100;
+}
+.nameButtons .button {
+    padding-left: 1.5rem;
+}
+
+.red {
+    color: red;
+}
+
+.blue {
+    color: blue;
+}
+
+.green {
+    color: green;
 }
 </style>

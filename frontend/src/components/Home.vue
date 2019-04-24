@@ -7,48 +7,45 @@
                 Biomass Feedstock Logistics
             </h1>
             <h2 class="subtitle">
-                Some introduction about team.
+                Virginia Tech
             </h2>
-            <router-link class="button is-primary" to="/about">View More</router-link>
+            <router-link class="button is-link" to="/s-bfls">Decision Support Tool</router-link>
+            <router-link class="button is-link" to="/methodology">Methodolgy</router-link>
+            <a class="button is-link" href="https://github.com/fzsun/BFL-web/tree/master">GitHub</a>
             </div>
         </div>
     </section>
-
-    <div class="section columns">
-
-    <div class="column is-4">
-        <div class="card">
-        <div class="card-image">
-            <figure class="image is-3by2">
-            <img src="../assets/images/s-bfls.jpg" alt="Placeholder image">
-            </figure>
-        </div>
-        <div class="card-content">
-            <p class="title">Sorghum BFLS</p>
-            <p>A decision support tool for optimal design of sorghum biomass feedstock supply chains.</p>
-        </div>
-        <div class="card-content is-bottom">
-            <router-link class="button is-primary is-fullwidth" :to="{ name: 'S_BFLS'}">View</router-link>
-        </div>
-        </div>
-    </div>
-
-        <div class="column is-4">
-        <div class="card">
-        <div class="card-image">
-            <figure class="image is-3by2">
-            <img src="https://picsum.photos?random" alt="Placeholder image">
-            </figure>
-        </div>
-        <div class="card-content">
-            <p class="title">Maps Example</p>
-        </div>
-        <div class="card-content is-bottom">
-            <router-link class="button is-primary is-fullwidth" :to="{ name: 'Map'}">View</router-link>
-        </div>
-        </div>
-    </div>
-
+    <div class="about">
+        <div class="title is-4">Development Team</div>
+        <About></About>
     </div>
 </div>
 </template>
+<script>
+import About from './About'
+
+export default {
+    components: {
+        'About': About
+    }
+}
+</script>
+<style>
+.about {
+    margin: 2rem;
+}
+
+.title {
+    text-align: center;
+}
+
+.textLeft {
+    text-align: left;
+}
+
+.hero-body .button {
+    width: 11rem;
+    height: 3rem;
+    margin: .25rem .5rem;
+}
+</style>

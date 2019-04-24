@@ -1,613 +1,594 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Nov 11 16:58:23 2018
-
-@author: 999Na
-"""
 '''
-
-
 Perfect transport from ssl => should yield a max of 199991.99 Mg
-
 Total transport from farm to ssl can yield a max of 202672.0000000001 Mg
-
 '''
 
+from scipy import stats as stat
 import simpy
-import json
+import json 
 import numpy as np
 import re
-import math
+import math 
 import matplotlib.pyplot as plt
-
-# Define containers and resources and start process
-
+import random
 
 
-'''
-Data Creation Section
-'''
+#open input and output files to be used
+#with open('output_0.json') as output_file:
+ #   output_data = json.load(output_file)
+#with open('example_input.json') as algo_input:
+ #   algo_input_data = json.load(algo_input)
 
 class Simulation(object):
-
-    # For testing simulation against algorithm
-    '''# open input and output files to be used
-    with open("example_output1_jit.json") as output_file:
-        output_data = json.load(output_file)
-    with open("example_input.json") as algo_input:
-        algo_input_data = json.load(algo_input)
-    log = open('log.txt','w+')'''
-
-# open input and output files to be used
-# with open("example_output1_jit.json") as output_file:
-#     output_data = json.load(output_file)
-# with open("example_input.json") as algo_input:
-#     algo_input_data = json.load(algo_input)
-
-log = open('log.txt','w+')
-num_trials = int(input('How many sample trials would you like to simulate? '))
- # assign variables from algo input
-horizon = algo_input_data['horizon']
-demand = algo_input_data['demand']
-equipment_data = algo_input_data['cost']['equipment']
-degradation = algo_input_data['degrade']
-
-SIM_TIME = 1081
-
-# assign variables from output file
-coord_f = output_data['params']['Coord_f'] # coordinates x,y for farms (all possible)
-coord_s = output_data['params']['Coord_s'] # coordinates x,y for ssl (all possible)
-K = output_data['params']['K'] # ssl size and equipment loadout configurations
-a = np.array(output_data['params']['a']) # 26 harvest schedule (yield for each farm in each period Mg)
-d = output_data['params']['d'] # demand
-u = output_data['params']['u'] # capacities for ssl
-ue = output_data['params']['ue'] # processing rate of non-chopping methods
-sysnum = output_data['params']['Sysnum']
-solutions = output_data['solution'] # holds the algorithms solution dictionary
-configuration = output_data['params']['Configuration']
-num_ssl = len(coord_s)
-
-
-config_rate = {}
-loadout_rates = []
-loadout_rates_jit = []
-for equipment in configuration:
-    if equipment == 'loadout':
-        loadout_rate_standard = equipment_data[equipment][4]/40
-    if equipment == 'press':
-        config_rate.update({'press':equipment_data[equipment][4]/40})
-        press_rate = []
-    if equipment == 'chopper':
-        config_rate.update({'chopper':equipment_data[equipment][4]/40})
-        chopper_rate = []
-    if equipment == 'bagger':
-        config_rate.update({'bagger':equipment_data[equipment][4]/40})
-        bagger_rate = []
-    if equipment == 'module_former':
-        config_rate.update({'module_former':equipment_data[equipment][4]/40})
-        former_rate = []
-    if equipment == 'module_hauler':
-        loadout_rate_module = equipment_data[equipment][4]/40
-
-
-        self.SIM_TIME = 1081
-
+    
+    '''
+    -init defines all of the data that will saty constant throughout the simulation trials
+    -this is a combination of data from the algorithms input and output
+    '''
+    
+    def __init__(self):
+        print(" * Created new simulation")
+        
+    def new_input(self, algo_input_data, output_data):
+        self.algo_input_data = algo_input_data
+        self.output_data = output_data
+                   
+        self.num_trials = 100
+        self.work_week = 40
+         # assign variables from algo input
+        self.demand = self.algo_input_data['demand']
+        self.equipment_data = self.algo_input_data['cost']['equipment']
+        self.degradation = self.algo_input_data['degrade']
+        
+        self.SIM_TIME = self.algo_input_data['horizon']*self.work_week + self.work_week*2
+        
         # assign variables from output file
-        self.coord_f = output_data['params']['Coord_f'] # coordinates x,y for self.farms (all possible)
-        self.coord_s = output_data['params']['self.Coord_s'] # coordinates x,y for ssl (all possible)
-        self.K = output_data['params']['K'] # ssl size and equipment loadout configurations
-        self.a = np.array(output_data['params']['a']) # 26 harvest schedule (yield for each farm in each period Mg)
-        self.d = output_data['params']['d'] # self.demand
-        self.u = output_data['params']['u'] # capacities for ssl
-        self.ue = output_data['params']['ue'] # processing rate of non-chopping methods
-        self.sysnum = output_data['params']['Sysnum']
-        self.solutions = output_data['solution'] # holds the algorithms solution dictionary
-        self.configuration = output_data['params']['Configuration']
+        self.coord_f = self.output_data['params']['Coord_farms'] # coordinates x,y for farms (all possible)
+        self.coord_s = self.output_data['params']['Coord_ssls'] # coordinates x,y for ssl (all possible)
+        self.ssl_configurations = self.output_data['params']['SSL_configuration'] # ssl size and equipment loadout configurations
+        self.harvest_schedule = np.array(self.output_data['params']['harvested']) # 26 harvest schedule (yield for each farm in each period Mg)
+        self.ue = self.output_data['params']['upperbound_equip_proc_rate'] # processing rate of non-chopping methods
+        self.sysnum = self.output_data['params']['Sysnum']
+        self.solutions = self.output_data['solution'] # holds the algorithms solution dictionary
+        self.configuration = self.output_data['params']['Configuration']
         self.num_ssl = len(self.coord_s)
-
-
         self.config_rate = {}
-        self.loadout_rates = []
-        self.loadout_rates_jit = []
-        for equipment in self.configuration:
-            if equipment == 'loadout':
-                self.loadout_rate_standard = self.equipment_data[equipment][4]/40
-            if equipment == 'press':
-                self.config_rate.update({'press':self.equipment_data[equipment][4]/40})
-                self.press_rate = []
-            if equipment == 'chopper':
-                self.config_rate.update({'chopper':self.equipment_data[equipment][4]/40})
-                self.chopper_rate = []
-            if equipment == 'bagger':
-                self.config_rate.update({'bagger':self.equipment_data[equipment][4]/40})
-                self.bagger_rate = []
-            if equipment == 'module_former':
-                self.config_rate.update({'module_former':self.equipment_data[equipment][4]/40})
-                self.former_rate = []
-            if equipment == 'module_hauler':
-                self.loadout_rate_module = self.equipment_data[equipment][4]/40
+        self.loadout_rates_standard = []
+        self.loadout_rates_module = []
+        self.loadout_rates_standard_jit = []
+        self.loadout_rates_module_jit = []
+        self.loadout_rate_module_new = 0
+        self.loadout_rate_standard_new = 0
+        print(algo_input_data["new_input"])
+        if algo_input_data["new_input"]:
+            print("new!!!!!")
+            for equipment in self.configuration:
+                if equipment == 'loadout':
+                    self.loadout_rate_standard = self.equipment_data[equipment][4]/self.work_week
+                    self.loadout_rate_standard_new = self.loadout_rate_standard
+                elif equipment == 'press':
+                    self.config_rate.update({'press':self.equipment_data[equipment][4]/self.work_week})
+                    self.press_rate = []
+                elif equipment == 'chopper':
+                    self.config_rate.update({'chopper':self.equipment_data[equipment][4]/self.work_week})
+                    self.chopper_rate = []
+                elif equipment == 'bagger':
+                    self.config_rate.update({'bagger':self.equipment_data[equipment][4]/self.work_week})
+                    self.bagger_rate = []
+                elif equipment == 'module_former':
+                    self.config_rate.update({'module_former':self.equipment_data[equipment][4]/self.work_week})
+                    self.former_rate = []
+                elif equipment == 'module_hauler':
+                    self.loadout_rate_module = self.equipment_data[equipment][4]/self.work_week
+                    self.loadout_rate_module_new = self.loadout_rate_module
+                
+        self.breakdown ={'loadout':[], 'press':[], 'chopper':[], 'bagger':[], 'module former':[], 'module hauler': []}  
+        for trial in range(self.num_trials):
+            self.breakdown['loadout'].append([])
+            self.breakdown['press'].append([])
+            self.breakdown['chopper'].append([])
+            self.breakdown['bagger'].append([])
+            self.breakdown['module former'].append([])
+            self.breakdown['module hauler'].append([])
 
-
-        self.m = a.shape[0]
-        self.n = a.shape[1]
-
-        self.all_self.refinery_actual = []
+        self.m = self.harvest_schedule.shape[0]
+        self.n = self.harvest_schedule.shape[1]
+        
+        self.all_refinery_actual = []
         self.all_ssl_actual = []
         self.all_degradation_ensiled_actual = []
         self.all_degradation_farm_actual = []
         self.all_demand = []
+        self.all_farm_level = []
         self.harvest_hypothetical = []
         self.refinery_hypothetical = []
         self.hypothetical_ssl = []
-        self.refinery_average = []
-        self.ssl_average = []
+        self.hypothetical_farm = []
         self.degradation_farm_average = []
         self.degradation_ssl_average = []
+        self.refinery_graph = []
 
 
-for trial in range(num_trials):
-    env = simpy.Environment()
+
+    def main(self):
+        for trial in range(self.num_trials):
+            env = simpy.Environment() # sets up a new simpy env for every trial
+            self.env = env
+            self.trial_reset() # resets the simpy constructs and data structures for recording the information
+            self.env.process(self.create_loadout_rate())
+            self.env.process(self.harvest()) #triggers the harvest schedule, JIT_schedule and preprocessing every period
+            self.env.process(self.farm_transport(trial))
+            self.env.process(self.moniter_ssl())# checks the ssl transport schedule for refinery deliveries
+            #self.env.process(self.degradation_field()) # counts degredation of sitting sorghum at the fields
+            #self.env.process(self.degradation_ensiled()) # counts degradation of ensiled sorghum
+            self.env.process(self.record_data()) # Records all of the trial specific data and appends it to trial constant data
+            self.env.run(until=self.SIM_TIME) # planning horizon in hours
+            self.all_demand.append(self.refinery.level)
+        self.schedules()
+        self.sim_results = {"demand": {"percent": 0, "average": 0, "stdev":0, "sem":0, "conf int":"N/a", 'range':[0,0], "conf":{'90':0, '95':0, '99':0}}, "telehandler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "press rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "chopper rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "bagger rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module former rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}, "module hauler rate":{"average": 0, "stdev":0, "sem":0, "conf int":0, 'range':[0,0]}}
+        self.simulation_results()
+        self.round_conf_int()
+        
 
 
-    farms = []
-    # create farms
-    for farm in range(n):
-        farms.append(simpy.Container(env, 10000000, init=0))
-    refinery = simpy.Container(env, capacity=100000000, init=0)
-    degraded_ensiled = simpy.Container(env, capacity=100000000, init=0)
-    degraded_field = simpy.Container(env, capacity=100000000, init=0)
-
-    farm_transport_schedule = []
-    harvest_actual = []
-    jit_farm_transport = []
-    farm_level_actual = []
-    farm_inventory = []
-    for period in range(m):
-        farm_transport_schedule.append([])
-        harvest_actual.append([])
-        jit_farm_transport.append([])
-        farm_level_actual.append([])
-        farm_inventory.append([])
-        for farm in range(n):
-            harvest_actual[period].append(0)
-            farm_transport_schedule[period].append(0)
-            jit_farm_transport[period].append(0)
-            farm_level_actual[period].append(0)
-            farm_inventory[period].append(0)
-
-
-    ssl_route = [] # distance from ssl to orgin (refinery)
-    for coord in coord_s:
-        ssl_route.append(math.sqrt(coord_s[coord][1]**(2)+coord_s[coord][0]**(2)))
-
-
-    equip_in_ssl = {} # dictionary for ssl configuration
-    before_ssl = {}
-    ssl_container = {} # dictionary relating ssl site location to container with proper capacity
-    ssl_location = {} # x,y location of ssl
-    for solution in solutions:
-        aa = solution[0]
-        cc = solution[1]
-        bb = re.split('\W', aa)
-        if bb[0] == 'w':
-            equip_in_ssl[bb[1]] = K[bb[2]][1:]
-            before_ssl[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
-            ssl_container[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
-            ssl_location[bb[1]] = coord_s[bb[1]]
-
-
-    ssl_level_actual = []
-    ssl_transport_schedule = []
-    ssl_inventory = []
-    for period in range(m):
-        ssl_transport_schedule.append([])
-        ssl_inventory.append([])
-        ssl_level_actual.append([])
-        for ssl in range(num_ssl):
-            ssl_transport_schedule[period].append(0)
-            ssl_inventory[period].append(0)
-            ssl_level_actual[period].append(0)
-
-
-    farm_route = [] # distance from farm n to designated ssl
-    farm_ssl = {} # shows which farm corresponds to using which ssl
-    for solution in solutions:
-        aa = solution[0]
-        cc = solution[1]
-        bb = re.split('\W', aa)
-        if bb[0] == 'y':
-            farm_route.append(math.sqrt((ssl_location[bb[2]][0]-coord_f[bb[1]][0])**(2)+(ssl_location[bb[2]][1]-coord_f[bb[1]][1])**(2)))
-            farm_ssl.update({int(bb[1]):int(bb[2])})
-        if bb[0] == 'zfs':  # populate the farm transport schedule from algorithm solution
-            farm_transport_schedule[int(bb[1])][int(bb[2])] = cc
-        if bb[0] == 'zs':   # populate the ssl transportation schedule from algorithm solution
-            ssl_transport_schedule[int(bb[1])][int(bb[2])] = cc
-        if bb[0] == 'z_jit':
-            jit_farm_transport[int(bb[1])][int(bb[2])] = cc
-        if bb[0] == 'Is':
-            ssl_inventory[int(bb[1])][int(bb[2])] = cc
-        if bb[0] == 'If':
-            farm_inventory[int(bb[1])][int(bb[2])] = cc
-
-    '''
-
-    Start Trials
-
-    '''
-
-    # create functions
-    def harvest(env):
-        x = 0
-        y = 0
-        for period in range(m):
-            if 'module_hauler' in configuration:
-                loadout_rate = np.random.normal(loadout_rate_module, 1/5*loadout_rate_module)
+    def simulation_results(self):        
+        for equipment in self.configuration:
+            if equipment == 'press':
+                print('The average compression rate in MG/hour:',np.mean(self.press_rate))
+                self.sim_results['press rate'].update({'average':round(np.mean(self.press_rate),2)*40})
+                self.sim_results['press rate'].update({'stdev':round(np.std(self.press_rate),2)*40})
+                self.sim_results['press rate'].update({'sem':round(stat.sem(self.press_rate),2)*40})
+                self.sim_results['press rate'].update({'conf int':stat.norm.interval(.95,round(np.mean(self.press_rate),1)*40,round(np.std(self.press_rate),1)*40)})
+                self.sim_results['press rate']['range'][0] = round(min(self.press_rate),2)*40
+                self.sim_results['press rate']['range'][1] = round(max(self.press_rate),2)*40
+            if equipment == 'chopper':
+                print('The average chopper rate in MG/hour:',np.mean(self.chopper_rate))
+                self.sim_results['chopper rate'].update({'average':round(np.mean(self.chopper_rate),2)*40})
+                self.sim_results['chopper rate'].update({'stdev':round(np.std(self.chopper_rate),2)*40})
+                self.sim_results['chopper rate'].update({'sem':round(stat.sem(self.chopper_rate),2)*40})
+                self.sim_results['chopper rate'].update({'conf int':stat.t.interval(0.95,len(self.chopper_rate)-1, loc=np.mean(self.chopper_rate)*40, scale=stat.sem(self.chopper_rate)*40)})
+                self.sim_results['chopper rate']['range'][0] = round(min(self.chopper_rate),2)
+                self.sim_results['chopper rate']['range'][1] = round(max(self.chopper_rate),2)
+            if equipment == 'bagger':
+                print('The average bagger rate in MG/hour:',np.mean(self.bagger_rate))
+                self.sim_results['bagger rate'].update({'average':round(np.mean(self.bagger_rate),2)*40})
+                self.sim_results['bagger rate'].update({'stdev':round(np.std(self.bagger_rate),2)*40})
+                self.sim_results['bagger rate'].update({'sem':round(stat.sem(self.bagger_rate),2)*40})
+                self.sim_results['bagger rate'].update({'conf int':stat.t.interval(0.95,len(self.bagger_rate)-1, loc=np.mean(self.bagger_rate)*40, scale=stat.sem(self.bagger_rate)*40)})
+                self.sim_results['bagger rate']['range'][0] = round(min(self.bagger_rate),2)*40
+                self.sim_results['bagger rate']['range'][1] = round(max(self.bagger_rate),2)*40
+            if equipment == 'module_former':
+                print('The average module former rate in MG/hour:',np.mean(self.former_rate))
+                self.sim_results['module former rate'].update({'average':round(np.mean(self.former_rate),2)*40})
+                self.sim_results['module former rate'].update({'stdev':round(np.std(self.former_rate),2)*40})
+                self.sim_results['module former rate'].update({'sem':round(stat.sem(self.former_rate),2)*40})
+                self.sim_results['module former rate'].update({'conf int':stat.t.interval(0.95,len(self.former_rate)-1, loc=np.mean(self.former_rate)*40, scale=stat.sem(self.former_rate)*40)})
+                self.sim_results['module former rate']['range'][0] = round(min(self.former_rate),2)*40
+                self.sim_results['module former rate']['range'][1] = round(max(self.former_rate),2)*40
+            if equipment == 'module_hauler':
+                print('The average loadout rate for module hauler in MG/hour:',np.mean(self.loadout_rates_module)) 
+                self.sim_results['module hauler rate'].update({'average':round(np.mean(self.loadout_rates_module),2)*40})
+                self.sim_results['module hauler rate'].update({'stdev':round(np.std(self.loadout_rates_module),2)*40})
+                self.sim_results['module hauler rate'].update({'sem':round(stat.sem(self.loadout_rates_module),2)*40})
+                self.sim_results['module hauler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_module)-1, loc=np.mean(self.loadout_rates_module)*40, scale=stat.sem(self.loadout_rates_module)*40)})
+                self.sim_results['module hauler rate']['range'][0] = round(min(self.loadout_rates_module),2)
+                self.sim_results['module hauler rate']['range'][1] = round(max(self.loadout_rates_module),2)
+            if equipment == 'loadout':
+                print('Average telehandler loadout rate in MG/hour:',np.mean(self.loadout_rates_standard))
+                self.sim_results['telehandler rate'].update({'average':round(np.mean(self.loadout_rates_standard),2)*40})
+                self.sim_results['telehandler rate'].update({'stdev':round(np.std(self.loadout_rates_standard),2)*40})
+                self.sim_results['telehandler rate'].update({'sem':round(stat.sem(self.loadout_rates_standard),2)*40})
+                self.sim_results['telehandler rate'].update({'conf int':stat.t.interval(0.95,len(self.loadout_rates_standard)-1, loc=np.mean(self.loadout_rates_standard)*40, scale=stat.sem(self.loadout_rates_standard)*40)})
+                self.sim_results['telehandler rate']['range'][0] = round(min(self.loadout_rates_standard),2)*40
+                self.sim_results['telehandler rate']['range'][1] = round(max(self.loadout_rates_standard),2)*40
+    
+        self.percent_met = np.mean(self.all_demand)/self.demand*100
+        self.sim_results['demand'].update({'percent':round(self.percent_met,2)})
+        self.sim_results['demand'].update({'average':round(np.mean(self.all_demand),2)})
+        self.sim_results['demand'].update({'stdev':round(np.std(self.all_demand),2)})
+        self.sim_results['demand'].update({'sem':round(stat.sem(self.all_demand),2)})
+        self.sim_results['demand']['range'][0] = round(min(self.all_demand),2)
+        self.sim_results['demand']['range'][1] = round(max(self.all_demand),2)
+        
+        print(self.percent_met,'% of the ',self.demand,'MG demand was met over the current planning horizon for',self.num_trials,'samples')
+        count_90 = 0
+        count_95 = 0
+        count_99 = 0
+        for demand in self.all_demand:
+            if demand >= .99*self.demand:
+                count_99 += 1
+                count_95 += 1
+                count_90 += 1
+            elif demand >= .95*self.demand:
+                count_90 += 1
+                count_95 += 1
+            elif demand >= .9*self.demand:
+                count_90 += 1
             else:
-                loadout_rate = np.random.normal(loadout_rate_standard, 1/5*loadout_rate_standard)
-            loadout_rates.append(loadout_rate)
-            for farm in range(n):
-                self.harvest_actual[period].append(0)
-                self.farm_transport_schedule[period].append(0)
-                self.jit_farm_transport[period].append(0)
-                self.farm_level_actual[period].append(0)
-                self.farm_inventory[period].append(0)
+                pass
+        self.sim_results['demand']['conf'].update({'90':float(count_90/self.num_trials*100)})
+        self.sim_results['demand']['conf'].update({'95':float(count_95/self.num_trials*100)})
+        self.sim_results['demand']['conf'].update({'99':float(count_99/self.num_trials*100)})
 
-        for coord in self.coord_s:
-            self.ssl_route.append(math.sqrt(self.coord_s[coord][1]**(2)+self.coord_s[coord][0]**(2)))
+    '''
+    Simulation Environment 
+    '''
 
-        for solution in self.solutions:
-            aa = solution[0]
-            cc = solution[1]
-            bb = re.split('\W', aa)
-            if bb[0] == 'w':
-                self.equip_in_ssl[bb[1]] = K[bb[2]][1:]
-                self.before_ssl[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
-                self.ssl_container[bb[1]] = simpy.Container(env,capacity=K[bb[2]][0], init=0)
-                self.ssl_location[bb[1]] = self.coord_s[bb[1]]
-
+    def harvest(self):
         for period in range(self.m):
-            self.ssl_transport_schedule.append([])
-            self.ssl_inventory.append([])
-            self.ssl_level_actual.append([])
-            for ssl in range(self.num_ssl):
-                self.ssl_transport_schedule[period].append(0)
-                self.ssl_inventory[period].append(0)
-                self.ssl_level_actual[period].append(0)
-
-        for solution in self.sol:
-            aa = solution[0]
-            cc = solution[1]
-            bb = re.split('\W', aa)
-            if bb[0] == 'y':
-                self.farm_route.append(math.sqrt((self.ssl_location[bb[2]][0]-self.coord_f[bb[1]][0])**(2)+(self.ssl_location[bb[2]][1]-self.coord_f[bb[1]][1])**(2)))
-                self.farm_ssl.update({int(bb[1]):int(bb[2])})
-            if bb[0] == 'zfs':  # populate the farm transport schedule from algorithm solution
-                self.farm_transport_schedule[int(bb[1])][int(bb[2])] = cc
-            if bb[0] == 'zs':   # populate the ssl transportation schedule from algorithm solution
-                self.ssl_transport_schedule[int(bb[1])][int(bb[2])] = cc
-            if bb[0] == 'z_jit':
-                self.jit_farm_transport[int(bb[1])][int(bb[2])] = cc
-            if bb[0] == 'Is':
-                self.ssl_inventory[int(bb[1])][int(bb[2])] = cc
-            if bb[0] == 'If':
-                self.farm_inventory[int(bb[1])][int(bb[2])] = cc
-
-        self.degradation_farm_expected = []
-        self.degradation_ensiled_expected = []
-
-        '''
-        Functions Section
-        '''
-
-        # create functions
-        def harvest(env, self):
-            self.harvest_total_period = 0
-            self.harvest_total = 0
-            for period in range(self.m):
-                if 'module_hauler' in self.configuration:
-                    self.loadout_rate = np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)
+            for farm in range(self.n):
+                if self.harvest_schedule[period][farm] != 0:
+                    self.harvest_actual[period][farm]=max(1/10*self.harvest_schedule[period][farm],np.random.normal(self.harvest_schedule[period][farm], 1/5*self.harvest_schedule[period][farm]))
+                    self.farms[farm].put(self.harvest_actual[period][farm])
                 else:
                     pass
-                if jit_farm_transport[period][farm] != 0:
-                    env.process(JIT_schedule(env, period, farm, loadout_rate))
-                env.process(preprocessing(env, period, farm))
-                y=y+x
-                x=0
-            yield env.timeout(40)
-        env.timeout(1)
-        #print('total harvested = ',y)
+            yield self.env.timeout(self.work_week)
+    
 
 
-    def preprocessing(env, period, farm):
-        y = farm_transport_schedule[period][farm]
-        x = min(y,farms[farm].level)
-        i=1
+    def farm_transport(self, trial):
+        for period in range(self.m):
+            for farm in range(self.n):
+                if self.jit_farm_transport[period][farm] != 0:
+                    self.env.process(self.JIT_delivery(period, farm))
+                if self.farm_transport_schedule[period][farm] != 0:
+                    self.env.process(self.preprocessing(period, farm, trial))
+            yield self.env.timeout(self.work_week)
+
+            
+    
+    def preprocessing(self, period, farm, trial):
+        x = min(self.farm_transport_schedule[period][farm],self.farms[farm].level)
+        #y = random.randint(0,1000)
         if x > 0:
-            farms[farm].get(x)
-            #mylog(env,'Sorghum is being sent to ssl and unloaded for preprocessing and ensilation', log)
-            before_ssl[str(farm_ssl[farm])].put(x)
-            for equipment in config_rate:
-                rate = np.random.normal(config_rate[equipment],1/5*config_rate[equipment])
-                if equipment == 'press':
-                    press_rate.append(rate)
-                if equipment == 'chopper':
-                    chopper_rate.append(rate)
-                if equipment == 'bagger':
-                    bagger_rate.append(rate)
-                if equipment == 'module_former':
-                    former_rate.append(rate)
-                env.timeout(x/(rate*equip_in_ssl[str(farm_ssl[farm])][i]))
-                i=i+1
-                yield env.timeout(.25)
-            #mylog(env,'sorghum has been preprocessed and ensiled', log)
-            before_ssl[str(farm_ssl[farm])].get(x)
-            ssl_container[str(farm_ssl[farm])].put(x)
-            ssl_level_actual[period][farm_ssl[farm]] = ssl_container[str(farm_ssl[farm])].level
-            i=1
+            '''if y == 1:
+                yield self.env.timeout(8)
+                self.breakdown['loadout'][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})'''
+            self.farms[farm].get(x)
+            with self.ssl[self.farm_ssl[farm]][0].request() as req:
+                yield req
+                yield self.env.timeout(x/(self.equip_in_ssl[self.farm_ssl[farm]][0]*self.loadout_rate_standard_new))
+            self.before_ssl[self.farm_ssl[farm]].put(x)
+            self.env.process(self.use_equipment(period, farm, x, trial))
+            self.before_ssl[self.farm_ssl[farm]].get(x)
+            self.ssl_container[self.farm_ssl[farm]].put(x)
+            self.ssl_level_actual[period][self.farm_ssl[farm]] = self.ssl_container[self.farm_ssl[farm]].level
 
 
-    def moniter_ssl(env):
-        yield env.timeout(10)
-        for period in range(m):
-            if 'module_hauler' in configuration:
-                loadout_rate = np.random.normal(loadout_rate_module, 1/5*loadout_rate_module)
+
+    def use_equipment(self, period, farm, x, trial):
+        i=1
+        for equipment in self.config_rate:
+            if equipment == 'loadout' or equipment == 'module_former':
+                pass
             else:
-                loadout_rate = np.random.normal(loadout_rate_standard, 1/5*loadout_rate_standard)
-            loadout_rates.append(loadout_rate)
-            for ssl in range(num_ssl):
-                env.process(refinery_transport(env, ssl_transport_schedule[period][ssl], ssl, period, loadout_rate))
-            yield env.timeout(40)
-            #mylog(env,'period is over', log)
+                '''z = random.randint(0,1000)
+                #print(z)
+                if z == 1:
+                    yield self.env.timeout(8)
+                    self.breakdown[equipment][trial].append({'ssl num':self.farm_ssl[farm], 'time':self.env.now})'''
+                equipment_rate = min(1.25*self.config_rate[equipment],max(1/10*self.config_rate[equipment],np.random.normal(self.config_rate[equipment],1/5*self.config_rate[equipment])))
+                if equipment == 'press':
+                    self.press_rate.append(equipment_rate)
+                if equipment == 'chopper':
+                    self.chopper_rate.append(equipment_rate)
+                if equipment == 'bagger':
+                    self.bagger_rate.append(equipment_rate)
+                if equipment == 'module_former':
+                    self.former_rate.append(equipment_rate)
+                with self.ssl[self.farm_ssl[farm]][i].request() as req:
+                    yield req
+                    yield self.env.timeout(x/(equipment_rate*self.equip_in_ssl[self.farm_ssl[farm]][i]))
+                i=i+1
+                yield self.env.timeout(.25)
+    
 
 
-    def refinery_transport(env, amount, ssl, period, loadout_rate):
-        x=int(amount)
-    #    travel_time = ssl_route[ssl]/np.random.uniform(low=rtruck_speed_low, high=rtruck_speed_high)
-        if x > 0 and ssl_container[str(ssl)].level > 0:
-    #        ssl_container[str(ssl)].get(x)
-            y=min(x,ssl_container[str(ssl)].level)
-            ssl_container[str(ssl)].get(y)
-    #        yield env.timeout(travel_time)
-            yield env.timeout(x/(equip_in_ssl[str(farm_ssl[farm])][0]*loadout_rate))
-            #mylog(env,'Sorghum loaded and is being sent to refinery', log)
-            refinery.put(y)
-        else:
-            pass
+    def moniter_ssl(self):
+        for period in range(self.m):      
+            for ssl in range(self.num_ssl):
+                if self.ssl_transport_schedule[period][ssl] !=0:
+                    self.env.process(self.refinery_transport(ssl, period))
+                else:
+                    pass
+            yield self.env.timeout(self.work_week)
 
 
-    def JIT_schedule(env, period, farm, loadout_rate):
-        if jit_farm_transport[period][farm] > 0:
-            env.process(JIT_delivery(env,period,farm,loadout_rate))
-        else:
-            pass
-        yield env.timeout(0)
+            
+    def refinery_transport(self, ssl, period):
+        whats_left = self.ssl_transport_schedule[period][ssl]
+        while whats_left != 0:
+            if self.ssl_container[ssl].level == 0 and self.before_ssl[ssl] == 0:
+                break
+            if self.ssl_container[ssl].level > 0:
+                y=min(whats_left,self.ssl_container[ssl].level)
+                self.ssl_container[ssl].get(y)
+                if 'module_hauler' in self.configuration:
+                    with self.ssl[ssl][0].request() as req:
+                        yield req
+                        yield self.env.timeout(y/(self.equip_in_ssl[ssl][0]*self.loadout_rate_module_new))
+                    self.refinery.put(y)
+                    whats_left = whats_left - y
+                else:
+                    with self.ssl[ssl][0].request() as req:
+                        yield req
+                        yield self.env.timeout(y/(self.equip_in_ssl[ssl][0]*self.loadout_rate_standard_new))
+                    self.refinery.put(y)
+                    whats_left = whats_left - y
+            else:
+                pass
+            yield self.env.timeout(1)
+
+        '''if self.ssl_container[ssl].level > 0:
+            z = self.ssl_container[ssl].level
+            self.ssl_container[ssl].get(z)
+            if 'module_hauler' in self.configuration:
+                with self.ssl[ssl][0].request() as req:
+                    yield req
+                    yield self.env.timeout(z/(self.equip_in_ssl[ssl][0]*self.loadout_rate_module_new))
+            else:
+                with self.ssl[ssl][0].request() as req:
+                    yield req
+                    yield self.env.timeout(z/(self.equip_in_ssl[ssl][0]*self.loadout_rate_standard_new))
+            self.refinery.put(z)'''
+    
 
 
-    def JIT_delivery(env, period, farm, loadout_rate):
-        y = min(jit_farm_transport[period][farm],farms[farm].level)
-        #travel_time_sr = ssl_route[farm_ssl[farm]]/np.random.uniform(low=rtruck_speed_low, high=rtruck_speed_high)
+    def JIT_delivery(self, period, farm):
+        y = min(self.jit_farm_transport[period][farm],self.farms[farm].level)
         if y > 0:
-            farms[farm].get(y)
-            if configuration[0] == 'whole_stalk':
-                yield env.timeout(y/config_rate['chopper'])
-            yield env.timeout(y/(equip_in_ssl[str(farm_ssl[farm])][0]*loadout_rate))
-            #yield env.timeout(travel_time_sr)
-            refinery.put(y)
+            self.farms[farm].get(y)
+            if self.configuration[0] == 'whole_stalk':
+                yield self.env.timeout(y/self.config_rate['chopper'])
+            yield self.env.timeout(y/(self.equip_in_ssl[self.farm_ssl[farm]][0]*self.loadout_rate_standard_new))
+            self.refinery.put(y)
+        else:
+            pass
 
 
-    degradation_farm_expected = []
-    def degradation_field(env):
+
+    def create_loadout_rate(self):
+        for period in range(self.m):
+            if 'module_hauler' in self.configuration:
+                self.loadout_rate_module_new = min(1.25*self.loadout_rate_module,max(1/10*self.loadout_rate_module,np.random.normal(self.loadout_rate_module, 1/5*self.loadout_rate_module)))
+                self.loadout_rates_module.append(self.loadout_rate_module_new)
+            self.loadout_rate_standard_new = min(1.25*self.loadout_rate_standard,max(1/10*self.loadout_rate_standard,np.random.normal(self.loadout_rate_standard, 1/5*self.loadout_rate_standard)))
+            self.loadout_rates_standard.append(self.loadout_rate_standard_new)
+            yield self.env.timeout(self.work_week)
+
+
+
+    def degradation_field(self): 
         x = 0
         y = 0
-        for period in range(m):
-            yield env.timeout(20)
-            for farm in range(n):
-                if farms[farm].level > 0:
-                    if sysnum in [0,1,2,3,4,5,6,7]:
-                        degradation_amount = farms[farm].level/9
-                        degraded_field.put(degradation_amount)
-                    if sysnum in [8,9,10,11,12,13,14,15]:
-                        degradation_amount = farms[farm].level/5
-                        degraded_field.put(degradation_amount)
+        for period in range(self.m):
+            yield self.env.timeout(self.work_week-1)
+            for farm in range(self.n):
+                if self.farms[farm].level > 0:
+                    if self.sysnum in [0,1,2,3,4,5,6,7]:
+                        degradation_amount = self.farms[farm].level/9
+                        self.degraded_field.put(degradation_amount)
+                    if self.sysnum in [8,9,10,11,12,13,14,15]:
+                        degradation_amount = self.farms[farm].level/5
+                        self.degraded_field.put(degradation_amount)
                 else:
                     pass
-                if farm_inventory[period][farm] > 0:
-                    if sysnum in [0,1,2,3,4,5,6,7]:
-                        degradation_amount = farm_inventory[period][farm]/9
+                if self.farm_inventory[period][farm] > 0:
+                    if self.sysnum in [0,1,2,3,4,5,6,7]:
+                        degradation_amount = self.farm_inventory[period][farm]/9
                         x=x+degradation_amount
-                    if sysnum in [8,9,10,11,12,13,14,15]:
-                        degradation_amount = farm_inventory[period][farm]/5
+                    if self.sysnum in [8,9,10,11,12,13,14,15]:
+                        degradation_amount = self.farm_inventory[period][farm]/5
                         x=x+degradation_amount
                 else:
                     pass
             y=y+x
             x=0
-            degradation_farm_expected.append(y)
-            yield env.timeout(20)
+            self.degradation_farm_expected.append(y)
+            yield self.env.timeout(1)                        
+       
 
-    degradation_ensiled_expected = []
-    def degradation_ensiled(env):
+
+    def degradation_ensiled(self):
         x=0
         y=0
-        for period in range(m):
-            yield env.timeout(39)
-            for ssl in ssl_container:
-                if ssl_container[ssl].level > 0:
-                    if sysnum in [0,4,8,12]:
-                        degradation_amount = ssl_container[ssl].level/5
-                        degraded_ensiled.put(degradation_amount)
-                    if sysnum in [1,5,9,13]:
-                        degradation_amount = ssl_container[ssl].level/100
-                        degraded_ensiled.put(degradation_amount)
-                    if sysnum in [2,6,10,14]:
-                        degradation_amount = ssl_container[ssl].level/8
-                        degraded_ensiled.put(degradation_amount)
-                    if sysnum in [3,7,11,15]:
+        for period in range(self.m):
+            yield self.env.timeout(self.work_week-1)
+            for ssl in self.ssl_container:
+                if self.ssl_container[ssl].level > 0:
+                    if self.sysnum in [0,4,8,12]:
+                        degradation_amount = self.ssl_container[ssl].level/5
+                        self.degraded_ensiled.put(degradation_amount)
+                    if self.sysnum in [1,5,9,13]:
+                        degradation_amount = self.ssl_container[ssl].level/100
+                        self.degraded_ensiled.put(degradation_amount)
+                    if self.sysnum in [2,6,10,14]:
+                        degradation_amount = self.ssl_container[ssl].level/80
+                        self.degraded_ensiled.put(degradation_amount)
+                    if self.sysnum in [3,7,11,15]:
                         pass
-                    if self.farm_inventory[period][farm] > 0:
-                        if self.sysnum in [0,1,2,3,4,5,6,7]:
-                            self.degradation_amount = self.farm_inventory[period][farm]/9
-                            x=x+self.degradation_amount
-                        if self.sysnum in [8,9,10,11,12,13,14,15]:
-                            self.degradation_amount = self.farm_inventory[period][farm]/5
-                            x=x+self.degradation_amount
-                    else:
-                        pass
-                y=y+x
-                x=0
-                degradation_field_to.append(y)
-                yield env.timeout(20)
-
-        def degradation_ensiled(env, self):
+                else:
+                    pass
+                if self.ssl_inventory[period][int(ssl)] > 0:
+                    if self.sysnum in [0,4,8,12]:
+                        degradation_amount = self.ssl_inventory[period][int(ssl)]/5
+                        x=x+degradation_amount
+                    if self.sysnum in [1,5,9,13]:
+                        degradation_amount = self.ssl_inventory[period][int(ssl)]/100
+                        x=x+degradation_amount
+                    if self.sysnum in [2,6,10,14]:
+                        degradation_amount = self.ssl_inventory[period][int(ssl)]/80
+                        x=x+degradation_amount               
+            y=y+x
             x=0
-            degradation_ensiled_expected.append(y)
-            yield env.timeout(1)
+            self.degradation_ensiled_expected.append(y)
+            yield self.env.timeout(1)
 
 
+    '''
+    Data Collection and Reset
+    '''
 
-    def record_data(env):
-        total_harvest = []
-        refinery_actual = []
-        actual_ssl = []
-        degradation_ensiled_actual = []
-        degradation_farm_actual = []
+
+    def schedules(self):
+        total2 = 0
+        self.refinery_total = 0
+        total6 = 0
+        total4 = 0
+        total8 = 0
+        for period in range(self.m):
+            for farm in range(self.n):
+                total2 = total2 + self.harvest_schedule[period][farm] 
+                total6 = total6 + self.farm_transport_schedule[period][farm]
+                self.refinery_total = self.refinery_total + self.jit_farm_transport[period][farm]
+                total8 = total8 + self.farm_inventory[period][farm]
+            self.hypothetical_farm.append(total8)
+            self.harvest_hypothetical.append(total2)
+            for ssl in self.ssl_container:
+                self.refinery_total = self.refinery_total + self.ssl_transport_schedule[period][ssl] 
+                total4 = total4 + self.ssl_inventory[period][ssl]
+            self.hypothetical_ssl.append(total4)
+            self.refinery_hypothetical.append(self.refinery_total)
+            total4 = 0
+            total8 = 0
+        self.refinery_graph = np.mean(self.all_refinery_actual, axis=0)
+        self.ssl_graph = np.mean(self.all_ssl_actual, axis=0)
+        self.farm_graph = np.mean(self.all_farm_level, axis=0)
+        self.harvest_actual = np.mean(self.harvest_actual, axis=0)
+        #print(self.breakdown)
+
+
+    def record_data(self):
         total = 0
         total5 = 0
-        for period in range(m):
-            for farm in range(n):
-                total = total + harvest_actual[period][farm]
-            total_harvest.append(total)
-            for ssl in ssl_container:
-                total5 = total5 + ssl_container[ssl].level
-            actual_ssl.append(total5)
-            degradation_ensiled_actual.append(degraded_ensiled.level)
-            degradation_farm_actual.append(degraded_field.level)
-            refinery_actual.append(refinery.level)
-            yield env.timeout(40)
-            total5 = 0
-        all_refinery_actual.append(refinery_actual)
-        all_ssl_actual.append(actual_ssl)
-        all_degradation_ensiled_actual.append(degradation_ensiled_actual)
-        all_degradation_farm_actual.append(degradation_farm_actual)
-
-
-    '''def mylog(env, string, log):
-        print(f'@{env.now}: refinery inventory={refinery.level}| {string}')
-        log.write(f'@{env.now}: refinery inventory={refinery.level}| {string} \n')'''
-
-
-    '''
-    Simulation Run
-    '''
-
-    env.process(harvest(env))
-    env.process(moniter_ssl(env))
-    env.process(degradation_ensiled(env))
-    env.process(degradation_field(env))
-    env.process(record_data(env))
-    env.run(until=SIM_TIME)
-    all_demand.append(refinery.level)
-
-
-def graphs():
-    total2 = 0
-    total3 = 0
-    total4 = 0
-    for period in range(m):
-        for farm in range(n):
-            total2 = total2 + a[period][farm]
-            total3 = total3 + jit_farm_transport[period][farm]
-        harvest_hypothetical.append(total2)
-        for ssl in range(num_ssl):
-            total3 = total3 + ssl_transport_schedule[period][ssl]
-            total4 = total4 + ssl_inventory[period][ssl]
-        hypothetical_ssl.append(total4)
-        refinery_hypothetical.append(total3)
-        total4 = 0
-    for period in range(m):
-        total6 = 0
         total7 = 0
-        total8 = 0
-        total9 = 0
-        for trial in range(num_trials):
-            total6 = total6 + all_degradation_ensiled_actual[trial][period]
-            total7 = total7 + all_degradation_farm_actual[trial][period]
-            total8 = total8 + all_ssl_actual[trial][period]
-            total9 = total9 + all_refinery_actual[trial][period]
-        degradation_ssl_average.append(total6/num_trials)
-        degradation_farm_average.append(total7/num_trials)
-        ssl_average.append(total8/num_trials)
-        refinery_average.append(total9/num_trials)
+        #yield self.env.timeout(self.work_week)
+        for period in range(self.m):
+            for farm in range(self.n):   
+                total = total + self.harvest_actual[period][farm]
+            self.total_harvest.append(total)
+            yield self.env.timeout(self.work_week)
+            for farm in range(self.n):
+                total7 = total7 + self.farms[farm].level
+            for ssl in self.ssl_container:
+                total5 = total5 + self.ssl_container[ssl].level
+            self.actual_farm.append(total7)
+            self.actual_ssl.append(total5)
+            self.degradation_ensiled_actual.append(self.degraded_ensiled.level)
+            self.degradation_farm_actual.append(self.degraded_field.level)
+            self.refinery_actual.append(self.refinery.level)
+            #print('harvested amount @ ',self.env.now,'acutal: ', total, '   hypothetical: ', total2)
+            #print('total ssl inventory @  ',self.env.now, '   acutal: ', total5, '   hypothetical: ', total4)
+            #print('refinery level @ ',self.env.now, '  ', self.refinery.level)
+            total5 = 0
+            total7 = 0
+        self.all_farm_level.append(self.actual_farm)
+        self.all_refinery_actual.append(self.refinery_actual)
+        self.all_ssl_actual.append(self.actual_ssl)
+        self.all_degradation_ensiled_actual.append(self.degradation_ensiled_actual)
+        self.all_degradation_farm_actual.append(self.degradation_farm_actual)
+        
+
+
+    '''def graphs(self):
+        X = np.linspace(0,1080,27)
+        
+        print('\nRefinery Inventory level v.s. Time')
+        plt.plot(X, self.refinery_hypothetical, color="blue", linewidth=1.0, linestyle="-", label='scheduled refinery inventory')
+        plt.plot(X, self.refinery_graph, color="red", linewidth=1.0, linestyle="-", label='actual refinery inventory')
+        plt.xlim(0,1080)
+        plt.ylim(0,230000)
+        plt.xticks(np.linspace(0,1080,10,endpoint=True))
+        plt.yticks(np.linspace(0,230000,12,endpoint=True))
+        plt.legend(loc='upper left', frameon=False)
+        plt.show()'''
+        
+
+    def trial_reset(self):           
+        self.farms = []
+        # create farms
+        for farm in range(self.n):
+            self.farms.append(simpy.Container(self.env, 10000000, init=0)) # creates all the farm containers
+        self.refinery = simpy.Container(self.env, capacity=100000000, init=0) # creates refinery containers
+        self.degraded_ensiled = simpy.Container(self.env, capacity=100000000, init=0) # degradation containers
+        self.degraded_field = simpy.Container(self.env, capacity=100000000, init=0)
+        
+        self.farm_transport_schedule = np.zeros((self.m,self.n)).tolist()
+        self.harvest_actual = np.zeros((self.m,self.n)).tolist()
+        self.jit_farm_transport = np.zeros((self.m,self.n)).tolist()  
+        self.farm_inventory = np.zeros((self.m,self.n)).tolist()
+
+        self.ssl_route = [] # distance from ssl to orgin (refinery)
+        for coord in self.coord_s:
+            self.ssl_route.append(math.sqrt(self.coord_s[coord][1]**(2)+self.coord_s[coord][0]**(2)))
+
+        self.ssl = {}
+        self.equip_in_ssl = {} # dictionary for ssl configuration
+        self.before_ssl = {}
+        self.ssl_container = {} # dictionary relating ssl site location to container with proper capacity
+        self.ssl_location = {} # x,y location of ssl
+        for solution in self.solutions:
+            aa = solution[0]
+            cc = solution[1]
+            bb = re.split('\W', aa)
+            if bb[0] == 'ssl_configuration_selection':
+                i=1
+                z = len(self.ssl_configurations[int(bb[2])])-1
+                self.ssl[int(bb[1])] = []
+                for number in range(z):
+                    self.ssl[int(bb[1])].append(simpy.Resource(self.env, capacity=1))
+                    i=i+1
+                self.equip_in_ssl[int(bb[1])] = self.ssl_configurations[int(bb[2])][1:]
+                self.before_ssl[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
+                self.ssl_container[int(bb[1])] = simpy.Container(self.env, capacity=self.ssl_configurations[int(bb[2])][0], init=0)
+                self.ssl_location[int(bb[1])] = self.coord_s[int(bb[1])]
+            else:
+                pass    
+
+        self.ssl_level_actual = np.zeros((self.m,self.num_ssl)).tolist()
+        self.ssl_transport_schedule = np.zeros((self.m+1,self.num_ssl)).tolist()
+        self.ssl_inventory = np.zeros((self.m,self.num_ssl)).tolist()
+          
+        self.farm_ssl = {} # shows which farm corresponds to using which ssl      
+        for solution in self.solutions:
+            aa = solution[0]
+            cc = solution[1]
+            bb = re.split('\W', aa)
+            if bb[0] == 'farm_to_ssl':
+                self.farm_ssl.update({int(bb[1]):int(bb[2])})
+            if bb[0] == 'shipped_farm_ssl':  # populate the farm transport schedule from algorithm solution
+                self.farm_transport_schedule[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'shipped_ssl_refinery':   # populate the ssl transportation schedule from algorithm solution
+                self.ssl_transport_schedule[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'shipped_jit':
+                self.jit_farm_transport[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'inventory_level_ssl':
+                self.ssl_inventory[int(bb[1])][int(bb[2])] = cc
+            if bb[0] == 'inventory_level_farm':
+                self.farm_inventory[int(bb[1])][int(bb[2])] = cc       
+            else:
+                pass
+
+        self.degradation_farm_expected = []
+        self.degradation_ensiled_expected = []  
+        self.total_harvest = []
+        self.refinery_actual = []
+        self.actual_ssl = []
+        self.degradation_ensiled_actual = []
+        self.degradation_farm_actual = []
+        self.actual_farm = []
+        self.breakdown_count = 0
 
 
 
-
-    X = np.linspace(0,1080,27)
-
-    print('\nRefinery Inventory level v.s. Time')
-    plt.plot(X, refinery_hypothetical, color="blue", linewidth=1.0, linestyle="-", label='scheduled refinery inventory')
-    plt.plot(X, refinery_average, color="red", linewidth=1.0, linestyle="-", label='actual refinery inventory')
-    plt.xlim(0,1080)
-    plt.ylim(0,230000)
-    plt.xticks(np.linspace(0,1080,10,endpoint=True))
-    plt.yticks(np.linspace(0,230000,12,endpoint=True))
-    plt.legend(loc='upper left', frameon=False)
-    plt.show()
-
-    print('\nSum of Ensiled Sorghum v.s. Time')
-    plt.plot(X, hypothetical_ssl, color="blue", linewidth=1.0, linestyle="-", label='scheduled total ssl inventory')
-    plt.plot(X, ssl_average, color="red", linewidth=1.0, linestyle="-", label='actual total ssl inventory')
-    plt.xlim(0,1080)
-    plt.ylim(0,150000)
-    plt.xticks(np.linspace(0,1080,10,endpoint=True))
-    plt.legend(loc='upper left', frameon=False)
-    plt.show()
-
-    print('\nDegradation of Ensiled Sorghum v.s. Time')
-    plt.plot(X,degradation_ssl_average,label='Degraded sorghum in MG')
-    plt.plot(X,degradation_ensiled_expected,label='Expected degraded sorghum in MG')
-    plt.xlim(0,1080)
-    plt.ylim(0,100000)
-    plt.xticks(np.linspace(0,1080,10,endpoint=True))
-    plt.legend(loc='upper left',frameon=False)
-    plt.show()
-
-    print('\nDegradation of Harvested Field Sorghum v.s. Time')
-    plt.plot(X,degradation_farm_average,label='Degraded sorghum in MG')
-    plt.plot(X,degradation_farm_expected,label='Expected degraded sorghum in MG')
-    plt.xlim(0,1080)
-    plt.ylim(0,100000)
-    plt.xticks(np.linspace(0,1080,10,endpoint=True))
-    plt.legend(loc='upper left',frameon=False)
-    plt.show()
-
-
-
-graphs()
-for equipment in config_rate:
-    if equipment == 'press':
-        print('The average compression rate in MG/hour:',np.mean(press_rate))
-    if equipment == 'chopper':
-        print('The average chopper rate in MG/hour:',np.mean(chopper_rate))
-    if equipment == 'bagger':
-        print('The average bagger rate in MG/hour:',np.mean(bagger_rate))
-    if equipment == 'module_former':
-        print('The average module former rate in MG/hour:',np.mean(former_rate))
-
-    if equipment == 'module_hauler':
-        print('The average loadout rate for module hauler in MG/hour:',np.mean(loadout_rates))
-if 'module_hauler' in configuration:
-    print('Average module hauler loadout rate in MG/hour:',np.mean(loadout_rates))
-else:
-    print('Average loadout rate in MG/hour:',np.mean(loadout_rates))
-
-if np.mean(all_demand) >= demand:
-    print('The whole demand of ',demand,'MG was met over the current planning hrorizon for',num_trials,'samples')
-else:
-    percent_met = np.mean(all_demand)/demand*100
-    print(percent_met,'% of the ',demand,'MG demand was met over the current planning horizon for',num_trials,'samples')
-
-'''degradation_cost = 0
-for period in range(m):
-    degradation_cost = degradation_cost + ((degradation_ssl_average[period]-degradation_ensiled_expected[period])*65+(degradation_farm_average[period]-degradation_farm_expected[period])*65)
-print('The extra cost incured due to unforseen degradation is: ',degradation_cost,' dollars')'''
+    def round_conf_int(self):
+        for dic in self.sim_results:
+            if dic == 'demand':
+                pass
+            elif self.sim_results[dic]['conf int'] != 0:
+                x = list(self.sim_results[dic]['conf int'])
+                x[0] = round(x[0], 2)
+                x[1] = round(x[1], 2)
+                self.sim_results[dic]['conf int'] = x
+            else:
+                pass

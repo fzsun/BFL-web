@@ -17,6 +17,7 @@ from algorithm.s_bfl import s_bfl
 from flask_cors import CORS, cross_origin
 # from simulation.sim import Simulation
 from algorithm.geo import Geo
+from simulation.sim import Simulation
 import json
 
 class CustomFlask(Flask):
@@ -45,6 +46,8 @@ CORS(app, supports_credentials = True)
 
 # mail = Mail(app)
 
+my_sim = Simulation()
+
 @app.route('/s-bfls/', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def Sbfl():
@@ -53,7 +56,12 @@ def Sbfl():
     my_s_bfl.input(input_data, sysnum = 2)
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
-    response = jsonify(my_s_bfl.optimization_result)
+    response_dict = dict()
+    response_dict['op_response'] = my_s_bfl.optimization_result
+    my_sim.new_input(input_data,my_s_bfl.optimization_result)
+    my_sim.main()
+    response_dict['sim_response'] = my_sim.sim_results
+    response = jsonify(response_dict)
     # response.headers.add('Access-Control-Allow-Origin', '*')
 
     # msg = Message('S-BFLS',

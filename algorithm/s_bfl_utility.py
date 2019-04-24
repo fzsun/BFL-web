@@ -16,7 +16,6 @@ import argparse
 from matplotlib import pyplot as plt
 from algorithm.geo import Geo
 
-# switch to variable mode 
 def create_data(raw_data, sysnum, seed=None, out_file=None,
                 plot_coords=False):
     """
@@ -59,6 +58,18 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         a dict object containing all the data for modeling.
     """
     # %%
+    def toFloat(inputList):
+        floatList = list()
+        for value in inputList:
+            floatList.append(float(value))
+        return floatList
+
+    def toInt(inputList):
+        floatList = list()
+        for value in inputList:
+            floatList.append(int(value))
+        return floatList
+    
     if type(raw_data) is str:
         with open(raw_data, 'r') as stream:
             if raw_data.split('.')[-1] == 'json':
@@ -66,10 +77,43 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 raw = yaml.load(stream)
     elif type(raw_data) is dict:
+        int(raw_data['horizon'])
         raw = raw_data
+        sysnum = int(raw_data['sysnum'])
+        raw['moisture'] = float(raw_data['moisture'])
+        raw['demand'] = int(raw_data['demand'])
+        raw['horizon'] = int(raw_data['horizon'])
+        raw['num_fields'] = int(raw_data['num_fields'])
+        raw['num_ssls'] = int(raw_data['num_ssls'])
+        raw['ssl_sizes'] = toInt(raw_data['ssl_sizes'])
+        raw['ssl_sizes'] = toFloat(raw_data['ssl_sizes'])
+        raw['field']['dry_yield'] = int(raw_data['field']['dry_yield'])
+        raw['field']['radius'] = int(raw_data['field']['radius'])
+        raw['field']['proportion_devoted'] = float(raw_data['field']['proportion_devoted'])
+        raw['field']['area_ratio'] = toInt(raw_data['field']['area_ratio'])
+        raw['price'] = float(raw_data['price'])
+        raw['interest_rate'] = float(raw_data['interest_rate'])
+        raw['insurance_rate'] = float(raw_data['insurance_rate'])
+        raw['tax_rate'] = float(raw_data['tax_rate'])
+        raw['cost']['equipment']['loadout'] = toFloat(raw_data['cost']['equipment']['loadout'])
+        raw['cost']['equipment']['press'] = toFloat(raw_data['cost']['equipment']['press'])
+        raw['cost']['equipment']['chopper'] = toFloat(raw_data['cost']['equipment']['chopper'])
+        raw['cost']['equipment']['bagger'] = toFloat(raw_data['cost']['equipment']['bagger'])
+        raw['cost']['equipment']['module_former'] = toFloat(raw_data['cost']['equipment']['module_former'])
+        raw['cost']['equipment']['module_hauler'] = toFloat(raw_data['cost']['equipment']['module_hauler'])
+        raw['cost']['bunker_annual_own'] = float(raw_data['cost']['bunker_annual_own'])
+        raw['cost']['ssl_annual_own'] = float(raw_data['cost']['ssl_annual_own']) 
+        raw['cost']['base_infield'] = float(raw_data['cost']['base_infield']) 
+        raw['cost']['base_highway'] = float(raw_data['cost']['base_highway'])
+        raw['cost']['transport_coef']['compressed'] = float(raw_data['cost']['transport_coef']['compressed'])
+        raw['cost']['transport_coef']['whole_stalk'] = float(raw_data['cost']['transport_coef']['whole_stalk'])
+        raw['cost']['transport_coef']['in_module'] = float(raw_data['cost']['transport_coef']['in_module'])
+        raw['degrade']['whole_stalk'] = int(raw_data['degrade']['whole_stalk'])
+        raw['degrade']['chopped'] = int(raw_data['degrade']['chopped'])
+        raw['degrade']['in_bunker'] = int(raw_data['degrade']['in_bunker'])
+        raw['degrade']['in_bag'] = int(raw_data['degrade']['in_bag'])
     else:
         raise TypeError('raw_data must be str (filename) or dict.')
-    
     num_weeks_horizon = raw['horizon']
     num_farms = raw['num_fields']
     num_ssls = raw['num_ssls']
@@ -84,14 +128,12 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         sits_in = sites[np.sum(sites * sites, axis=1) <= radius**2]
         coord_farms = sits_in[:num_farms]
         coord_ssls = sits_in[-num_ssls:]
-    elif mode == "coordinates": 
-        coord_farms = np.array(list(raw["Coord_f"].values()))
-        coord_ssls = np.array(list(raw["Coord_s"].values()))
+    elif mode == "coordinates":
+        coord_farms = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_f"].items()])
+        coord_ssls = np.array([[v['lat'], v['lng']] for k,v in raw["Coord_s"].items()])
         refinery_location = raw["refinery_location"]
         num_farms = len(coord_farms)
         num_ssls = len(coord_ssls)
-        assert len(coord_farms) == num_farms
-        assert len(coord_ssls) == num_ssls
 
     if plot_coords:
         l1, = plt.plot(0, 'g^', markersize=7)
@@ -115,14 +157,14 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     proportion_devoted = raw['field']['proportion_devoted']
     # 1 sqkm = 100 ha
     total_supply = 100 * pi * radius**2 * proportion_devoted * dry_yield
-    # what is the a_weight? Is it just a way of configuring the matrix? 
+    # what is the a_weight? Is it just a way of configuring the matrix?
     a_weight = np.zeros(num_weeks_horizon + 1, dtype=int)
     a_weight[1:len(harvest_progress) + 1] = harvest_progress
     weekly_supply = a_weight / a_weight.sum() * total_supply
     field_weight = np.random.uniform(1, 10, size=num_farms)
     field_weight = field_weight / field_weight.sum()
 
-    #if a is the amount harvested in farm f at time t why is it a single number here? 
+    #if a is the amount harvested in farm f at time t why is it a single number here?
     harvested = weekly_supply[:, None] * field_weight[None]
     harvested = harvested.round(0).astype(int)
 
@@ -153,7 +195,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     else:
         ssl_holding_cost = raw['price'] / raw['degrade']['chopped']
 
-    # c_op = operating cost? 
+    # c_op = operating cost?
     operating_cost = 0
     for e in config[1:]:
         if e == 'bunker':
@@ -172,11 +214,11 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
     elif mode == 'coordinates':
         farm_ssl_trans_cost = Geo().distance_points(coord_farms, coord_ssls) * farm_ssl_trans_cost_rate
 
-    # Cost per Mg to send from ssl to refinery 
+    # Cost per Mg to send from ssl to refinery
     ssl_refinery_trans_cost_jit_rate = ssl_refinery_trans_cost_rate = raw['cost']['base_highway'] / dry_part
     ssl_refinery_trans_cost_rate *= tran_coef['compressed'] if 'press' in config else 1
     ssl_refinery_trans_cost_rate *= tran_coef['in_module'] if 'module_former' in config else 1
- 
+
     # use geolocation here, backward compatable (works with all ways it used to run)
     if mode =='paper':
         ssl_refinery_trans_cost = np.linalg.norm(coord_ssls, axis=1) * ssl_refinery_trans_cost_rate
@@ -185,7 +227,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         ssl_refinery_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_rate
         ssl_refinery_jit_trans_cost = Geo().distance_center(refinery_location, coord_ssls) * ssl_refinery_trans_cost_jit_rate
 
-    # UE upperbound equipment processing rate 
+    # UE upperbound equipment processing rate
     UE, UE_jit = dict(), dict()
     for v in equip_arr:
         caps_jit = [
@@ -201,7 +243,7 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
         UE[v] = int(min(caps_other) * dry_part)
         UE_jit[v] = int(min(caps_jit) * dry_part)
 
-    # what is own_cost? owner cost? owner of what? 
+    # what is own_cost? owner cost? owner of what?
     own_cost = {'bunker': raw['cost']['bunker_annual_own'] / 52 * num_weeks_horizon}
     for k, v in equipments.items():
         depreciation = (v[0] - v[2]) / v[1]
@@ -224,14 +266,14 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
                     for i, v in enumerate(coord_farms)},
         'Coord_ssls': {i: v.tolist()
                     for i, v in enumerate(coord_ssls)},
-        'K': {i: list(k)
+        'SSL_configuration': {i: list(k)
               for i, k in enumerate(K)},
         'Seed': seed,
         'Sysnum': sysnum,
         'harvested': harvested.tolist(),
         'operating_cost': operating_cost,
         'operating_cost_jit': operating_cost_jit,
-        # what is this the "price" of? 
+        # what is this the "price" of?
         'c_pen': raw['price'] * 3,
         'farm_ssl_trans_cost': np.round(farm_ssl_trans_cost, 2).tolist(),
         'ssl_refinery_trans_cost': np.round(ssl_refinery_trans_cost, 2).tolist(),
@@ -251,7 +293,6 @@ def create_data(raw_data, sysnum, seed=None, out_file=None,
             else:
                 yaml.dump(all_data, f)
     return all_data
-
 
 def check_filename(value):
     if value.split('.')[-1] not in ['json', 'yaml']:
