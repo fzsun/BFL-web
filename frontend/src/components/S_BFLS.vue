@@ -405,6 +405,9 @@ export default {
       this.customForm = false;
       this.showOptButton = false;
     },
+
+    //Add "routes" to map (lines between one point and another) to give a better
+    //view of what farm goes where.
     parseApplyRoutes(response) {
       var len = response.summary.allocation_from_farm.length;
       var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}
@@ -423,6 +426,9 @@ export default {
         this.$refs.map.addRoutes(route);
       }
     },
+
+    //Get info from the map and send all information to the backend,
+    //updating the map and solution fields when the optimization finishes.
     optimize(event) {
       NProgress.start();
       var mapInfo = this.$refs.map.submitLocations();
@@ -455,6 +461,8 @@ export default {
 
       }
     },
+
+    //Display the pie chart and relative costs when the optimization/simulation finishes
     show_results(data) {
 			this.chart_info = {}; this.chart_data = [];
 
