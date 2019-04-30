@@ -4,6 +4,15 @@
 Created on Sat Jun 30 21:01:11 2018
 
 @author: Fangzhou Sun
+
+This file is intended to show an example of how Gurobipy can be used
+to create optimization algorithms in an object oriented way. In structure,
+it is very similar to s_bfl.py and should be a starting point for writing
+additional optimizations. Writting optimizations in an object oriented way 
+makes it much easier to utilize the code within a project because we can 
+simply import the class into another python file and create an instance of 
+the class to run the optimization.
+
 """
 import numpy as np
 from scipy.spatial import distance_matrix

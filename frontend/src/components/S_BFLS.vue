@@ -442,7 +442,13 @@ export default {
         this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
         this.model.new_input = this.new_input;
-        console.log(this.model);
+        /* 
+          axios is a 3rd party module that allows us to communicate with the backend API.
+          In this case, we issue a post method and provide axios the port our server is running 
+          on (http://localhost:5000) with the route we want to access (/s-bfls/) plus the data we
+          want to send it (this.model). We then instruct axios what to do onec it gets a response 
+          from the backend server sends in the .then() section.
+        */
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
