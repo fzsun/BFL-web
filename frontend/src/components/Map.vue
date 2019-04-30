@@ -250,11 +250,14 @@ export default {
 
         //Submit locations to background for optimization
         submitLocations() {
-            //This removes all the elements in the map that were deleted (became null)
-            //The array has to act like this because if we simply remove elements
-            //during deletion on the map, then all the references to each point will
-            //be off by 1 element. Instead, we make that element null when removed,
-            //and when we send to the backend, we create new arrays without the null elements.
+            /*
+                Because the backend code relies on the position of elements
+                added to the coordinate arrays, we cannot simply delete
+                entries because this would mess up the order. Therefore, 
+                we instead null the item that was deleted before submission
+                and then use this function to remove the null entries at 
+                the end to maintain proper ordering.
+            */
             var filteredFarm = this.farms.filter(function (el) {
                 return el != null;
             });

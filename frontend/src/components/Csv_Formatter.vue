@@ -23,10 +23,11 @@ export default {
         }
     },
     methods: {
-        //Create a single csv file with mutliple tables. This is technically not
-        //possible to do normally, so simply add rows to a single giant table that
-        //are either empty (to act like spacers), and have header information
-        //to signify start of new "table"
+        /*
+            CSV file format does not support writing to multiple
+            tabs (like a spredsheet can), for this reason one large
+            csv file is created with added rows as spacers.
+        */
         generateCsv(data, refinery_location) {
             var csv_index = 0;
 
