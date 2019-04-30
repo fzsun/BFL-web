@@ -11,11 +11,7 @@ import jinja2
 from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
 from algorithm.tsp import tsp
 from algorithm.s_bfl import s_bfl
-# from email_credentials import credentials
-# from flask_mail import Mail
-# from flask_mail import Message
 from flask_cors import CORS, cross_origin
-# from simulation.sim import Simulation
 from algorithm.geo import Geo
 from simulation.sim import Simulation
 import json
@@ -30,21 +26,6 @@ class CustomFlask(Flask):
 
 app = CustomFlask(__name__)  # This replaces your existing "app = Flask(__name__)"
 CORS(app, supports_credentials = True)
-
-# c = credentials()
-# c.setPassword()
-
-
-# app.config.update(
-#     DEBUG = True,
-#     MAIL_SERVER = 'smtp.gmail.com',
-#     MAIL_PORT = 465,
-#     MAIL_USE_SSL = True,
-#     MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
-#     MAIL_PASSWORD = c.password,
-# )
-
-# mail = Mail(app)
 
 my_sim = Simulation()
 
@@ -62,13 +43,6 @@ def Sbfl():
     my_sim.main()
     response_dict['sim_response'] = my_sim.sim_results
     response = jsonify(response_dict)
-    # response.headers.add('Access-Control-Allow-Origin', '*')
-
-    # msg = Message('S-BFLS',
-    #                 sender="robert.b.shelton.42@gmail.com",
-    #                 recipients=["robes98@vt.edu"])
-    # msg.body = "Thanks for using SBFLS! Attached are our results."
-    # mail.send(msg)
     return response
 
 @app.errorhandler(404)
