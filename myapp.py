@@ -16,11 +16,6 @@ from algorithm.geo import Geo
 from simulation.sim import Simulation
 import json
 
-""" for email feature 
-# from email_credentials import credentials
-# from flask_mail import Mail
-# from flask_mail import Message
-"""
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
     jinja_options.update(dict(
@@ -32,21 +27,6 @@ class CustomFlask(Flask):
 app = CustomFlask(__name__)  # This replaces your existing "app = Flask(__name__)"
 CORS(app, supports_credentials = True)
 
-""" for email feature
-# c = credentials()
-# c.setPassword()
-
-# app.config.update(
-#     DEBUG = True,
-#     MAIL_SERVER = 'smtp.gmail.com',
-#     MAIL_PORT = 465,
-#     MAIL_USE_SSL = True,
-#     MAIL_USERNAME = 'robert.b.shelton.42@gmail.com',
-#     MAIL_PASSWORD = c.password,
-# )
-
-# mail = Mail(app)
-"""
 my_sim = Simulation()
 
 @app.route('/s-bfls/', methods=['POST'])
@@ -63,16 +43,6 @@ def Sbfl():
     my_sim.main()
     response_dict['sim_response'] = my_sim.sim_results
     response = jsonify(response_dict)
-
-    """ for email feature
-    # response.headers.add('Access-Control-Allow-Origin', '*')
-
-    # msg = Message('S-BFLS',
-    #                 sender="robert.b.shelton.42@gmail.com",
-    #                 recipients=["robes98@vt.edu"])
-    # msg.body = "Thanks for using SBFLS! Attached are our results."
-    # mail.send(msg)
-    """
     return response
 
 @app.errorhandler(404)
