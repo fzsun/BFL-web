@@ -104,7 +104,7 @@ export default {
             })
         },
 
-        //Add points to map
+        //Called when user clicks on map to add pin
         addPushpin() {
             var ref = this;
             google.maps.event.addListener(this.map, 'click', function(event) {
@@ -113,6 +113,8 @@ export default {
             });
         },
 
+        //Place specific marker on map, given the location and name. Give different
+        //colors and place in different arrays based on which location type it is
         placeMarker(location, locationname) {
             var ref = this;
 			if (this.name == 'Refinery') {
@@ -186,7 +188,8 @@ export default {
                 this.farmsCounter = this.farmsCounter + 1;
             }
         },
-        
+
+        //Delete marker from map and from it's corresponding array
         delMarker(id, type) {
 			if (type == "refinery") {
 				var marker = this.refineryMarker;
@@ -215,6 +218,7 @@ export default {
             this.placeMarker(myLatlng, farmname);
         },
 
+        //Put address on map and in array when given a specific address for a location
         submitAddress() {
             var address = this.address;
             var addressName = this.addressName;
@@ -246,6 +250,14 @@ export default {
 
         //Submit locations to background for optimization
         submitLocations() {
+            /*
+                Because the backend code relies on the position of elements
+                added to the coordinate arrays, we cannot simply delete
+                entries because this would mess up the order. Therefore, 
+                we instead null the item that was deleted before submission
+                and then use this function to remove the null entries at 
+                the end to maintain proper ordering.
+            */
             var filteredFarm = this.farms.filter(function (el) {
                 return el != null;
             });

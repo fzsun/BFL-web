@@ -1,40 +1,8 @@
 <template>
 <vue-json-to-csv :json-data="op_response_csv"
 csv-title="s_bfl_optimization"
-:labels="{
-   0: { title: '' },
-   1: { title: '' },
-   2: { title: '' },
-   3: { title: '' },
-   4: { title: '' },
-   5: { title: '' },
-   6: { title: '' },
-   7: { title: '' },
-   8: { title: '' },
-   9: { title: '' },
-   10: { title: '' },
-   11: { title: '' },
-   12: { title: '' },
-   13: { title: '' },
-   14: { title: '' },
-   15: { title: '' },
-   16: { title: '' },
-   17: { title: '' },
-   18: { title: '' },
-   19: { title: '' },
-   20: { title: '' },
-   21: { title: '' },
-   22: { title: '' },
-   23: { title: '' },
-   24: { title: '' },
-   25: { title: '' },
-   26: { title: '' },
-   27: { title: '' },
-   28: { title: '' },
-   29: { title: '' },
-   30: { title: '' },
-   31: { title: '' }
-    }">
+:labels="total_labels">
+
 <button id="optimization_csv_button" class="button is-success" hidden="true">
     Download Full Results
   </button>
@@ -50,10 +18,16 @@ export default {
     },
     data() {
         return {
-           op_response_csv: [], 
+            op_response_csv: [], 
+            total_labels: {}
         }
     },
     methods: {
+        /*
+            CSV file format does not support writing to multiple
+            tabs (like a spredsheet can), for this reason one large
+            csv file is created with added rows as spacers.
+        */
         generateCsv(data, refinery_location) {
             var csv_index = 0;
 
@@ -80,6 +54,12 @@ export default {
             var upperbound_equip_proc_rate = params.upperbound_equip_proc_rate;
             var upperbound_equip_proc_rate_jit = params.upperbound_equip_proc_rate_jit;
             var upperbound_inventory = params.upperbound_inventory;
+            var horizon = data.summary.others.num_weeks_horizon;
+
+            var n;
+            for (n = 0; n < (horizon + 6); n++) {
+                this.total_labels[n] = {title: '' };                
+            }
 
             //sysnum, configuration, seed, refinery coords chart
             this.op_response_csv[csv_index++] = ["sysnum",
@@ -116,37 +96,13 @@ export default {
 
 
             //harvested + demand
-            this.op_response_csv[csv_index++] = ["",
-                                                 "week 0",
-                                                 "week 1",
-                                                 "week 2",
-                                                 "week 3",
-                                                 "week 4",
-                                                 "week 5",
-                                                 "week 6",
-                                                 "week 7",
-                                                 "week 8",
-                                                 "week 9",
-                                                 "week 10",
-                                                 "week 11",
-                                                 "week 12",
-                                                 "week 13",
-                                                 "week 14",
-                                                 "week 15",
-                                                 "week 16",
-                                                 "week 17",
-                                                 "week 18",
-                                                 "week 19",
-                                                 "week 20",
-                                                 "week 21",
-                                                 "week 22",
-                                                 "week 23",
-                                                 "week 24",
-                                                 "week 25",
-                                                 "week 26"];
+            this.op_response_csv[csv_index] = [""];
+            for (n = 0; n < (horizon + 1); n++) {
+                this.op_response_csv[csv_index][this.op_response_csv[csv_index].length] = "week " + n;
+            }
 
+            csv_index++;
             var total_index = csv_index;
-            var n;
 
             for (n = 0; n < harvested[0].length; n++) {
                 this.op_response_csv[csv_index] = ["farm " + n];
@@ -159,7 +115,7 @@ export default {
 
             this.op_response_csv[csv_index] = ["week total: "];
             var m;
-            for (m = 1; m <= 27; m++) {
+            for (m = 1; m <= (horizon + 1); m++) {
                 var p;
                 var total = 0;
                 for (p = total_index; p < csv_index; p++) {
@@ -194,37 +150,18 @@ export default {
                         this.op_response_csv[csv_index++] = [];
                         this.op_response_csv[csv_index++] = [];
 
-                        this.op_response_csv[csv_index++] = ["farm num",
+                        this.op_response_csv[csv_index] = ["farm num",
                                                              "farm lat",
                                                              "farm lng",
                                                              "ssl num",
-                                                             "farm to ssl cost ($/Mg)",
-                                                             "week 1 (Mg)",
-                                                             "week 2",
-                                                             "week 3",
-                                                             "week 4",
-                                                             "week 5",
-                                                             "week 6",
-                                                             "week 7",
-                                                             "week 8",
-                                                             "week 9",
-                                                             "week 10",
-                                                             "week 11",
-                                                             "week 12",
-                                                             "week 13",
-                                                             "week 14",
-                                                             "week 15",
-                                                             "week 16",
-                                                             "week 17",
-                                                             "week 18",
-                                                             "week 19",
-                                                             "week 20",
-                                                             "week 21",
-                                                             "week 22",
-                                                             "week 23",
-                                                             "week 24",
-                                                             "week 25",
-                                                             "week 26"];
+                                                             "farm to ssl cost ($/Mg)"];
+
+                        var q;
+                        for (q = 0; q < (horizon); q++) {
+                            this.op_response_csv[csv_index][this.op_response_csv[csv_index].length] = "week " + (q + 1);
+                        }
+
+                        csv_index++;
                         farm_ssl = false;
                         farm_index = csv_index;
                     }
@@ -252,38 +189,17 @@ export default {
                         this.op_response_csv[csv_index++] = [];
                         this.op_response_csv[csv_index++] = [];
 
-                        this.op_response_csv[csv_index++] = ["ssl num",
+                        this.op_response_csv[csv_index] = ["ssl num",
                                                              "ssl lat",
                                                              "ssl lng",
                                                              "ssl to ref cost ($/Mg)",
                                                              "cost to build ssl ($)",
-                                                             "ssl type",
-                                                             "week 1 (Mg)",
-                                                             "week 2",
-                                                             "week 3",
-                                                             "week 4",
-                                                             "week 5",
-                                                             "week 6",
-                                                             "week 7",
-                                                             "week 8",
-                                                             "week 9",
-                                                             "week 10",
-                                                             "week 11",
-                                                             "week 12",
-                                                             "week 13",
-                                                             "week 14",
-                                                             "week 15",
-                                                             "week 16",
-                                                             "week 17",
-                                                             "week 18",
-                                                             "week 19",
-                                                             "week 20",
-                                                             "week 21",
-                                                             "week 22",
-                                                             "week 23",
-                                                             "week 24",
-                                                             "week 25",
-                                                             "week 26"];
+                                                             "ssl type"];
+                        var q;
+                        for (q = 0; q < (horizon); q++) {
+                            this.op_response_csv[csv_index][this.op_response_csv[csv_index].length] = "week " + (q + 1);
+                        }
+                        csv_index++;
                         ssl_ref = false;
                         ssl_index = csv_index;
 
@@ -381,19 +297,21 @@ export default {
             this.op_response_csv[csv_index++] = [];
             this.op_response_csv[csv_index++] = [];
 
-            this.fill_undefined();
+            this.fill_undefined(horizon);
             document.getElementById('optimization_csv_button').hidden = false;
         },
-        fill_undefined() {
+
+        //Fill unused column elemenets
+        fill_undefined(horizon) {
             var k;
             for (k = 0; k < this.op_response_csv.length; k++) {
                 var m;
-                for (m = 0; m < 32; m++) {
+                for (m = 0; m < (horizon + 6); m++) {
                     if (this.op_response_csv[k][m] == null)
                         this.op_response_csv[k][m] = "";
                 }
                 var obj = {};
-                for (m = 0; m < 32; m++) {
+                for (m = 0; m < (horizon + 6); m++) {
                     obj[m] = this.op_response_csv[k][m];
                 }
                 this.op_response_csv[k] = obj;

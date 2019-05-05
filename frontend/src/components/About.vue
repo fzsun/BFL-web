@@ -24,6 +24,7 @@
 export default {
     data() {
         return {
+			//Members of the team, including name, image, email, and small bio
             team_members: [
                 {
                   name: "Dr. Subhash Sarin", 

@@ -405,6 +405,9 @@ export default {
       this.customForm = false;
       this.showOptButton = false;
     },
+
+    //Add "routes" to map (lines between one point and another) to give a better
+    //view of what farm goes where.
     parseApplyRoutes(response) {
       var len = response.summary.allocation_from_farm.length;
       var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}
@@ -422,6 +425,9 @@ export default {
         this.$refs.map.addRoutes(route);
       }
     },
+
+    //Get info from the map and send all information to the backend,
+    //updating the map and solution fields when the optimization finishes.
     optimize(event) {
       var mapInfo = this.$refs.map.submitLocations();
 
@@ -434,7 +440,13 @@ export default {
         this.model.input_format = mapInfo.mode;
         this.model.refinery_location = mapInfo.refinery_location;
         this.model.new_input = this.new_input;
-        console.log(this.model);
+        /* 
+          axios is a 3rd party module that allows us to communicate with the backend API.
+          In this case, we issue a post method and provide axios the port our server is running 
+          on (http://localhost:5000) with the route we want to access (/s-bfls/) plus the data we
+          want to send it (this.model). We then instruct axios what to do onec it gets a response 
+          from the backend server sends in the .then() section.
+        */
         axios
           .post('http://localhost:5000/s-bfls/', this.model)
           .then(response => {
@@ -453,6 +465,8 @@ export default {
 
       }
     },
+
+    //Display the pie chart and relative costs when the optimization/simulation finishes
     show_results(data) {
 			this.chart_info = {}; this.chart_data = [];
 
