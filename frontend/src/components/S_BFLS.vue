@@ -408,7 +408,6 @@ export default {
     parseApplyRoutes(response) {
       var len = response.summary.allocation_from_farm.length;
       var refinery = {"lat": this.model.refinery_location[0], "lng": this.model.refinery_location[1]}
-      var routes = [];
       var i;
       this.$refs.map.removeRoutes();
       for (i=0; i < len; i++){
@@ -424,13 +423,12 @@ export default {
       }
     },
     optimize(event) {
-      NProgress.start();
       var mapInfo = this.$refs.map.submitLocations();
-      NProgress.start()
 
       if (mapInfo == "Refinery Missing") {
         alert("Need Refinery");
       } else {
+      	NProgress.start();
         this.model.Coord_f = mapInfo.Coord_f;
         this.model.Coord_s = mapInfo.Coord_s;
         this.model.input_format = mapInfo.mode;
