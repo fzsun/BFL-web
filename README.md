@@ -59,7 +59,7 @@ A Waitress production server can be started by `python production.py`.
 - Never push to master
 - Don't work on a feature on an isolated branch for an entire semester
 - - Make consistent pull request to keep master from falling to far behind
-- - This will create reduce merge conflicts in the future
+- - This will reduce merge conflicts in the future
 
 ## Adding a new feature
 - Start on master branch if on a different branch `git checkout master`
