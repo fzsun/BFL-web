@@ -33,16 +33,31 @@ my_sim = Simulation()
 @cross_origin(supports_credentials=True)
 def Sbfl():
     input_data = request.get_json(force=True)
+
+    # Intialize instance of s_bfl class which contains
+    # Gurobipy optimization logic
     my_s_bfl = s_bfl()
+    # use class input method to load data in instance
     my_s_bfl.input(input_data, sysnum = 2)
+    # run the Gurobi model
     my_s_bfl.solve()
     print(my_s_bfl.optimization_result)
+
+    # create response dictionary that will be converted to
+    # JSON and returned to frontend as response payload
     response_dict = dict()
     response_dict['op_response'] = my_s_bfl.optimization_result
+
+    # run simulation with result of optimization and orginal
+    # user created data
     my_sim.new_input(input_data,my_s_bfl.optimization_result)
     my_sim.main()
+
+    # store result
     response_dict['sim_response'] = my_sim.sim_results
     response = jsonify(response_dict)
+
+    # send to frontend
     return response
 
 @app.errorhandler(404)
