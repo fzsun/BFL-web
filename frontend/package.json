@@ -11,7 +11,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bulma-tooltip": "^2.0.2",
     "chart.js": "^2.8.0",
     "geocodio": "^2.0.0",
