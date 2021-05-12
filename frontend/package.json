@@ -13,7 +13,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bulma-tooltip": "^2.0.2",
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "geocodio": "^2.0.0",
     "node-sass": "^4.11.0",
     "nprogress": "^0.2.0",
